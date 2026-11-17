@@ -1,0 +1,31 @@
+{
+  "name": "vto-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.5.13",
+    "pinia": "^2.3.1",
+    "axios": "^1.8.4",
+    "element-plus": "^2.9.7",
+    "@element-plus/icons-vue": "^2.3.1",
+    "@antv/x6": "^2.18.1",
+    "@antv/x6-plugin-selection": "^2.2.2",
+    "@antv/x6-plugin-keyboard": "^2.2.3",
+    "@antv/x6-plugin-history": "^2.2.4",
+    "@antv/x6-plugin-clipboard": "^2.1.6",
+    "@antv/x6-plugin-snapline": "^2.1.7",
+    "nanoid": "^5.0.7"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.3",
+    "vite": "^5.4.15",
+    "typescript": "~5.8.3",
+    "vue-tsc": "^2.2.8"
+  }
+}
