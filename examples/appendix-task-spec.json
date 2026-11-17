@@ -1,0 +1,15 @@
+{
+  "source": "用户登录功能规格",
+  "detectedFormat": "markdown",
+  "tasks": [
+    { "key": "1.1", "name": "校验用户名格式", "type": "task", "dependsOn": [], "parallelGroup": 1 },
+    { "key": "1.2", "name": "校验密码非空", "type": "task", "dependsOn": [], "parallelGroup": 1 },
+    { "key": "2.1", "name": "查询用户信息", "type": "task", "dependsOn": ["1.1", "1.2"], "parallelGroup": null },
+    { "key": "2.2", "name": "比对密码哈希", "type": "task", "dependsOn": ["2.1"], "parallelGroup": null, "output": "passed" },
+    { "key": "3.1", "name": "认证是否通过", "type": "condition", "dependsOn": ["2.2"], "expression": "passed == true" },
+    { "key": "3.2", "name": "记录登录日志", "type": "task", "dependsOn": ["3.1"], "branch": "true" },
+    { "key": "3.3", "name": "生成会话令牌", "type": "task", "dependsOn": ["3.2"], "branch": "true" },
+    { "key": "3.4", "name": "返回错误提示", "type": "task", "dependsOn": ["3.1"], "branch": "false" },
+    { "key": "3.5", "name": "输出登录结果", "type": "end", "dependsOn": ["3.3", "3.4"] }
+  ]
+}
