@@ -1,0 +1,13 @@
+{
+  "source": "自然语言登录流程",
+  "detectedFormat": "numbered",
+  "tasks": [
+    {"key":"1","name":"输入账号密码","type":"task","dependsOn":[]},
+    {"key":"2","name":"后端校验账号密码","type":"task","dependsOn":["1"],"output":"passed"},
+    {"key":"3","name":"判断校验结果","type":"condition","dependsOn":["2"],"expression":"passed == true"},
+    {"key":"4","name":"跳转首页","type":"task","dependsOn":["3"],"branch":"true"},
+    {"key":"5","name":"显示错误提示","type":"task","dependsOn":["3"],"branch":"false"},
+    {"key":"6","name":"记录审计日志","type":"task","dependsOn":["1"]},
+    {"key":"7","name":"结束登录流程","type":"end","dependsOn":["4","5","6"]}
+  ]
+}
