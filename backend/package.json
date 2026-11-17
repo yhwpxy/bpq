@@ -1,1 +1,1 @@
-{"name":"vto-backend","version":"1.0.0","private":true,"type":"module","scripts":{"dev":"node --watch server.js","start":"node server.js"},"dependencies":{"express":"^4.21.2","cors":"^2.8.5","nanoid":"^5.0.7"}}
+{"name":"vto-backend","version":"1.0.0","private":true,"type":"module","scripts":{"dev":"node --watch server.js","start":"node server.js"},"dependencies":{"cors":"^2.8.5","dotenv":"^17.4.2","express":"^4.21.2","nanoid":"^5.0.7"}}
