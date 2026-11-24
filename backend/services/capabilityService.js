@@ -20,7 +20,7 @@ export function createCapabilityService(root, providers, options = {}) {
     assertSafeId(input.id);
     if (!Object.hasOwn(kinds, input.transport) || typeof input.enabled !== 'boolean' || typeof input.name !== 'string' || !input.name.trim()) throw new AppError(40001, 'Invalid capability manifest');
     for (const key of ['args', 'envAllowlist', 'roles']) if (input[key] !== undefined && (!Array.isArray(input[key]) || input[key].length > 64 || input[key].some(x => typeof x !== 'string' || /[\0\r\n]/.test(x)))) throw new AppError(40001, `Invalid ${key}`);
-    const c = { id: input.id, name: input.name.slice(0, 100), transport: input.transport, kind: kinds[input.transport], enabled: input.enabled, command: String(input.command || ''), args: input.args || [], providerId: String(input.providerId || ''), prompt: String(input.prompt || '').slice(0, 20000), envAllowlist: input.envAllowlist || [], roles: input.roles || ['worker'], failures: 0, circuit: 'closed' };
+    const c = { id: input.id, name: input.name.slice(0, 100), transport: input.transport, kind: kinds[input.transport], enabled: input.enabled, command: String(input.command || ''), args: input.args || [], providerId: String(input.providerId || ''), prompt: String(input.prompt || '').slice(0, 20000), envAllowlist: input.envAllowlist || [], roles: input.roles || (kinds[input.transport] === 'agent' ? ['worker','evaluator'] : ['worker']), failures: 0, circuit: 'closed' };
     return store.update(d => { const prior = d.capabilities.find(x => x.id === c.id); if (prior) { c.failures = prior.failures; c.circuit = prior.circuit; } d.capabilities = d.capabilities.filter(x => x.id !== c.id); d.capabilities.push(c); return c; });
   }
   async function record(id, ok) { return store.update(d => { const c = d.capabilities.find(x => x.id === id); if (!c) return; c.failures = ok ? 0 : (c.failures || 0) + 1; c.circuit = c.failures >= 3 ? 'open' : c.failures >= 2 ? 'half_open' : 'closed'; }); }
@@ -34,6 +34,7 @@ export function createCapabilityService(root, providers, options = {}) {
   }
   async function invoke(id, request) {
     const c = await get(id);
+    if (request.role && c.roles && !c.roles.includes(request.role)) throw new AppError(40002, 'Capability role mismatch');
     if (!c.enabled || c.circuit === 'open') throw new AppError(40002, 'Capability disabled or circuit open');
     if (c.transport !== 'simulated' && !request.readOnly && request.permissionTier === 'strict' && !request.approved) throw new AppError(40002, 'Human approval required before mutation');
     const governance = await options.governance?.get();

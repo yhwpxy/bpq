@@ -63,7 +63,7 @@ function assertTaskSpecSemantics(taskSpec) {
   }
 }
 
-async function readLimitedResponse(response, maxBytes, signal) {
+export async function readLimitedResponse(response, maxBytes, signal) {
   if (!response.body?.getReader) throw new AppError(50201, '模型服务返回的响应协议不受支持');
   const reader = response.body.getReader(); const chunks = []; let size = 0;
   const abort = () => { void reader.cancel().catch(() => {}); };

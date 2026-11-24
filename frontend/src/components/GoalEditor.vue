@@ -7,7 +7,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: any] }>()
 const fields = ['requirements','acceptanceCriteria','inputs','outputs','constraints','assumptions','modules']
 const labels: Record<string, [string,string]> = { requirements:['功能需求','Requirements'], acceptanceCriteria:['验收标准','Acceptance criteria'], inputs:['输入','Inputs'], outputs:['输出','Outputs'], constraints:['约束','Constraints'], assumptions:['假设','Assumptions'], modules:['模块','Modules'] }
 function update(field: string, value: any) { emit('update:modelValue', { ...props.modelValue, [field]: value }) }
-function item(field: string, index: number, key: string, value: any) { const rows = structuredClone(props.modelValue[field]); rows[index][key] = value; update(field, rows) }
+function item(field: string, index: number, key: string, value: any) { const rows = structuredClone(props.modelValue[field]); rows[index][key] = value; if(key==='text') rows[index].source='user_confirmed'; update(field, rows) }
 async function confirm(id: string) { try { const { data } = await workApi.post('/goals/confirm', { goalSpec: props.modelValue, id }); emit('update:modelValue', data.goalSpec) } catch (e:any) { ElMessage.error(e.response?.data?.message || e.message) } }
 function add(field: string) {
   const prefix: Record<string,string> = { requirements:'FR', acceptanceCriteria:'AC', inputs:'IN', outputs:'OUT', constraints:'CON', assumptions:'ASM', modules:'MOD' }

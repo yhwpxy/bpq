@@ -52,3 +52,12 @@ it('certifies a complete live worktree run through a local QA HTTP protocol fixt
     expect(payload.tools.map(t => t.function.name)).toEqual(['read_file', 'list_dir']); expect(payload.messages.at(-1).content).toContain('AC-01');
   } finally { await s.runService.close(); await new Promise(r => server.close(r)); }
 });
+it('extended verification detects scope escapes and credential-like artifacts', async () => {
+  const certifier=createCertifier({}, {diff:async()=>({files:['outside.txt','.env'],patch:''})});
+  const r=await certifier.security({}, {snapshot:{workspaceHandle:{cwd:dir},graph:{nodes:[{props:{executorKind:'tool',fileScope:['artifacts/**']}}]}}});
+  expect(r.outcome).toBe('task_failure');expect(r.certification.findings.some(x=>x.includes('credential'))).toBe(true);
+});
+it('extended verification reports the explicit limit of its artifact checks', async () => {
+  const certifier=createCertifier({}, {diff:async()=>({files:[],patch:''})});
+  const r=await certifier.security({}, {snapshot:{workspaceHandle:{cwd:dir},graph:{nodes:[]}}});expect(r.outcome).toBe('completed');expect(r.output).toContain('not a vulnerability scanner');
+});

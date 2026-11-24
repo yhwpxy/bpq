@@ -12,7 +12,7 @@ export async function inside(root, candidate = '.') {
       let actual;
       try { actual = await realpath(cursor); } catch (e) { if (stat.isSymbolicLink()) throw new Error('Broken symlink is not a writable workspace path'); throw e; }
       const rel = path.relative(base, actual);
-      if (rel === '..' || rel.startsWith(`..${path.sep}`) || path.isAbsolute(rel)) throw new Error('Symlink escapes workspace');
+      if (rel === '..' || rel.startsWith(`..${path.sep}`) || path.isAbsolute(rel) || rel.split(path.sep).includes('.git')) throw new Error('Symlink escapes workspace');
       break;
     } catch (e) { if (e.code !== 'ENOENT') throw e; const parent = path.dirname(cursor); if (parent === cursor) throw e; cursor = parent; }
   }

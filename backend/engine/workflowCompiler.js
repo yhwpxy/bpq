@@ -16,7 +16,7 @@ export function compileWorkflow(goalSpec, options = {}, capabilities = []) {
   const outputs = goalSpec.outputs.map(({ name, type, required }) => ({ name, type, required }));
   function node(type, name, phase, control, extra = {}) {
     const n = createNode(type); n.props = { ...n.props, name: name.slice(0, 50), duration: 0, retry: 0, failRate: 0,
-      executorKind: control === 'human' ? 'human' : 'control', planningRationale: `为“${goalSpec.title}”提供${name}；通过明确的输入、输出和依赖接续执行。`, requirementRefs: [], acceptanceRefs: [], inputContract: inputs, outputContract: inputs, fileScope: [], parentId: phases[phase].id, phaseId: phases[phase].id, depth: 1, ...(control ? { control } : {}), ...extra };
+      assignedRole: control === 'qa' ? 'evaluator' : 'worker', executorKind: control === 'human' ? 'human' : 'control', planningRationale: `为“${goalSpec.title}”提供${name}；通过明确的输入、输出和依赖接续执行。`, requirementRefs: [], acceptanceRefs: [], inputContract: inputs, outputContract: inputs, fileScope: [], parentId: phases[phase].id, phaseId: phases[phase].id, depth: 1, ...(control ? { control } : {}), ...extra };
     plan.nodes.push(n); return n;
   }
   const edge = (a, b, kind = 'dep', label) => plan.edges.push({ id: `edge_${plan.edges.length + 1}`, source: a.id, target: b.id, kind, ...(label ? { label } : {}) });
@@ -35,7 +35,7 @@ export function compileWorkflow(goalSpec, options = {}, capabilities = []) {
   const outputProps = { inputContract: outputs, outputContract: outputs };
   const join = node('task', '汇总交付物', 1, 'join', outputProps); workers.forEach(w => edge(w, join));
   const condition = node('condition', '选择验证路径', 1, undefined, { ...outputProps, expression: config.branchExpression || String(Boolean(config.security)) }); edge(join, condition);
-  const full = node('task', '扩展检查路径', 1, 'prepare', outputProps), quick = node('task', '基础检查路径', 1, 'prepare', outputProps);
+  const full = node('task', '扩展检查路径', 1, 'security', outputProps), quick = node('task', '基础检查路径', 1, 'prepare', outputProps);
   edge(condition, full, 'pass', 'true'); edge(condition, quick, 'pass', 'false');
   const merge = node('task', '等待验证路径汇合', 1, 'join', outputProps); edge(full, merge); edge(quick, merge);
   const cp2 = node('task', '交付检查点', 1, 'checkpoint', outputProps); edge(merge, cp2);

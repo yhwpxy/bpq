@@ -1,3 +1,4 @@
+import { createGoalModelService } from './services/goalModelService.js';
 import { createGovernanceService } from './services/governanceService.js';
 import { createMcpService } from './services/mcpService.js';
 import express from 'express';
@@ -21,7 +22,7 @@ import { createVersionService } from './services/versionService.js';
 import { createLocalAuth } from './middleware/localAuth.js';
 
 const directory = path.dirname(fileURLToPath(import.meta.url));
-export function createApp({ storageDir = path.join(directory, 'storage'), runOptions, llmConfig = readLlmConfig(), fetchImpl, llmOptions, sessionToken } = {}) {
+export function createApp({ storageDir = process.env.VTO_DATA_DIR ? path.resolve(process.env.VTO_DATA_DIR) : path.join(directory, 'storage'), runOptions, llmConfig = readLlmConfig(), fetchImpl, llmOptions, sessionToken } = {}) {
   const app = express();
   app.disable('x-powered-by');
   app.use(cors({ origin: [/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/] }));
@@ -30,7 +31,7 @@ export function createApp({ storageDir = path.join(directory, 'storage'), runOpt
   const auditService = createAuditService(storageDir);
   const planService = createPlanService(storageDir, { audit: auditService });
   const llmDecomposeService = createLlmDecomposeService({ ...llmOptions, config: llmConfig, fetchImpl });
-  const planningService = createPlanningService(llmDecomposeService);
+  const planningService = createPlanningService(llmDecomposeService, createGoalModelService({ config: llmConfig, fetchImpl, ...llmOptions }));
   const providerService = createProviderService(storageDir, llmConfig);
   const governanceService = createGovernanceService(storageDir, auditService);
   const mcpService = createMcpService(storageDir, auditService);
@@ -60,7 +61,7 @@ export function createApp({ storageDir = path.join(directory, 'storage'), runOpt
   return app;
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const app = createApp({ llmConfig: loadLlmEnvironment() }); const server = app.listen(3000, '127.0.0.1', () => console.log('VTO 后端已启动：http://localhost:3000'));
+  const app = createApp({ llmConfig: loadLlmEnvironment() }); const port = Number(process.env.PORT || 3000); const server = app.listen(port, '127.0.0.1', () => console.log(`VTO backend: http://127.0.0.1:${server.address().port}/#workbench`));
   const stop = async () => { await app.locals.services.runService.close(); server.close(() => process.exit(0)); };
   process.once('SIGINT', stop); process.once('SIGTERM', stop);
 }

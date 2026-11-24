@@ -145,3 +145,7 @@ it('labels native capability probes as configuration checks, not live access', a
   await providers.save(config()); await caps.save({ id: 'native-api', name: 'api', transport: 'native', enabled: true, providerId: 'p' });
   expect(await caps.probe('native-api')).toMatchObject({ ok: true, check: 'configuration' });
 });
+it('blocks a workspace symlink that resolves to protected Git metadata', async () => {
+  await mkdir(path.join(dir,'.git'));await writeFile(path.join(dir,'.git','config'),'protected');await symlink(path.join(dir,'.git'),path.join(dir,'alias'));
+  await expect(inside(dir,'alias/config')).rejects.toThrow();
+});

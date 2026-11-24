@@ -1,5 +1,5 @@
 import { record, validateGoalSpec } from './goalSpecSchema.js';
-export const CONTROLS = ['prepare', 'join', 'human', 'checkpoint', 'restore', 'gate', 'selfcheck', 'qa', 'ghost'];
+export const CONTROLS = ['prepare', 'security', 'join', 'human', 'checkpoint', 'restore', 'gate', 'selfcheck', 'qa', 'ghost'];
 export const isWorkflow = plan => plan?.workflow?.format === 'twin-1';
 export const isForward = (plan, edge) => !isWorkflow(plan) || edge.kind !== 'loop';
 export function workflowSchema(plan) {

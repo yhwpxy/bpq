@@ -1,5 +1,5 @@
 import { stat } from 'node:fs/promises';
-import { inside } from '../sandbox/pathPolicy.js';
+import { inside, matchesScope } from '../sandbox/pathPolicy.js';
 export function valueMatches(type, value) {
   if (type === 'any') return value !== undefined;
   if (type === 'array') return Array.isArray(value);
@@ -54,7 +54,7 @@ export function createCertifier(capabilities, workspaces) {
     if (!gates.length || gates.some(n => env.snapshot.nodeStates[n.id].status !== 'SUCCESS' || n.props.demonstrationGate)) return { outcome: 'task_failure', output: 'Independent QA requires actual passing verification commands' };
     const diff = await workspaces.diff(env.snapshot.workspaceHandle);
     const result = await capabilities.invoke(node.props.capabilityId, {
-      ...requestFor(node, env), readOnly: true, fileScope: [],
+      ...requestFor(node, env), role: 'evaluator', readOnly: true, fileScope: [],
       prompt: JSON.stringify({ goal: env.snapshot.graph.workflow.goalSpec.goal, acceptanceCriteria: env.snapshot.graph.workflow.goalSpec.acceptanceCriteria,
         verifiedCommands: gates.map(n => ({ command: n.props.command, args: n.props.args })), changedFiles: diff.files, patch: diff.patch.slice(0, 24000),
         instruction: 'Read-only independent review. Evaluate actual evidence against acceptance criteria. Return only JSON: {"passed":boolean,"score":number,"findings":string[]}. Do not assume missing evidence passes.' }),
@@ -62,5 +62,16 @@ export function createCertifier(capabilities, workspaces) {
     const verdict = result.outcome === 'completed' ? parseAuditVerdict(result.output) : { passed: false, score: 0, findings: [result.output || 'QA invocation failed'] };
     return { ...result, outcome: verdict.passed ? 'completed' : 'task_failure', output: JSON.stringify(verdict), certification: { kind: 'qa', ...verdict, files: diff.files } };
   }
-  return { gate, selfcheck, qa };
+  async function security(_node, env) {
+    const diff = await workspaces.diff(env.snapshot.workspaceHandle);
+    const scopes = env.snapshot.graph.nodes.filter(n => ['tool','agent'].includes(n.props.executorKind)).flatMap(n => n.props.fileScope || []);
+    const findings = [];
+    for (const file of diff.files) {
+      if (!matchesScope(file, scopes)) findings.push(`Changed file outside declared worker scopes: ${file}`);
+      if (/(^|\/)\.env(?:\.|$)|\.(?:pem|key)$/i.test(file)) findings.push(`Potential credential artifact requires review: ${file}`);
+      try { await inside(env.snapshot.workspaceHandle.cwd, file); } catch { findings.push(`Unsafe artifact path: ${file}`); }
+    }
+    return { outcome: findings.length ? 'task_failure' : 'completed', output: findings.length ? findings.join('; ') : `Scoped artifact checks passed (${diff.files.length} files); not a vulnerability scanner`, certification: { kind: 'scope-security', passed: !findings.length, findings } };
+  }
+  return { gate, selfcheck, qa, security };
 }

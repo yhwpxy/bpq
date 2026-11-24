@@ -76,3 +76,17 @@ test('完成运行后通过界面恢复检查点并保留恢复引用',async({pa
   await page.getByRole('button',{name:'恢复此点',exact:true}).first().click();await page.getByRole('button',{name:'确定',exact:true}).click();
   await expect(page.getByTestId('live-logs')).toContainText('人工恢复检查点');await expect(page.getByTestId('run-status')).toHaveText('成功',{timeout:30000});
 });
+
+test('原创示例与 Markdown、Mermaid、JSON 计划导出',async({page})=>{
+  await open(page);await page.getByLabel('Requirement preset').selectOption('booking');await page.getByRole('button',{name:'填入示例',exact:true}).click();await expect(page.getByLabel('Requirement source')).toHaveValue(/实验室预约/);
+  await page.getByRole('button',{name:'提取需求契约',exact:true}).click();await page.getByRole('button',{name:'编译任务与双图',exact:true}).click();await page.getByRole('button',{name:'校验与版本',exact:true}).click();
+  for(const [kind,extension] of [['markdown','md'],['mermaid','mmd'],['json','json']]){await page.getByLabel('Plan export format').selectOption(kind);const promise=page.waitForEvent('download');await page.getByRole('button',{name:'导出执行计划',exact:true}).click();expect((await promise).suggestedFilename()).toBe(`workflow-plan.${extension}`);}
+});
+
+test('自然语言契约入口通过完整 HTTP 替身提取输入输出和约束',async({page})=>{
+  await open(page);await page.getByLabel('Requirement input mode').selectOption('natural');await page.getByLabel('Requirement source').fill('处理发票，输入发票数组，输出核对报告，不得修改原始文件');await page.getByRole('button',{name:'提取需求契约',exact:true}).click();
+  await expect(page.getByLabel('FR-01',{exact:true})).toHaveValue('处理发票');
+  await page.locator('.goal-editor summary').filter({hasText:'输入'}).click();await expect(page.getByLabel('IN-01',{exact:true})).toHaveValue('发票数组');
+  await page.locator('.goal-editor summary').filter({hasText:'输出'}).click();await expect(page.getByLabel('OUT-01',{exact:true})).toHaveValue('核对报告');
+  await page.locator('.goal-editor summary').filter({hasText:'约束'}).click();await expect(page.getByLabel('CON-01',{exact:true})).toHaveValue('不得修改原始文件');
+});

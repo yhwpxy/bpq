@@ -34,7 +34,7 @@ export function createRunService(storageDir, planService, options = {}) {
   async function executeTask(node, { context, snapshot, signal, attempt, onChunk }) {
     const handle = snapshot.workspaceHandle;
     const result = await options.capabilityService.invoke(node.props.capabilityId, {
-      cwd: handle.cwd, title: node.props.name, prompt: `${node.props.prompt || node.props.name}\nUpstream results: ${JSON.stringify(context.outputs).slice(0, 12000)}`,
+      cwd: handle.cwd, role: node.props.assignedRole, title: node.props.name, prompt: `${node.props.prompt || node.props.name}\nUpstream results: ${JSON.stringify(context.outputs).slice(0, 12000)}`,
       fileScope: node.props.fileScope, command: node.props.command, args: node.props.args, timeoutMs: node.props.timeoutMs || 60000,
       permissionTier: snapshot.graph.workflow.permissionTier, approved: snapshot.approved, signal, onChunk,
       extraEnv: { VTO_ATTEMPT: String(attempt), VTO_RUN_ID: snapshot.id },
@@ -61,6 +61,7 @@ export function createRunService(storageDir, planService, options = {}) {
     switch (node.props.control) {
       case 'prepare': case 'join': return { outcome: 'completed', output: '契约/汇合控制完成' };
       case 'checkpoint': return { outcome: 'completed', output: '已保存独立 Git 检查点', checkpoint: { ...await options.workspaceService.checkpoint(handle, node.props.name), nodeId: node.id } };
+      case 'security': return certifier.security(node, env);
       case 'gate': return certifier.gate(node, env);
       case 'qa': return certifier.qa(node, env);
       case 'restore': {

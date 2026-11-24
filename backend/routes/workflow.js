@@ -1,3 +1,5 @@
+import { exportPlan } from '../engine/planExport.js';
+import { REQUIREMENT_PRESETS } from '../../shared/workflowPresets.js';
 import { changeImpact } from '../engine/changeImpact.js';
 import { validatePlanSchema } from '../../shared/schema.js';
 import { AppError } from '../services/errors.js';
@@ -6,7 +8,7 @@ import { validatePlan } from '../engine/validator.js';
 import { Router } from 'express';
 export const route = fn => (req, res, next) => Promise.resolve().then(() => fn(req, res)).catch(next);
 
-export function workflowRouter({ planningService, providerService, capabilityService, versionService, workspaceService, runService, auditService, evidenceService, governanceService, mcpService, security }) {
+export function workflowRouter({ planningService, planService, providerService, capabilityService, versionService, workspaceService, runService, auditService, evidenceService, governanceService, mcpService, security }) {
   const router = Router();
   router.post('/goals/parse', route(async (req, res) => {
     const controller = new AbortController();
@@ -76,5 +78,8 @@ export function workflowRouter({ planningService, providerService, capabilitySer
     for (const n of plan.nodes.filter(n => n.props.capabilityId === 'local-tool')) { n.props.command = process.execPath; n.props.args = ['tools/deliver.cjs', n.props.requirementRefs[0].toLowerCase()]; n.props.duration = 0; }
     res.json({ plan, workspace });
   }));
+  router.get('/workflow-presets', security.requireAuth, (_req, res) => res.json(REQUIREMENT_PRESETS));
+  router.post('/workflows/export', security.requireAuth, route((req, res) => res.json(exportPlan(req.body))));
+  router.get('/plans/:id/export', security.requireAuth, route(async (req, res) => res.json(exportPlan(await planService.get(req.params.id)))));
   return router;
 }

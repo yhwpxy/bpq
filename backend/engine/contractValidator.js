@@ -29,6 +29,7 @@ export function validateWorkflowSemantics(plan, { capabilities, governance } = {
     for (const ref of p.acceptanceRefs) { if (!acs.has(ref)) add('R8', 'AC_REFERENCE', 2, 'error', `Unknown acceptance criterion ${ref}`, n.id, { requirementId: ref }); else accepted.add(ref); }
     if (['agent', 'tool'].includes(p.executorKind)) {
       const c = capabilities?.find(c => c.id === p.capabilityId);
+      if (c?.roles && p.assignedRole && !c.roles.includes(p.assignedRole)) add('R6', 'CAPABILITY_ROLE', 3, 'error', `Capability does not support role ${p.assignedRole}`, n.id);
       if (!c || !c.enabled || c.circuit === 'open' || c.kind !== p.executorKind) add('R6', 'CAPABILITY_UNAVAILABLE', 3, 'error', `Capability ${p.capabilityId || '(unset)'} is unavailable or incompatible`, n.id);
     }
     if (p.control === 'restore') {
@@ -52,6 +53,16 @@ export function validateWorkflowSemantics(plan, { capabilities, governance } = {
     const source = byId.get(e.source), target = byId.get(e.target);
     if (source?.props.control !== 'restore' || target?.props.control !== 'checkpoint' || !downstream(plan, [e.target]).has(e.source)) add('R2', 'ILLEGAL_LOOP', 1, 'error', 'Loop must connect a reachable restore back to its earlier checkpoint', e.source);
     if (source?.props.restoreTarget !== e.target) add('R8', 'CHECKPOINT_REFERENCE', 1, 'error', 'Loop and explicit restore target must agree', e.source);
+  }
+  if (w.permissionTier === 'strict') {
+    const start = plan.nodes.find(n => n.type === 'start');
+    const queue = start ? [start.id] : [], visited = new Set();
+    while (queue.length) {
+      const id = queue.shift(); if (visited.has(id)) continue; visited.add(id); const node = byId.get(id);
+      if (!node || node.props.control === 'human') continue;
+      if ((['tool','agent'].includes(node.props.executorKind) && node.props.capabilityId !== 'simulated') || node.props.control === 'gate') add('R6','HUMAN_ORDER',3,'error','Every strict mutation path must pass through a human gate',id);
+      for (const edge of plan.edges.filter(e => e.source === id && e.kind !== 'loop' && e.kind !== 'fail')) queue.push(edge.target);
+    }
   }
   if (w.permissionTier === 'strict' && !plan.nodes.some(n => n.props.control === 'human')) add('R6', 'HUMAN_REQUIRED', 3, 'error', 'Strict mode requires an explicit human gate');
   const workers = plan.nodes.filter(n => n.props.fileScope.length && ['tool', 'agent'].includes(n.props.executorKind));

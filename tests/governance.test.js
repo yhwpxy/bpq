@@ -66,3 +66,8 @@ it('blocks policy violations in validation before executing commands', async () 
   const caps = await s.capabilityService.list(), p = compileWorkflow(parseGoal('run'), { command: 'git', args: ['push', '--force'] }, caps);
   expect(validatePlan(p, { capabilities: caps }).some(i => i.code === 'EXECUTION_POLICY' && i.severity === 'error')).toBe(true);
 });
+it('validates capability role assignment in the existing R6 family', async () => {
+  const caps = [{id:'simulated',kind:'tool',enabled:true,roles:['worker']}],p=compileWorkflow(parseGoal('role'),{},caps);
+  const worker=p.nodes.find(n=>n.props.requirementRefs.length);worker.props.assignedRole='evaluator';
+  expect(validatePlan(p,{capabilities:caps}).some(i=>i.code==='CAPABILITY_ROLE'&&i.nodeId===worker.id)).toBe(true);
+});

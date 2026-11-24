@@ -13,7 +13,8 @@
     "test:watch": "vitest",
     "build": "npm run build --workspace frontend",
     "check": "npm test && npm run build",
-    "test:e2e": "npm run build && playwright test"
+    "test:e2e": "npm run build && playwright test",
+    "package:web": "npm run build && node scripts/package-web.mjs"
   },
   "engines": {
     "node": ">=18"
