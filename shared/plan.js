@@ -1,3 +1,4 @@
+import { isForward } from './workflowSchema.js';
 import { nanoid } from 'nanoid';
 import { NODE_TYPES, START_MAX_OUTGOING } from './constants.js';
 
@@ -16,7 +17,7 @@ export function autoLayout(plan) {
  const nodes=new Map(result.nodes.map(n=>[n.id,n]));
  const incoming=new Map(result.nodes.map(n=>[n.id,[]]));
  const outgoing=new Map(result.nodes.map(n=>[n.id,[]]));
- for(const e of result.edges){if(nodes.has(e.source)&&nodes.has(e.target)){incoming.get(e.target).push(e.source);outgoing.get(e.source).push(e.target);}}
+ for(const e of result.edges.filter(e=>isForward(result,e))){if(nodes.has(e.source)&&nodes.has(e.target)){incoming.get(e.target).push(e.source);outgoing.get(e.source).push(e.target);}}
  const degrees=new Map([...incoming].map(([id,a])=>[id,a.length]));
  const levels=new Map(result.nodes.map(n=>[n.id,0]));
  const queue=result.nodes.filter(n=>!degrees.get(n.id)).map(n=>n.id);let visited=0;

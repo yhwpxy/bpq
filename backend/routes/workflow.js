@@ -1,3 +1,5 @@
+import { compileWorkflow } from '../engine/workflowCompiler.js';
+import { validatePlan } from '../engine/validator.js';
 import { Router } from 'express';
 export const route = fn => (req, res, next) => Promise.resolve().then(() => fn(req, res)).catch(next);
 
@@ -19,5 +21,13 @@ export function workflowRouter({ planningService, providerService, capabilitySer
   router.get('/capabilities', route(async (_req, res) => res.json(await capabilityService.list())));
   router.post('/capabilities', route(async (req, res) => res.json(await capabilityService.save(req.body))));
   router.post('/capabilities/:id/probe', route(async (req, res) => res.json(await capabilityService.probe(req.params.id))));
+  router.post('/workflows/compile', security.requireAuth, route(async (req, res) => {
+    const capabilities = await capabilityService.list();
+    const plan = compileWorkflow(req.body?.goalSpec, req.body?.options, capabilities);
+    res.json({ plan, diagnostics: validatePlan(plan, { capabilities }) });
+  }));
+  router.post('/workflows/validate', security.requireAuth, route(async (req, res) => {
+    res.json({ diagnostics: validatePlan(req.body, { capabilities: await capabilityService.list() }) });
+  }));
   return router;
 }

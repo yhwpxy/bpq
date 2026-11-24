@@ -1,3 +1,4 @@
+import { workflowSchema } from './workflowSchema.js';
 import { NODE_TYPES, MAX_NODES, MAX_EDGES } from './constants.js';
 const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 const text = (v, max=128) => typeof v === 'string' && v.trim().length > 0 && [...v].length <= max;
@@ -49,5 +50,6 @@ export function validatePlanSchema(plan, {allowMissingId=false}={}) {
   if(!isSafeId(e.source)||!isSafeId(e.target)) add('边的 source 与 target 必须是节点 ID');
   if(e.label !== undefined && typeof e.label !== 'string') add('边标签必须是字符串');
  }
+ if (!errors.length) errors.push(...workflowSchema(plan));
  return errors;
 }

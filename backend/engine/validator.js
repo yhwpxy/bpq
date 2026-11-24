@@ -1,3 +1,5 @@
+import { isWorkflow, isForward } from '../../shared/workflowSchema.js';
+import { validateWorkflowSemantics } from './contractValidator.js';
 import { validatePlanSchema } from '../../shared/schema.js';
 import { parseExpression } from './expression.js';
 import { START_MAX_OUTGOING } from '../../shared/constants.js';
@@ -6,7 +8,7 @@ export function buildGraph(plan) {
   const nodes = new Map(plan.nodes.map(n => [n.id, n]));
   const incoming = new Map(plan.nodes.map(n => [n.id, []]));
   const outgoing = new Map(plan.nodes.map(n => [n.id, []]));
-  for (const edge of plan.edges) {
+  for (const edge of plan.edges.filter(e => isForward(plan, e))) {
     if (nodes.has(edge.source) && nodes.has(edge.target)) {
       outgoing.get(edge.source).push(edge); incoming.get(edge.target).push(edge);
     }
@@ -32,7 +34,7 @@ export function topologicalLevels(plan) {
   return levels;
 }
 
-export function validatePlan(plan, { allowStartFanOut = START_MAX_OUTGOING > 1 } = {}) {
+export function validatePlan(plan, { allowStartFanOut = START_MAX_OUTGOING > 1, capabilities } = {}) {
   const errors = validatePlanSchema(plan);
   if (errors.length) return errors.map(error => ({ ...error, rule: 'R6' }));
   const add = (nodeId, rule, message) => errors.push({ nodeId, rule, message });
@@ -91,7 +93,7 @@ export function validatePlan(plan, { allowStartFanOut = START_MAX_OUTGOING > 1 }
     const fromStart = reachable(starts[0].id); const toEnd = reachable(ends[0].id, true);
     for (const n of plan.nodes) {
       if (!fromStart.has(n.id)) add(n.id, 'R3', '从开始节点无法到达此节点');
-      if (!toEnd.has(n.id)) add(n.id, 'R3', '此节点无法到达结束节点');
+      if (!toEnd.has(n.id) && !(isWorkflow(plan) && n.props.control === 'restore' && toEnd.has(n.props.restoreTarget))) add(n.id, 'R3', '此节点无法到达结束节点');
     }
   }
   for (const n of plan.nodes.filter(n => n.type === 'condition')) {
@@ -102,5 +104,6 @@ export function validatePlan(plan, { allowStartFanOut = START_MAX_OUTGOING > 1 }
     const a = reachable(edges[0].target); const b = reachable(edges[1].target);
     if (![...a].some(id => b.has(id) && incoming.get(id).length > 1)) add(n.id, 'R4', '条件的两个分支必须汇聚到同一汇聚节点');
   }
+  if (isWorkflow(plan)) errors.push(...validateWorkflowSemantics(plan, { capabilities }));
   return errors;
 }
