@@ -12,6 +12,7 @@ import { createPlanningService } from './services/planningService.js';
 import { workflowRouter } from './routes/workflow.js';
 import { createProviderService } from './services/providerService.js';
 import { createCapabilityService } from './services/capabilityService.js';
+import { createWorkspaceService } from './services/workspaceService.js';
 import { createVersionService } from './services/versionService.js';
 import { createLocalAuth } from './middleware/localAuth.js';
 
@@ -27,11 +28,12 @@ export function createApp({ storageDir = path.join(directory, 'storage'), runOpt
   const planningService = createPlanningService(llmDecomposeService);
   const providerService = createProviderService(storageDir, llmConfig);
   const capabilityService = createCapabilityService(storageDir, providerService);
+  const workspaceService = createWorkspaceService(storageDir);
   const versionService = createVersionService(storageDir, planService, capabilityService);
-  const runService = createRunService(storageDir, planService, { ...runOptions, versionService, capabilityService });
+  const runService = createRunService(storageDir, planService, { ...runOptions, versionService, capabilityService, workspaceService });
   const security = createLocalAuth(sessionToken);
   app.locals.security = security;
-  app.locals.services = { planService, runService, llmDecomposeService, planningService, providerService, capabilityService, versionService, security };
+  app.locals.services = { planService, runService, llmDecomposeService, planningService, providerService, capabilityService, versionService, workspaceService, security };
   app.get('/api/local-session', security.session);
   app.use('/api', workflowRouter(app.locals.services));
   app.use('/api', createApiRouter({ planService, runService, llmDecomposeService }));

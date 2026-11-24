@@ -14,7 +14,7 @@ export function stopProcess(child) {
 }
 export function spawnManaged(command, args, options) {
   if (typeof command !== 'string' || !command.trim() || !Array.isArray(args) || args.some(x => typeof x !== 'string' || x.includes('\0'))) throw new Error('Invalid executable or arguments');
-  return spawn(command, args, { cwd: options.cwd, env: cleanEnvironment(options.envAllowlist), shell: false, detached: process.platform !== 'win32', windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
+  return spawn(command, args, { cwd: options.cwd, env: { ...cleanEnvironment(options.envAllowlist), ...options.extraEnv }, shell: false, detached: process.platform !== 'win32', windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
 }
 export function runProcess(command, args = [], options = {}) {
   return new Promise((resolve, reject) => {
