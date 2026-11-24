@@ -1,3 +1,4 @@
+import { aggregateUsage } from './usageMeter.js';
 import { nanoid } from 'nanoid';
 import { evaluateExpression, parseExpression } from './expression.js';
 import { buildGraph, topologicalLevels, validatePlan } from './validator.js';
@@ -44,6 +45,7 @@ export function createRun(inputPlan, options = {}) {
   function notify() {
     snapshot.graph = structuredClone(plan);
     snapshot.runtime = { variables: { ...context.variables }, outputs: structuredClone(context.outputs), edgeStates: Object.fromEntries(edgeStates) };
+    snapshot.usage = aggregateUsage(snapshot.attempts, plan.workflow?.budgetUsd ?? null);
     snapshot.resources = options.broker?.snapshot() || { maxWorkers: limit, activeWorkers: active, queued: 0 };
     if (!options.onUpdate) return;
     const copy = structuredClone(snapshot);
@@ -80,7 +82,7 @@ export function createRun(inputPlan, options = {}) {
   }
   function recordAttempt(node) {
     const number = (snapshot.nodeStates[node.id].attempt || 0) + 1;
-    const attempt = { id: `attempt_${nanoid(10)}`, nodeId: node.id, number, status: 'RUNNING', startedAt: now(), finishedAt: null, input: { preview: JSON.stringify(context.outputs).slice(0, 12000), contract: node.props.inputContract || [] }, output: null };
+    const attempt = { id: `attempt_${nanoid(10)}`, nodeId: node.id, number, capabilityKind: node.props.executorKind || 'tool', capabilityId: node.props.capabilityId || '', status: 'RUNNING', startedAt: now(), finishedAt: null, input: { preview: JSON.stringify(context.outputs).slice(0, 12000), contract: node.props.inputContract || [] }, output: null };
     if (['tool', 'agent'].includes(node.props.executorKind) || ['gate', 'qa'].includes(node.props.control)) {
       attempt.sessionId = `session_${nanoid(10)}`;
       snapshot.sessions.push({ id: attempt.sessionId, nodeId: node.id, attemptId: attempt.id, capabilityId: node.props.capabilityId || 'local-tool', status: 'RUNNING', startedAt: now(), messages: [], bytes: 0 });
@@ -142,7 +144,7 @@ export function createRun(inputPlan, options = {}) {
           else { await wait(node.props.duration, signal); if (!current()) return; result = { outcome: random() < node.props.failRate ? 'task_failure' : 'completed', output: '执行成功', mode: 'simulation' }; }
           if (!current()) return;
           if (result.outcome !== 'completed') {
-            endAttempt(attempt, 'FAILED', result.output);
+            endAttempt(attempt, 'FAILED', result);
             if (retry < node.props.retry) { const delay = 500 * (retry + 1); const message = `第 ${retry + 1} 次尝试失败，${delay}ms 后重试`; snapshot.nodeStates[node.id].message = message; log(node, 'retry', message); notify(); await wait(delay, signal); if (!current()) return; }
             else { state(node, 'FAILED', 'fail', `重试耗尽，共尝试 ${retry + 1} 次${result.output ? `：${result.output}` : ''}`); settleEdges(node, 'failed'); return; }
           } else {

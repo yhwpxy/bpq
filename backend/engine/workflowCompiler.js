@@ -9,7 +9,7 @@ export function compileWorkflow(goalSpec, options = {}, capabilities = []) {
   const config = { ...template, ...options }, plan = createEmptyPlan();
   const tier = config.permissionTier || 'supervised';
   plan.name = goalSpec.title.slice(0, 50); plan.meta.maxConcurrency = config.maxConcurrency;
-  plan.workflow = { format: 'twin-1', goalSpec: structuredClone(goalSpec), permissionTier: tier, maxReworkIterations: config.maxReworkIterations ?? 2, template: config.id, groups: [] };
+  plan.workflow = { format: 'twin-1', goalSpec: structuredClone(goalSpec), permissionTier: tier, maxReworkIterations: config.maxReworkIterations ?? 2, template: config.id, budgetUsd: config.budgetUsd ?? null, groups: [] };
   const phases = ['理解与准备 / Prepare', '并行交付 / Deliver', '验证与恢复 / Verify'].map((title, i) => ({ id: `phase_${i + 1}`, kind: 'phase', parentId: null, title }));
   plan.workflow.groups.push(...phases);
   const inputs = goalSpec.inputs.map(({ name, type, required }) => ({ name, type, required }));

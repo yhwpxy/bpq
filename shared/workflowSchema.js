@@ -8,6 +8,7 @@ export function workflowSchema(plan) {
   const add = (message, nodeId = '') => issues.push({ rule: 'R6', code: 'WORKFLOW_SCHEMA', nodeId, severity: 'error', level: 1, message });
   if (!record(w) || w.format !== 'twin-1') { add('Unknown workflow format'); return issues; }
   issues.push(...validateGoalSpec(w.goalSpec));
+  if (w.budgetUsd !== undefined && w.budgetUsd !== null && (!Number.isFinite(w.budgetUsd) || w.budgetUsd < 0)) add('Budget must be nonnegative');
   if (!['strict', 'supervised', 'turbo'].includes(w.permissionTier)) add('Unknown permission tier');
   if (!Number.isInteger(w.maxReworkIterations) || w.maxReworkIterations < 1 || w.maxReworkIterations > 20) add('Rework limit must be 1–20');
   if (!Array.isArray(w.groups) || w.groups.length > 200 || w.groups.some(g => !record(g) || typeof g.id !== 'string' || !['phase', 'task'].includes(g.kind) || typeof g.title !== 'string')) add('Invalid WBS containers');

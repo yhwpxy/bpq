@@ -1,3 +1,4 @@
+import { policyViolation } from '../engine/executionPolicy.js';
 import { settingsStore } from './settingsStore.js';
 import { AppError, assertSafeId } from './errors.js';
 import { runProcess } from '../sandbox/processRunner.js';
@@ -35,8 +36,12 @@ export function createCapabilityService(root, providers, options = {}) {
     const c = await get(id);
     if (!c.enabled || c.circuit === 'open') throw new AppError(40002, 'Capability disabled or circuit open');
     if (c.transport !== 'simulated' && !request.readOnly && request.permissionTier === 'strict' && !request.approved) throw new AppError(40002, 'Human approval required before mutation');
+    const governance = await options.governance?.get();
+    const actualCommand = c.transport === 'local' ? request.command : c.command;
+    const actualArgs = c.transport === 'local' ? request.args : c.args;
+    if (['local', 'cli', 'acp'].includes(c.transport)) { const violation = policyViolation(actualCommand, actualArgs, governance?.policy, request.permissionTier, request.approved); if (violation) throw new AppError(40002, violation, [{ rule: 'R6', code: 'EXECUTION_POLICY', severity: 'error', message: violation }]); }
     let chunkChain = Promise.resolve(), chunkError;
-    const cleanRequest = { ...request, envAllowlist: c.envAllowlist, systemPrompt: c.prompt, onChunk: (role, text) => { chunkChain = chunkChain.then(async () => request.onChunk?.(role, await providers.redact(text))).catch(e => { chunkError = e; }); return chunkChain; } };
+    const cleanRequest = { ...request, envAllowlist: c.envAllowlist, systemPrompt: [c.prompt, governance?.policy.text, governance?.terms.map(t => `${t.context}: ${t.term} (${t.definition})`).join('\n')].filter(Boolean).join('\n'), onChunk: (role, text) => { chunkChain = chunkChain.then(async () => request.onChunk?.(role, await providers.redact(text))).catch(e => { chunkError = e; }); return chunkChain; } };
     let result;
     if (c.prompt) await request.onChunk?.('system', await providers.redact(c.prompt));
     await request.onChunk?.('user', await providers.redact(request.prompt || request.title || [request.command, ...(request.args || [])].filter(Boolean).join(' ')));

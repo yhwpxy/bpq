@@ -1,5 +1,7 @@
+import { terminologyIssues } from './terminology.js';
+import { policyViolation } from './executionPolicy.js';
 import { downstream, scopesOverlap } from './graphSemantics.js';
-export function validateWorkflowSemantics(plan, { capabilities } = {}) {
+export function validateWorkflowSemantics(plan, { capabilities, governance } = {}) {
   const issues = [], w = plan.workflow;
   const add = (rule, code, level, severity, message, nodeId = '', extra = {}) => issues.push({ rule, code, level, severity, message, nodeId, ...extra });
   const byId = new Map(plan.nodes.map(n => [n.id, n]));
@@ -16,6 +18,8 @@ export function validateWorkflowSemantics(plan, { capabilities } = {}) {
   const covered = new Set(), accepted = new Set();
   for (const n of plan.nodes) {
     const p = n.props;
+    issues.push(...terminologyIssues(`${p.name} ${p.prompt || ''} ${p.planningRationale}`, governance?.terms || [], n.id));
+    if (p.command) { const violation = policyViolation(p.command, p.args, governance?.policy, w.permissionTier, true); if (violation) add('R6', 'EXECUTION_POLICY', 3, 'error', violation, n.id); }
     if (!p.planningRationale.trim()) add('R6', 'RATIONALE', 2, 'warning', 'Explain this node’s purpose and executor choice', n.id);
     if (!groups.has(p.parentId)) add('R8', 'WBS_PARENT', 1, 'error', 'Node parent does not exist', n.id);
     const parent = groups.get(p.parentId);
@@ -56,5 +60,6 @@ export function validateWorkflowSemantics(plan, { capabilities } = {}) {
     if (downstream(plan, [a.id]).has(b.id) || downstream(plan, [b.id]).has(a.id)) continue;
     if (a.props.fileScope.some(x => b.props.fileScope.some(y => scopesOverlap(x, y)))) add('R6', 'PARALLEL_WRITES', 3, 'warning', `Parallel write scopes overlap: ${a.props.name}, ${b.props.name}`, b.id, { relatedNodeIds: [a.id, b.id] });
   }
+  issues.push(...terminologyIssues(`${w.goalSpec.goal} ${w.goalSpec.requirements.map(r => r.text).join(' ')}`, governance?.terms || []));
   return issues;
 }

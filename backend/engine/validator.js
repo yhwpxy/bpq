@@ -34,7 +34,7 @@ export function topologicalLevels(plan) {
   return levels;
 }
 
-export function validatePlan(plan, { allowStartFanOut = START_MAX_OUTGOING > 1, capabilities } = {}) {
+export function validatePlan(plan, { allowStartFanOut = START_MAX_OUTGOING > 1, capabilities, governance } = {}) {
   const errors = validatePlanSchema(plan);
   if (errors.length) return errors.map(error => ({ ...error, rule: 'R6' }));
   const add = (nodeId, rule, message) => errors.push({ nodeId, rule, message });
@@ -104,6 +104,6 @@ export function validatePlan(plan, { allowStartFanOut = START_MAX_OUTGOING > 1, 
     const a = reachable(edges[0].target); const b = reachable(edges[1].target);
     if (![...a].some(id => b.has(id) && incoming.get(id).length > 1)) add(n.id, 'R4', '条件的两个分支必须汇聚到同一汇聚节点');
   }
-  if (isWorkflow(plan)) errors.push(...validateWorkflowSemantics(plan, { capabilities }));
+  if (isWorkflow(plan)) errors.push(...validateWorkflowSemantics(plan, { capabilities, governance }));
   return errors;
 }

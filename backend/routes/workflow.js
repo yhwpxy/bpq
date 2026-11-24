@@ -6,7 +6,7 @@ import { validatePlan } from '../engine/validator.js';
 import { Router } from 'express';
 export const route = fn => (req, res, next) => Promise.resolve().then(() => fn(req, res)).catch(next);
 
-export function workflowRouter({ planningService, providerService, capabilityService, versionService, workspaceService, runService, auditService, evidenceService, security }) {
+export function workflowRouter({ planningService, providerService, capabilityService, versionService, workspaceService, runService, auditService, evidenceService, governanceService, mcpService, security }) {
   const router = Router();
   router.post('/goals/parse', route(async (req, res) => {
     const controller = new AbortController();
@@ -27,10 +27,10 @@ export function workflowRouter({ planningService, providerService, capabilitySer
   router.post('/workflows/compile', security.requireAuth, route(async (req, res) => {
     const capabilities = await capabilityService.list();
     const plan = compileWorkflow(req.body?.goalSpec, req.body?.options, capabilities);
-    res.json({ plan, diagnostics: validatePlan(plan, { capabilities }) });
+    res.json({ plan, diagnostics: validatePlan(plan, { capabilities, governance: await governanceService.get() }) });
   }));
   router.post('/workflows/validate', security.requireAuth, route(async (req, res) => {
-    res.json({ diagnostics: validatePlan(req.body, { capabilities: await capabilityService.list() }) });
+    res.json({ diagnostics: validatePlan(req.body, { capabilities: await capabilityService.list(), governance: await governanceService.get() }) });
   }));
   router.post('/workflows/impact', security.requireAuth, route((req, res) => {
     if (validatePlanSchema(req.body?.before).length || validatePlanSchema(req.body?.after).length) throw new AppError(40001, 'Invalid impact comparison plans');
@@ -55,5 +55,18 @@ export function workflowRouter({ planningService, providerService, capabilitySer
   }));
   router.get('/evidence/search', security.requireAuth, route(async (req, res) => res.json(await evidenceService.search(req.query.q || '', { offset: Number(req.query.offset || 0), limit: Number(req.query.limit || 40) }))));
   router.get('/audit', security.requireAuth, route(async (req, res) => res.json(await auditService.list({ since: Number(req.query.since || 0), planId: req.query.planId, limit: Number(req.query.limit || 1000) }))));
+  router.get('/governance', security.requireAuth, route(async (_req, res) => res.json(await governanceService.get())));
+  router.post('/governance/terms', security.requireAuth, route(async (req, res) => res.json(await governanceService.saveTerm(req.body))));
+  router.delete('/governance/terms/:id', security.requireAuth, route(async (req, res) => { await governanceService.removeTerm(req.params.id); res.json({ ok: true }); }));
+  router.post('/governance/policy', security.requireAuth, route(async (req, res) => res.json(await governanceService.savePolicy(req.body))));
+  router.get('/mcp', security.requireAuth, route(async (_req, res) => res.json(await mcpService.list())));
+  router.post('/mcp', security.requireAuth, route(async (req, res) => res.json(await mcpService.save(req.body))));
+  router.post('/mcp/:id/probe', security.requireAuth, route(async (req, res) => res.json(await mcpService.probe(req.params.id))));
+  router.post('/doctor', security.requireAuth, route(async (_req, res) => {
+    const result = await workspaceService.doctor();
+    result.capabilities = [];
+    for (const c of await capabilityService.list()) result.capabilities.push({ id: c.id, ...await capabilityService.probe(c.id) });
+    res.json(result);
+  }));
   return router;
 }

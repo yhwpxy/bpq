@@ -1,3 +1,5 @@
+import { createGovernanceService } from './services/governanceService.js';
+import { createMcpService } from './services/mcpService.js';
 import express from 'express';
 import cors from 'cors';
 import path from 'node:path';
@@ -30,14 +32,16 @@ export function createApp({ storageDir = path.join(directory, 'storage'), runOpt
   const llmDecomposeService = createLlmDecomposeService({ ...llmOptions, config: llmConfig, fetchImpl });
   const planningService = createPlanningService(llmDecomposeService);
   const providerService = createProviderService(storageDir, llmConfig);
-  const capabilityService = createCapabilityService(storageDir, providerService);
+  const governanceService = createGovernanceService(storageDir, auditService);
+  const mcpService = createMcpService(storageDir, auditService);
+  const capabilityService = createCapabilityService(storageDir, providerService, { governance: governanceService });
   const workspaceService = createWorkspaceService(storageDir);
-  const versionService = createVersionService(storageDir, planService, capabilityService, auditService);
-  const runService = createRunService(storageDir, planService, { ...runOptions, versionService, capabilityService, workspaceService });
+  const versionService = createVersionService(storageDir, planService, capabilityService, auditService, governanceService);
+  const runService = createRunService(storageDir, planService, { ...runOptions, versionService, capabilityService, workspaceService, governanceService });
   const evidenceService = createEvidenceService(runService, versionService, auditService, providerService);
   const security = createLocalAuth(sessionToken);
   app.locals.security = security;
-  app.locals.services = { planService, runService, llmDecomposeService, planningService, providerService, capabilityService, versionService, workspaceService, auditService, evidenceService, security };
+  app.locals.services = { planService, runService, llmDecomposeService, planningService, providerService, capabilityService, versionService, workspaceService, auditService, evidenceService, governanceService, mcpService, security };
   app.get('/api/local-session', security.session);
   app.use('/api', workflowRouter(app.locals.services));
   app.use('/api', createApiRouter({ planService, runService, llmDecomposeService, security }));

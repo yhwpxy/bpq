@@ -76,7 +76,7 @@ export function createRunService(storageDir, planService, options = {}) {
     return createRun(plan, {
       ...options, id, autoStart: false, broker, initialSnapshot, workspaceHandle, inputs,
       versionId: version?.id || initialSnapshot?.versionId, versionTag: version?.tag || initialSnapshot?.versionTag,
-      validationOptions: { ...options.validationOptions, capabilities: await options.capabilityService?.list() },
+      validationOptions: { ...options.validationOptions, capabilities: await options.capabilityService?.list(), governance: await options.governanceService?.get() },
       executeTask, executeControl, restoreCheckpoint: (cp, snapshot) => options.workspaceService.restore(snapshot.workspaceHandle, cp), onUpdate: snapshot => atomicWrite(file(snapshot.id), snapshot),
     });
   }
@@ -96,7 +96,7 @@ export function createRunService(storageDir, planService, options = {}) {
       const version = options.versionService ? await options.versionService.forExecution(planId, request?.versionId) : null;
       const plan = version?.plan ?? await planService.get(planId);
       const capabilities = await options.capabilityService?.list();
-      const errors = validatePlan(plan, { capabilities }).filter(i => !i.severity || i.severity === 'error');
+      const errors = validatePlan(plan, { capabilities, governance: await options.governanceService?.get() }).filter(i => !i.severity || i.severity === 'error');
       if (errors.length) throw new AppError(40002, '编排方案校验失败', errors);
       const id = `run_${nanoid(10)}`; let workspaceHandle;
       const inputs = structuredClone(request.inputs ?? {});

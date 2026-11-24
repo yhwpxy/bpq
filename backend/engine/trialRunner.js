@@ -3,8 +3,8 @@ import { nextFrontier, settleEdges } from './frontier.js';
 import { rewindIds } from './graphSemantics.js';
 import { evaluateExpression } from './expression.js';
 import { graphDigest } from './changeImpact.js';
-export function runTrial(plan, { capabilities, failures = {} } = {}) {
-  const diagnostics = validatePlan(plan, { capabilities });
+export function runTrial(plan, { capabilities, governance, failures = {} } = {}) {
+  const diagnostics = validatePlan(plan, { capabilities, governance });
   const steps = [], states = Object.fromEntries(plan.nodes.map(n => [n.id, { status: 'PENDING', attempt: 0 }]));
   const report = { digest: graphDigest(plan), passed: false, dryRun: true, diagnostics, steps, nodeStates: states, reworkCount: 0, createdAt: new Date().toISOString() };
   if (diagnostics.some(i => !i.severity || i.severity === 'error')) return report;

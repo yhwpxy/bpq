@@ -8,7 +8,7 @@ import { validatePlanSchema } from '../../shared/schema.js';
 import { isWorkflow } from '../../shared/workflowSchema.js';
 import { runTrial } from '../engine/trialRunner.js';
 import { graphDigest } from '../engine/changeImpact.js';
-export function createVersionService(root, plans, capabilities, audit) {
+export function createVersionService(root, plans, capabilities, audit, governance) {
   const directory = id => path.join(root, 'versions', assertSafeId(id));
   const reportPath = id => path.join(root, 'trials', `${assertSafeId(id)}.json`);
   async function get(planId, versionId) {
@@ -23,7 +23,7 @@ export function createVersionService(root, plans, capabilities, audit) {
   }
   async function trial(planId, scenarios = {}) {
     const plan = await plans.get(planId);
-    const report = runTrial(plan, { capabilities: await capabilities.list(), failures: scenarios.failures || {} });
+    const report = runTrial(plan, { capabilities: await capabilities.list(), governance: await governance?.get(), failures: scenarios.failures || {} });
     await atomicWrite(reportPath(planId), report); await audit?.append({ category: 'trial', action: 'trial', planId, message: report.passed ? 'Trial passed' : 'Trial blocked', detail: { digest: report.digest } }); return report;
   }
   async function report(planId) { await plans.get(planId); return readJson(reportPath(planId), { fallback: null }); }
@@ -36,7 +36,7 @@ export function createVersionService(root, plans, capabilities, audit) {
     return withLock(`${directory(planId)}:publish`, async () => {
       const plan = await plans.get(planId), digest = graphDigest(plan);
       if (expectedDigest && expectedDigest !== digest) throw new AppError(40901, 'Draft changed; review it again');
-      const validation = validatePlan(plan, { capabilities: await capabilities.list() });
+      const validation = validatePlan(plan, { capabilities: await capabilities.list(), governance: await governance?.get() });
       if (validation.some(i => !i.severity || i.severity === 'error')) throw new AppError(40002, 'Workflow validation failed', validation);
       const latest = await report(planId);
       if (!latest?.passed || latest.digest !== digest) throw new AppError(40901, 'A passing trial for the current draft is required');
