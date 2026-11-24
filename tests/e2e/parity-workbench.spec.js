@@ -90,3 +90,15 @@ test('自然语言契约入口通过完整 HTTP 替身提取输入输出和约�
   await page.locator('.goal-editor summary').filter({hasText:'输出'}).click();await expect(page.getByLabel('OUT-01',{exact:true})).toHaveValue('核对报告');
   await page.locator('.goal-editor summary').filter({hasText:'约束'}).click();await expect(page.getByLabel('CON-01',{exact:true})).toHaveValue('不得修改原始文件');
 });
+
+test('快速连续修改两个节点时影响分析同时保留两项需求',async({page})=>{
+  await open(page);await demo(page);
+  let releaseImpact;const hold=new Promise(resolve=>{releaseImpact=resolve});
+  await page.route('**/api/workflows/impact',async route=>{await hold;await route.continue();});
+  await page.locator('.wb-tree button').filter({hasText:'生成第一份报告'}).click();await page.getByLabel('Planning rationale').fill('第一项修改');await page.getByRole('button',{name:'应用节点修改',exact:true}).click();
+  await page.locator('.wb-tree button').filter({hasText:'生成第二份报告'}).click();await page.getByLabel('Planning rationale').fill('第二项修改');await page.getByRole('button',{name:'应用节点修改',exact:true}).click();
+  releaseImpact();
+  await expect(page.getByTestId('impact-report')).toContainText('FR-02');
+  // The report is tied to the last successfully analyzed baseline, so a rapid batch retains both edits.
+  await expect(page.getByTestId('impact-report')).toContainText('FR-01');
+});

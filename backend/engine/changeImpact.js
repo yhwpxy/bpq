@@ -15,7 +15,7 @@ export const graphDigest = plan => createHash('sha256').update(JSON.stringify(ca
 export function changeImpact(before, after) {
   const a = new Map(before.nodes.map(n => [n.id, n])), b = new Map(after.nodes.map(n => [n.id, n]));
   const added = [...b.keys()].filter(id => !a.has(id)), removed = [...a.keys()].filter(id => !b.has(id));
-  const changed = [...b.keys()].filter(id => a.has(id) && JSON.stringify(a.get(id).props) !== JSON.stringify(b.get(id).props));
+  const changed = [...b.keys()].filter(id => a.has(id) && (a.get(id).type !== b.get(id).type || JSON.stringify(a.get(id).props) !== JSON.stringify(b.get(id).props)));
   const edgesChanged = JSON.stringify(before.edges) !== JSON.stringify(after.edges);
   const goalChanged = JSON.stringify(before.workflow) !== JSON.stringify(after.workflow) || JSON.stringify(before.meta) !== JSON.stringify(after.meta);
   const seeds = new Set([...added, ...changed]);

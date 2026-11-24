@@ -80,3 +80,8 @@ describe('Change impact', () => {
     const a = makePlan(), b = structuredClone(a); b.nodes[0].x += 100; b.updatedAt = new Date().toISOString(); expect(graphDigest(a)).toBe(graphDigest(b)); expect(changeImpact(a, b).requiresRetrial).toBe(false);
   });
 });
+it('includes node type changes and both edits in one impact comparison', () => {
+  const before=makePlan(),after=structuredClone(before),workers=after.nodes.filter(n=>n.props.requirementRefs.length);
+  workers[0].type='delay';workers[0].props.wait=10;workers[1].props.planningRationale+=' adjusted';
+  const impact=changeImpact(before,after);expect(impact.changedNodeIds).toEqual(expect.arrayContaining(workers.map(n=>n.id)));expect(impact.requirementIds).toEqual(expect.arrayContaining(['FR-01','FR-02']));expect(impact.requiresRetrial).toBe(true);
+});

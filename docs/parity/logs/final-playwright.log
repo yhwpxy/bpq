@@ -18,9 +18,9 @@ computing gzip size...
 dist/index.html                           0.92 kB │ gzip:   0.57 kB
 dist/assets/WorkbenchView-DWlXeAzH.css   10.89 kB │ gzip:   3.07 kB
 dist/assets/index-Du3XswTo.css          386.48 kB │ gzip:  54.08 kB
-dist/assets/WorkbenchView-CabcHEci.js    63.83 kB │ gzip:  21.44 kB
+dist/assets/WorkbenchView-8oiUiptz.js    63.83 kB │ gzip:  21.44 kB
 dist/assets/vue-YTr3FcUW.js              92.07 kB │ gzip:  36.44 kB
-dist/assets/index-YtMyL4Tq.js           129.47 kB │ gzip:  51.00 kB
+dist/assets/index-aZfMgjz_.js           129.47 kB │ gzip:  51.00 kB
 dist/assets/canvas-Cx6BbhPh.js          457.22 kB │ gzip: 127.66 kB
 dist/assets/element-BF4NHbKz.js         955.80 kB │ gzip: 309.27 kB
 
@@ -28,39 +28,40 @@ dist/assets/element-BF4NHbKz.js         955.80 kB │ gzip: 309.27 kB
 - Using dynamic import() to code-split the application
 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
-✓ built in 4.67s
-[WebServer] (node:29816) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+✓ built in 4.51s
+[WebServer] (node:51157) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
 [WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
 
-Running 26 tests using 1 worker
+Running 27 tests using 1 worker
 
-(node:29819) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(node:51160) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
 (Use `node --trace-warnings ...` to show where the warning was created)
-  ✓   1 tests/e2e/canvas.spec.js:36:1 › AC-03 五类节点真实拖拽创建并吸附网格 (1.8s)
+  ✓   1 tests/e2e/canvas.spec.js:36:1 › AC-03 五类节点真实拖拽创建并吸附网格 (2.7s)
   ✓   2 tests/e2e/canvas.spec.js:54:1 › AC-04 端口真实连线与自环、重复、开始二出、条件第三出拒绝 (4.0s)
   ✓   3 tests/e2e/canvas.spec.js:76:1 › AC-03 选中、属性修改、复制粘贴、删除与撤销重做 (1.9s)
-  ✓   4 tests/e2e/canvas.spec.js:103:1 › 1280×720 五区布局、侧栏折叠与日志折叠无页面溢出 (558ms)
-  ✓   5 tests/e2e/execution.spec.js:40:1 › AC-07 浏览器注入失败、重试与下游跳过，日志红色高亮 (3.5s)
-  ✓   6 tests/e2e/execution.spec.js:62:1 › 停止执行使未完成节点 CANCELED，刷新后状态仍然保留 (1.7s)
-  ✓   7 tests/e2e/execution.spec.js:80:1 › AC-09 导出 JSON 再导入保留图与属性，损坏文件友好拒绝 (1.9s)
+  ✓   4 tests/e2e/canvas.spec.js:103:1 › 1280×720 五区布局、侧栏折叠与日志折叠无页面溢出 (553ms)
+  ✓   5 tests/e2e/execution.spec.js:40:1 › AC-07 浏览器注入失败、重试与下游跳过，日志红色高亮 (3.4s)
+  ✓   6 tests/e2e/execution.spec.js:62:1 › 停止执行使未完成节点 CANCELED，刷新后状态仍然保留 (1.4s)
+  ✓   7 tests/e2e/execution.spec.js:80:1 › AC-09 导出 JSON 再导入保留图与属性，损坏文件友好拒绝 (3.2s)
   ✓   8 tests/e2e/natural-language-http.spec.js:3:1 › 完整HTTP链路：自然语言→模型协议替身→校验→同一确认表→依赖修改→执行 (4.5s)
-  ✓   9 tests/e2e/natural-language.spec.js:35:1 › 自然语言复用确认表：编辑名称与依赖、生成画布、执行并显示日志 (4.4s)
-  ✓  10 tests/e2e/natural-language.spec.js:72:1 › 未配置 API Key 时禁用 AI，结构化规格仍可正常分解 (1.1s)
-  ✓  11 tests/e2e/natural-language.spec.js:92:3 › AI 失败显示可读信息并保持输入：40001 (872ms)
-  ✓  12 tests/e2e/natural-language.spec.js:92:3 › AI 失败显示可读信息并保持输入：50201 (916ms)
-  ✓  13 tests/e2e/natural-language.spec.js:92:3 › AI 失败显示可读信息并保持输入：50301 (848ms)
-  ✓  14 tests/e2e/natural-language.spec.js:106:1 › 切换模式取消 AI 等待，迟到结果不覆盖规则输入 (1.2s)
-  ✓  15 tests/e2e/natural-language.spec.js:128:1 › 重新检查配置可启用 AI，空需求不发请求 (862ms)
-  ✓  16 tests/e2e/parity-workbench.spec.js:6:1 › 双语入口与来源确认：规则提取到三级任务树、画布和节点编辑 (1.7s)
-  ✓  17 tests/e2e/parity-workbench.spec.js:21:1 › 真实端到端：试运行、v1 发布、人工门禁、Ghost、自动返工与证据下载 (3.9s)
-  ✓  18 tests/e2e/parity-workbench.spec.js:36:1 › 暂停人工等待、刷新恢复、v1 与 v2 隔离 (3.1s)
-  ✓  19 tests/e2e/parity-workbench.spec.js:45:1 › 能力管理的 DDD 与 MCP 登记、鉴权、审计检索和布局 (1.3s)
-  ✓  20 tests/e2e/parity-workbench.spec.js:55:1 › 校验定位、画布选中、显式失效报告与前向连线表单 (1.3s)
-  ✓  21 tests/e2e/parity-workbench.spec.js:67:1 › 人工拒绝终止后续任务并可在审计历史重新打开 (1.5s)
-  ✓  22 tests/e2e/parity-workbench.spec.js:73:1 › 完成运行后通过界面恢复检查点并保留恢复引用 (3.7s)
-  ✓  23 tests/e2e/parity-workbench.spec.js:80:1 › 原创示例与 Markdown、Mermaid、JSON 计划导出 (725ms)
-  ✓  24 tests/e2e/parity-workbench.spec.js:86:1 › 自然语言契约入口通过完整 HTTP 替身提取输入输出和约束 (717ms)
-  ✓  25 tests/e2e/workflow.spec.js:3:1 › TC-01~03 / TC-06 / TC-08~10 规格编辑生成执行持久化与离线依赖 (8.1s)
-  ✓  26 tests/e2e/workflow.spec.js:44:1 › 空文本、不可识别、上传边界与取消分支 (1.2s)
+  ✓   9 tests/e2e/natural-language.spec.js:35:1 › 自然语言复用确认表：编辑名称与依赖、生成画布、执行并显示日志 (4.6s)
+  ✓  10 tests/e2e/natural-language.spec.js:72:1 › 未配置 API Key 时禁用 AI，结构化规格仍可正常分解 (1.2s)
+  ✓  11 tests/e2e/natural-language.spec.js:92:3 › AI 失败显示可读信息并保持输入：40001 (918ms)
+  ✓  12 tests/e2e/natural-language.spec.js:92:3 › AI 失败显示可读信息并保持输入：50201 (989ms)
+  ✓  13 tests/e2e/natural-language.spec.js:92:3 › AI 失败显示可读信息并保持输入：50301 (893ms)
+  ✓  14 tests/e2e/natural-language.spec.js:106:1 › 切换模式取消 AI 等待，迟到结果不覆盖规则输入 (1.1s)
+  ✓  15 tests/e2e/natural-language.spec.js:128:1 › 重新检查配置可启用 AI，空需求不发请求 (982ms)
+  ✓  16 tests/e2e/parity-workbench.spec.js:6:1 › 双语入口与来源确认：规则提取到三级任务树、画布和节点编辑 (1.3s)
+  ✓  17 tests/e2e/parity-workbench.spec.js:21:1 › 真实端到端：试运行、v1 发布、人工门禁、Ghost、自动返工与证据下载 (4.1s)
+  ✓  18 tests/e2e/parity-workbench.spec.js:36:1 › 暂停人工等待、刷新恢复、v1 与 v2 隔离 (4.3s)
+  ✓  19 tests/e2e/parity-workbench.spec.js:45:1 › 能力管理的 DDD 与 MCP 登记、鉴权、审计检索和布局 (1.4s)
+  ✓  20 tests/e2e/parity-workbench.spec.js:55:1 › 校验定位、画布选中、显式失效报告与前向连线表单 (1.4s)
+  ✓  21 tests/e2e/parity-workbench.spec.js:67:1 › 人工拒绝终止后续任务并可在审计历史重新打开 (1.8s)
+  ✓  22 tests/e2e/parity-workbench.spec.js:73:1 › 完成运行后通过界面恢复检查点并保留恢复引用 (3.8s)
+  ✓  23 tests/e2e/parity-workbench.spec.js:80:1 › 原创示例与 Markdown、Mermaid、JSON 计划导出 (728ms)
+  ✓  24 tests/e2e/parity-workbench.spec.js:86:1 › 自然语言契约入口通过完整 HTTP 替身提取输入输出和约束 (549ms)
+  ✓  25 tests/e2e/parity-workbench.spec.js:94:1 › 快速连续修改两个节点时影响分析同时保留两项需求 (1.6s)
+  ✓  26 tests/e2e/workflow.spec.js:3:1 › TC-01~03 / TC-06 / TC-08~10 规格编辑生成执行持久化与离线依赖 (7.9s)
+  ✓  27 tests/e2e/workflow.spec.js:44:1 › 空文本、不可识别、上传边界与取消分支 (1.2s)
 
-  26 passed (59.9s)
+  27 passed (1.1m)

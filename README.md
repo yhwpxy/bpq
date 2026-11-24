@@ -152,7 +152,7 @@ npm run build
 npm run test:e2e
 ```
 
-原有 **225 项 Vitest 与 17 项 Playwright** 均保留。本次最终通过 **389 项 Vitest、26 项 Playwright**（新增 164 / 9）。通过时间和日志摘要见 [最终验收报告](docs/parity/最终验收报告.md)，各模块记录在 `docs/parity/M*-验收.md`。TypeScript 检查包含在 build 中。
+原有 **225 项 Vitest 与 17 项 Playwright** 均保留。本次最终通过 **390 项 Vitest、27 项 Playwright**（新增 165 / 10）。通过时间和日志摘要见 [最终验收报告](docs/parity/最终验收报告.md)，各模块记录在 `docs/parity/M*-验收.md`。TypeScript 检查包含在 build 中。
 
 Playwright 自动启动隔离的回环测试服务，模型请求使用本地协议替身，存储使用临时目录；不读取真实 API Key。新增验证覆盖完整工作台的来源确认、节点/画布联动、发布、人工控制、Ghost、真实产物与返工、版本隔离、手动恢复、MCP/DDD、搜索及导出。真实 Git、Node 子进程和 HTTP 传输在测试中实际运行。
 

@@ -5,34 +5,34 @@
 
  RUN  v1.6.1 /Users/bilibili/Documents/Codex/2026-11-24/github-https-github-com-yhwpxy-bpq/work/bpq
 
- ✓ tests/decomposer.test.js  (39 tests) 38ms
- ✓ tests/llmDecompose.test.js  (31 tests) 52ms
- ✓ tests/scheduler.test.js  (14 tests) 45ms
- ✓ tests/capabilities.test.js  (30 tests) 784ms
- ✓ tests/api.test.js  (10 tests) 1388ms
- ✓ tests/certifier.test.js  (14 tests) 1719ms
- ✓ tests/evidence.test.js  (9 tests) 3249ms
- ✓ tests/workflow-graph.test.js  (21 tests) 32ms
- ✓ tests/workflow-versions.test.js  (15 tests) 880ms
- ✓ tests/governance.test.js  (11 tests) 334ms
- ✓ tests/nl-api.test.js  (6 tests) 162ms
- ✓ tests/storage.test.js  (13 tests) 1393ms
+ ✓ tests/decomposer.test.js  (39 tests) 13ms
+ ✓ tests/llmDecompose.test.js  (31 tests) 45ms
+ ✓ tests/scheduler.test.js  (14 tests) 40ms
+ ✓ tests/capabilities.test.js  (30 tests) 688ms
+ ✓ tests/workflow-versions.test.js  (16 tests) 659ms
+ ✓ tests/api.test.js  (10 tests) 1486ms
+ ✓ tests/certifier.test.js  (14 tests) 1667ms
+ ✓ tests/workflow-graph.test.js  (21 tests) 24ms
+ ✓ tests/governance.test.js  (11 tests) 489ms
+ ✓ tests/evidence.test.js  (9 tests) 3487ms
+ ✓ tests/nl-api.test.js  (6 tests) 167ms
+ ✓ tests/storage.test.js  (13 tests) 1263ms
  ✓ tests/taskSpecSchema.test.js  (40 tests) 7ms
- ✓ tests/run-control.test.js  (12 tests) 6362ms
- ✓ tests/plan.test.js  (8 tests) 38ms
- ✓ tests/goalSpec.test.js  (17 tests) 39ms
+ ✓ tests/plan.test.js  (8 tests) 10ms
+ ✓ tests/run-control.test.js  (12 tests) 6169ms
+ ✓ tests/goalSpec.test.js  (17 tests) 8ms
  ✓ tests/validator.test.js  (19 tests) 8ms
- ✓ tests/goal-model.test.js  (9 tests) 25ms
- ✓ tests/llmConfig.test.js  (18 tests) 29ms
- ✓ tests/workbench-contract.test.js  (3 tests) 398ms
- ✓ tests/plan-export.test.js  (6 tests) 17ms
- ✓ tests/workspace.test.js  (9 tests) 4810ms
- ✓ tests/goal-api.test.js  (1 test) 51ms
- ✓ tests/recovery-ghost.test.js  (7 tests) 9427ms
- ✓ tests/expression.test.js  (27 tests) 3ms
+ ✓ tests/goal-model.test.js  (9 tests) 27ms
+ ✓ tests/llmConfig.test.js  (18 tests) 49ms
+ ✓ tests/plan-export.test.js  (6 tests) 20ms
+ ✓ tests/workbench-contract.test.js  (3 tests) 197ms
+ ✓ tests/workspace.test.js  (9 tests) 3954ms
+ ✓ tests/goal-api.test.js  (1 test) 50ms
+ ✓ tests/recovery-ghost.test.js  (7 tests) 8139ms
+ ✓ tests/expression.test.js  (27 tests) 4ms
 
  Test Files  25 passed (25)
-      Tests  389 passed (389)
-   Start at  16:29:01
-   Duration  11.21s (transform 428ms, setup 0ms, collect 2.40s, tests 31.29s, environment 3ms, prepare 1.48s)
+      Tests  390 passed (390)
+   Start at  16:39:34
+   Duration  9.77s (transform 277ms, setup 2ms, collect 1.83s, tests 28.67s, environment 3ms, prepare 1.12s)
 
