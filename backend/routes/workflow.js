@@ -46,6 +46,6 @@ export function workflowRouter({ planningService, providerService, capabilitySer
   router.post('/workspaces', route(async (req, res) => res.json(await workspaceService.register(req.body))));
   router.post('/workspaces/demo', route(async (_req, res) => res.json(await workspaceService.demo())));
   router.get('/resources', security.requireAuth, (_req, res) => res.json(runService.resources()));
-  for (const action of ['pause', 'resume', 'retry', 'resolve']) router.post(`/runs/:id/${action}`, security.requireAuth, route(async (req, res) => res.json(await runService.control(req.params.id, action, { ...req.body, authorized: true }))));
+  for (const action of ['pause', 'resume', 'retry', 'resolve', 'ghost', 'restore']) router.post(`/runs/:id/${action}`, security.requireAuth, route(async (req, res) => res.json(await runService.control(req.params.id, action, { ...req.body, authorized: true }))));
   return router;
 }

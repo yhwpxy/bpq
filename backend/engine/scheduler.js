@@ -4,6 +4,7 @@ import { buildGraph, topologicalLevels, validatePlan } from './validator.js';
 import { NODE_STATUS_COLORS } from '../../shared/constants.js';
 import { isWorkflow } from '../../shared/workflowSchema.js';
 import { nextFrontier, settleEdges as resolveEdges } from './frontier.js';
+import { spliceGhost } from './runGraphPatch.js';
 import { downstream } from './graphSemantics.js';
 
 /** Legacy simulation and typed workflows share one scheduler and edge-state machine. */
@@ -32,6 +33,7 @@ export function createRun(inputPlan, options = {}) {
   let active = 0, started = false, finished = false, pumping = false, paused = false, draining = false, generation = 0;
   let writeChain = Promise.resolve(), resolved = false, resolveDone;
   const done = new Promise(resolve => { resolveDone = resolve; });
+  const idleWaiters = [];
   const inFlight = new Set(), limit = plan.meta?.maxConcurrency ?? 3;
   const unsettled = s => ['PENDING', 'READY', 'RUNNING', 'WAITING_HUMAN', 'REWOUND'].includes(s);
   function log(node, event, message, extra = {}) {
@@ -76,7 +78,7 @@ export function createRun(inputPlan, options = {}) {
   }
   function recordAttempt(node) {
     const number = (snapshot.nodeStates[node.id].attempt || 0) + 1;
-    const attempt = { id: `attempt_${nanoid(10)}`, nodeId: node.id, number, status: 'RUNNING', startedAt: now(), finishedAt: null, input: structuredClone(context.outputs), output: null };
+    const attempt = { id: `attempt_${nanoid(10)}`, nodeId: node.id, number, status: 'RUNNING', startedAt: now(), finishedAt: null, input: { preview: JSON.stringify(context.outputs).slice(0, 12000), contract: node.props.inputContract || [] }, output: null };
     snapshot.attempts.push(attempt); state(node, 'RUNNING', 'start', number === 1 ? '开始执行' : `开始第 ${number} 次尝试`, { attempt: number }); return attempt;
   }
   const endAttempt = (attempt, status, output) => Object.assign(attempt, { status, output: output ?? null, finishedAt: now() });
@@ -85,18 +87,31 @@ export function createRun(inputPlan, options = {}) {
     const current = () => !finished && epoch === generation && !signal.aborted;
     let release, attempt;
     try {
-      const isWorker = node.type === 'task' && (!node.props.control || ['gate', 'qa'].includes(node.props.control));
+      const isWorker = node.type === 'task' && (!node.props.control || ['gate', 'qa', 'ghost'].includes(node.props.control));
       if (options.broker && isWorker) { state(node, 'READY', 'ready', '等待可用资源槽'); release = await options.broker.acquire({ signal, priority: node.props.priority === 'human' }); if (!current()) return; }
       attempt = recordAttempt(node);
       if (node.type === 'task' && node.props.control === 'human') {
         const intervention = { id: `human_${nanoid(10)}`, nodeId: node.id, status: 'open', question: node.props.name, createdAt: now() };
         snapshot.interventions.push(intervention); state(node, 'WAITING_HUMAN', 'waiting_human', '等待人工决定'); snapshot.status = 'WAITING_HUMAN'; notify(); return;
       }
-      if (node.type === 'task' && node.props.control) {
+      if (node.type === 'task' && node.props.control && node.props.control !== 'ghost') {
+        if (node.props.control === 'restore' && snapshot.reworkCount >= plan.workflow.maxReworkIterations + (snapshot.extraReworkAllowance || 0)) {
+          snapshot.interventions.push({ id: `human_${nanoid(10)}`, kind: 'rework_limit', nodeId: node.id, status: 'open', question: '返工额度已用尽：授权额外一次或拒绝停止', createdAt: now() });
+          state(node, 'WAITING_HUMAN', 'waiting_human', '返工额度已用尽'); snapshot.status = 'WAITING_HUMAN'; notify(); return;
+        }
         const result = await options.executeControl?.(node, { context, snapshot, signal, attempt: attempt.number });
         if (!current()) return;
         if (!result) throw new Error(`Control ${node.props.control} is not available`);
-        if (result.checkpoint) snapshot.checkpoints.push(result.checkpoint);
+        if (result.checkpoint) {
+          snapshot.checkpoints.push({ ...result.checkpoint, kind: 'checkpoint', engine: captureEngine() });
+          log(node, 'checkpoint', result.checkpoint.ref, { checkpointId: result.checkpoint.id, sha: result.checkpoint.sha });
+        }
+        if (result.restoration) {
+          endAttempt(attempt, 'SUCCESS', result.restoration.rescue.ref);
+          applyRestoration(result.restoration, result.checkpointTarget, true);
+          log(node, 'restore', `有界返工 ${snapshot.reworkCount}，保留 ${result.restoration.rescue.ref}`, { rescueRef: result.restoration.rescue.ref });
+          notify(); return;
+        }
         if (result.outcome !== 'completed') { endAttempt(attempt, 'FAILED', result.output); state(node, 'FAILED', 'fail', result.output || '验证未通过'); settleEdges(node, 'failed'); return; }
         endAttempt(attempt, 'SUCCESS', result.output); state(node, 'SUCCESS', 'success', result.output || '控制步骤完成'); settleEdges(node, 'active'); return;
       }
@@ -129,7 +144,7 @@ export function createRun(inputPlan, options = {}) {
       else failEngine(error);
     } finally {
       if (!current() && attempt?.status === 'RUNNING') endAttempt(attempt, 'CANCELED', 'Interrupted attempt');
-      release?.(); active--; inFlight.delete(node.id); if (active === 0) draining = false;
+      release?.(); active--; inFlight.delete(node.id); if (active === 0) { draining = false; idleWaiters.splice(0).forEach(resolve => resolve()); }
       if (!finished) { notify(); pump(); } else resolveAfterWrites();
     }
   }
@@ -184,7 +199,15 @@ export function createRun(inputPlan, options = {}) {
     const item = snapshot.interventions.find(i => i.id === id);
     if (!item) throw Object.assign(new Error('人工待办不存在'), { code: 40401 });
     if (item.status !== 'open') { if (item.action === action && item.reason === reason) return; throw Object.assign(new Error('人工待办已处理'), { code: 40901 }); }
+    if (item.kind === 'rework_limit' && action === 'override') throw Object.assign(new Error('返工额度只能显式追加一次或拒绝'), { code: 40001 });
     item.status = 'resolved'; item.action = action; item.reason = reason; item.resolvedAt = now();
+    if (item.kind === 'rework_limit' && action === 'approve') {
+      snapshot.extraReworkAllowance = (snapshot.extraReworkAllowance || 0) + 1;
+      const n = graph.nodes.get(item.nodeId), a = snapshot.attempts.filter(x => x.nodeId === n.id).at(-1);
+      if (a) endAttempt(a, 'WAIVED', reason);
+      state(n, 'PENDING', 'approve', `人工追加一次返工额度：${reason}`);
+      if (!paused) snapshot.status = 'RUNNING'; notify(); queueMicrotask(pump); return;
+    }
     const node = graph.nodes.get(item.nodeId), status = action === 'reject' ? 'FAILED' : action === 'override' ? 'WAIVED' : 'SUCCESS';
     const attempt = snapshot.attempts.filter(a => a.nodeId === node.id).at(-1); if (attempt) endAttempt(attempt, status, reason);
     state(node, status, action, reason); settleEdges(node, action === 'reject' ? 'failed' : 'active');
@@ -201,8 +224,50 @@ export function createRun(inputPlan, options = {}) {
     finished = false; paused = false; started = true; generation++; abortController = new AbortController(); snapshot.status = 'RUNNING'; snapshot.finishedAt = null; snapshot.error = null;
     log(graph.nodes.get(targets[0]), 'retry', '人工重试失败节点，保留历史尝试'); notify(); queueMicrotask(pump);
   }
+
+  function captureEngine() {
+    return { nodeStates: structuredClone(snapshot.nodeStates), variables: { ...context.variables }, outputs: structuredClone(context.outputs), edgeStates: Object.fromEntries(edgeStates), approved: snapshot.approved };
+  }
+  function applyRestoration(result, checkpoint, automatic) {
+    const saved = checkpoint.engine;
+    if (!saved) throw Object.assign(new Error('检查点缺少引擎状态'), { code: 40901 });
+    snapshot.checkpoints.push({ ...result.rescue, nodeId: checkpoint.nodeId, kind: 'rescue', engine: captureEngine(), preservedPath: result.preservedPath });
+    snapshot.workspaceHandle = result.handle;
+    for (const n of plan.nodes) {
+      const previous = snapshot.nodeStates[n.id], restored = saved.nodeStates[n.id];
+      snapshot.nodeStates[n.id] = { ...(restored || { status: 'PENDING' }), attempt: previous?.attempt || 0 };
+      if (n.id === checkpoint.nodeId || ['RUNNING', 'READY', 'REWOUND', 'WAITING_HUMAN'].includes(snapshot.nodeStates[n.id].status)) snapshot.nodeStates[n.id].status = 'PENDING';
+    }
+    for (const e of plan.edges) edgeStates.set(e.id, saved.edgeStates[e.id] || 'pending');
+    context.variables = Object.assign(Object.create(null), saved.variables); context.outputs = Object.assign(Object.create(null), structuredClone(saved.outputs));
+    snapshot.approved = saved.approved; snapshot.error = null; snapshot.finishedAt = null;
+    if (automatic) snapshot.reworkCount++; else snapshot.manualRestoreCount = (snapshot.manualRestoreCount || 0) + 1;
+    for (const i of snapshot.interventions) if (i.status === 'open') { i.status = 'cancelled'; i.reason = 'Checkpoint restored'; }
+  }
+  async function restoreCheckpoint(id) {
+    const checkpoint = snapshot.checkpoints.find(c => c.id === id && c.kind === 'checkpoint');
+    if (!checkpoint?.engine) throw Object.assign(new Error('请选择当前运行的可恢复检查点'), { code: 40001 });
+    pause(); await idle();
+    const result = await options.restoreCheckpoint(checkpoint, snapshot);
+    applyRestoration(result, checkpoint, false);
+    generation++; abortController = new AbortController(); paused = false; finished = false; started = true; snapshot.status = 'RUNNING';
+    log(graph.nodes.get(checkpoint.nodeId), 'restore', `人工恢复检查点，保留 ${result.rescue.ref}`, { checkpointId: id, rescueRef: result.rescue.ref }); notify(); queueMicrotask(pump);
+  }
+  function insertGhost(request, capabilities) {
+    if (finished) throw Object.assign(new Error('已结束运行不能插入任务'), { code: 40901 });
+    const patch = spliceGhost(plan, snapshot.nodeStates, request, capabilities);
+    plan = patch.plan; graph = buildGraph(plan); levels = topologicalLevels(plan); ordered = [...plan.nodes].sort((a, b) => levels.get(a.id) - levels.get(b.id));
+    expressions = new Map(plan.nodes.filter(n => n.type === 'condition').map(n => [n.id, parseExpression(n.props.expression)]));
+    snapshot.nodeStates[patch.node.id] = { status: 'PENDING', attempt: 0 }; edgeStates.set(patch.edge.id, 'pending');
+    snapshot.graphRevision = (snapshot.graphRevision || 0) + 1;
+    if (patch.node.props.capabilityId === 'simulated' && snapshot.mode === 'live') snapshot.mode = 'mixed';
+    log(patch.node, 'ghost', request.reason, { targetId: request.targetId, redirectedEdgeIds: patch.redirectedEdgeIds, addedEdgeId: patch.edge.id }); notify(); queueMicrotask(pump);
+    return patch.node.id;
+  }
+  function idle() { return active === 0 ? Promise.resolve() : new Promise(resolve => idleWaiters.push(resolve)); }
+
   function drain() { return writeChain; }
   notify();
   if (options.autoStart !== false) start();
-  return { snapshot, done, cancel, start, context, pause, resume, resolveHuman, retry, drain };
+  return { snapshot, done, cancel, start, context, pause, resume, resolveHuman, retry, drain, idle, insertGhost, restoreCheckpoint };
 }

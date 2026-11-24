@@ -60,6 +60,11 @@ export function createRunService(storageDir, planService, options = {}) {
         const r = await options.capabilityService.invoke('local-tool', { cwd: handle.cwd, command: node.props.command, args: node.props.args, signal, timeoutMs: node.props.timeoutMs || 60000, permissionTier: snapshot.graph.workflow.permissionTier, approved: snapshot.approved, extraEnv: { VTO_ATTEMPT: String(attempt), VTO_RUN_ID: snapshot.id } });
         return { ...r, output: `${node.props.demonstrationGate ? '[演示门禁，仅验证编排链路] ' : ''}${r.output}` };
       }
+      case 'restore': {
+        const cp = snapshot.checkpoints.filter(c => c.nodeId === node.props.restoreTarget && c.kind === 'checkpoint').at(-1);
+        if (!cp?.engine) return { outcome: 'task_failure', output: '恢复检查点不存在' };
+        return { outcome: 'completed', restoration: await options.workspaceService.restore(handle, cp), checkpointTarget: cp };
+      }
       case 'selfcheck': { const diff = await options.workspaceService.diff(handle); return { outcome: 'completed', output: `Diff: ${diff.files.length} files`, diff }; }
       default: return { outcome: 'task_failure', output: `Control ${node.props.control} is not enabled yet` };
     }
@@ -69,7 +74,7 @@ export function createRunService(storageDir, planService, options = {}) {
       ...options, id, autoStart: false, broker, initialSnapshot, workspaceHandle, inputs,
       versionId: version?.id || initialSnapshot?.versionId, versionTag: version?.tag || initialSnapshot?.versionTag,
       validationOptions: { ...options.validationOptions, capabilities: await options.capabilityService?.list() },
-      executeTask, executeControl, onUpdate: snapshot => atomicWrite(file(snapshot.id), snapshot),
+      executeTask, executeControl, restoreCheckpoint: (cp, snapshot) => options.workspaceService.restore(snapshot.workspaceHandle, cp), onUpdate: snapshot => atomicWrite(file(snapshot.id), snapshot),
     });
   }
   function track(controller) {
@@ -130,20 +135,24 @@ export function createRunService(storageDir, planService, options = {}) {
       const snapshot = await get(runId);
       controller = controllers.get(runId);
       if (!request.authorized) throw new AppError(40101, 'Local session required');
+      if (action === 'restore' && !snapshot.checkpoints?.some(c => c.id === request.checkpointId && c.kind === 'checkpoint' && c.engine)) throw new AppError(40001, '请选择当前运行的可恢复检查点');
       if (action === 'resolve' && !controller) {
         const resolved = snapshot.interventions?.find(i => i.id === request.interventionId);
         if (resolved?.status === 'resolved' && resolved.action === request.action && resolved.reason === request.reason) return snapshot;
       }
-      if (action === 'retry' && !controller) {
+      if (['retry', 'restore'].includes(action) && !controller) {
         if (!snapshot.graph || !snapshot.runtime) throw new AppError(40901, '旧运行不含恢复数据，请启动新运行');
         if (activeByPlan.has(snapshot.planId)) throw new AppError(40901, '该方案已有活动运行');
         controller = await makeController(snapshot.graph, runId, null, snapshot.workspaceHandle, snapshot);
-        controller.retry(request.nodeId); track(controller);
+        if (action === 'retry') { controller.retry(request.nodeId); track(controller); }
+        else { controller.pause(); track(controller); await controller.restoreCheckpoint(request.checkpointId); }
       } else {
         if (!controller) throw new AppError(40901, '运行已结束');
         if (action === 'pause') controller.pause();
         else if (action === 'resume') controller.resume();
         else if (action === 'retry') controller.retry(request.nodeId);
+        else if (action === 'ghost') controller.insertGhost(request, await options.capabilityService.list());
+        else if (action === 'restore') await controller.restoreCheckpoint(request.checkpointId);
         else if (action === 'resolve') controller.resolveHuman(request.interventionId, request.action, request.reason);
         else throw new AppError(40001, 'Unknown run control');
       }
