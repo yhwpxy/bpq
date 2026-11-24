@@ -21,6 +21,11 @@ export function createProviderService(root, legacy = {}) {
     return store.update(data => { data.providers = data.providers.filter(p => p.id !== next.id); data.providers.push(next); return publicView(next); });
   }
   async function resolve(id) { const p = (await all()).find(x => x.id === id); if (!p || !p.apiKey) throw new AppError(50301, 'Model provider is not configured'); return p; }
-  async function redact(value) { let text = typeof value === 'string' ? value : JSON.stringify(value); for (const p of await all()) if (p.apiKey) text = text.split(p.apiKey).join('[REDACTED]'); return text.replace(/Bearer\s+[A-Za-z0-9._-]+/gi, 'Bearer [REDACTED]'); }
-  return { list: async () => (await all()).map(publicView), save, resolve, redact };
+  async function redactor() {
+    const keys = (await all()).map(p => p.apiKey).filter(Boolean);
+    return value => { let text = typeof value === 'string' ? value : JSON.stringify(value); for (const key of keys) text = text.split(key).join('[REDACTED]').split(JSON.stringify(key).slice(1, -1)).join('[REDACTED]'); return text.replace(/Bearer\s+[A-Za-z0-9._-]+/gi, 'Bearer [REDACTED]'); };
+  }
+  async function redact(value) { return (await redactor())(value); }
+
+  return { list: async () => (await all()).map(publicView), save, resolve, redact, redactor };
 }

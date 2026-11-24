@@ -8,7 +8,7 @@ import { validatePlanSchema } from '../../shared/schema.js';
 import { isWorkflow } from '../../shared/workflowSchema.js';
 import { runTrial } from '../engine/trialRunner.js';
 import { graphDigest } from '../engine/changeImpact.js';
-export function createVersionService(root, plans, capabilities) {
+export function createVersionService(root, plans, capabilities, audit) {
   const directory = id => path.join(root, 'versions', assertSafeId(id));
   const reportPath = id => path.join(root, 'trials', `${assertSafeId(id)}.json`);
   async function get(planId, versionId) {
@@ -24,13 +24,13 @@ export function createVersionService(root, plans, capabilities) {
   async function trial(planId, scenarios = {}) {
     const plan = await plans.get(planId);
     const report = runTrial(plan, { capabilities: await capabilities.list(), failures: scenarios.failures || {} });
-    await atomicWrite(reportPath(planId), report); return report;
+    await atomicWrite(reportPath(planId), report); await audit?.append({ category: 'trial', action: 'trial', planId, message: report.passed ? 'Trial passed' : 'Trial blocked', detail: { digest: report.digest } }); return report;
   }
   async function report(planId) { await plans.get(planId); return readJson(reportPath(planId), { fallback: null }); }
   async function freeze(plan, validation, trialReport) {
     const versions = await list(plan.id), number = (versions[0]?.number || 0) + 1;
     const snapshot = { id: `version_${randomUUID()}`, planId: plan.id, number, tag: `v${number}.0`, digest: graphDigest(plan), plan: structuredClone(plan), validation, trial: trialReport, createdAt: new Date().toISOString() };
-    await atomicCreate(path.join(directory(plan.id), `${snapshot.id}.json`), snapshot); return snapshot;
+    await atomicCreate(path.join(directory(plan.id), `${snapshot.id}.json`), snapshot); await audit?.append({ category: 'version', action: 'publish', planId: plan.id, versionId: snapshot.id, message: `Published ${snapshot.tag}`, detail: { digest: snapshot.digest } }); return snapshot;
   }
   async function confirm(planId, expectedDigest) {
     return withLock(`${directory(planId)}:publish`, async () => {

@@ -38,8 +38,10 @@ export function createCapabilityService(root, providers, options = {}) {
     let chunkChain = Promise.resolve(), chunkError;
     const cleanRequest = { ...request, envAllowlist: c.envAllowlist, systemPrompt: c.prompt, onChunk: (role, text) => { chunkChain = chunkChain.then(async () => request.onChunk?.(role, await providers.redact(text))).catch(e => { chunkError = e; }); return chunkChain; } };
     let result;
+    if (c.prompt) await request.onChunk?.('system', await providers.redact(c.prompt));
+    await request.onChunk?.('user', await providers.redact(request.prompt || request.title || [request.command, ...(request.args || [])].filter(Boolean).join(' ')));
     try {
-      if (c.transport === 'native') result = await invokeNative(await providers.resolve(c.providerId), cleanRequest, options.http);
+      if (c.transport === 'native') { const provider = await providers.resolve(c.providerId); result = { ...await invokeNative(provider, cleanRequest, options.http), providerId: provider.id, model: provider.model, rates: provider.rates }; }
       else if (c.transport === 'acp') result = await invokeAcp(c, cleanRequest);
       else if (c.transport === 'simulated') result = { outcome: 'completed', exitCode: 0, output: '模拟执行 / Simulated execution', mode: 'simulated', files: [] };
       else {
@@ -54,6 +56,7 @@ export function createCapabilityService(root, providers, options = {}) {
     await chunkChain;
     if (chunkError) throw chunkError;
     result.output = await providers.redact(result.output || '');
+    if (result.output.length > 24000) { result.output = result.output.slice(0, 24000); result.truncated = true; }
     delete result.stdout; delete result.stderr;
     if (result.outcome !== 'aborted') await record(id, result.outcome === 'completed');
     return result;

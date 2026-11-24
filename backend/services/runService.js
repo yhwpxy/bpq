@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { readdir } from 'node:fs/promises';
 import { nanoid } from 'nanoid';
 import { createRun } from '../engine/scheduler.js';
 import { createCertifier, verifyValues } from '../engine/certifier.js';
@@ -10,7 +11,7 @@ import { matchesScope } from '../sandbox/pathPolicy.js';
 import { AppError, assertSafeId } from './errors.js';
 import { atomicWrite, readJson, withLock } from './storage.js';
 const ACTIVE = ['RUNNING', 'VALIDATING', 'PAUSED', 'WAITING_HUMAN'];
-const EVENTS = ['start', 'success', 'fail', 'retry', 'skip', 'cancel', 'ready', 'pause', 'resume', 'waiting_human', 'approve', 'reject', 'override', 'checkpoint', 'restore', 'ghost', 'chunk'];
+const EVENTS = ['start', 'success', 'fail', 'retry', 'skip', 'cancel', 'ready', 'pause', 'resume', 'waiting_human', 'approve', 'reject', 'override', 'checkpoint', 'restore', 'ghost', 'chunk', 'run'];
 function validateRun(run) {
   const object = x => x !== null && typeof x === 'object' && !Array.isArray(x);
   const date = x => typeof x === 'string' && Number.isFinite(Date.parse(x));
@@ -30,12 +31,12 @@ export function createRunService(storageDir, planService, options = {}) {
   const certifier = createCertifier(options.capabilityService, options.workspaceService);
   const file = id => path.join(directory, `${assertSafeId(id, 40402)}.json`);
   const lock = id => `${directory}:plan:${id}`;
-  async function executeTask(node, { context, snapshot, signal, attempt }) {
+  async function executeTask(node, { context, snapshot, signal, attempt, onChunk }) {
     const handle = snapshot.workspaceHandle;
     const result = await options.capabilityService.invoke(node.props.capabilityId, {
       cwd: handle.cwd, title: node.props.name, prompt: `${node.props.prompt || node.props.name}\nUpstream results: ${JSON.stringify(context.outputs).slice(0, 12000)}`,
       fileScope: node.props.fileScope, command: node.props.command, args: node.props.args, timeoutMs: node.props.timeoutMs || 60000,
-      permissionTier: snapshot.graph.workflow.permissionTier, approved: snapshot.approved, signal,
+      permissionTier: snapshot.graph.workflow.permissionTier, approved: snapshot.approved, signal, onChunk,
       extraEnv: { VTO_ATTEMPT: String(attempt), VTO_RUN_ID: snapshot.id },
     });
     if (result.outcome !== 'completed') return result;
@@ -168,5 +169,11 @@ export function createRunService(storageDir, planService, options = {}) {
   }
   async function removePlan(planId) { return withLock(lock(planId), async () => { if (activeByPlan.has(planId)) throw new AppError(40901, '方案正在执行中，不能删除'); return planService.delete(planId); }); }
   async function close() { const list = [...controllers.values()]; list.forEach(c => c.cancel()); await Promise.all(list.map(c => c.done)); }
-  return { execute, get, cancel, control, removePlan, close, resources: () => broker.snapshot(), isRunning: id => activeByPlan.has(id) };
+  async function list() {
+    const names = await readdir(directory).catch(e => { if (e.code === 'ENOENT') return []; throw e; });
+    const items = [];
+    for (const name of names.filter(n => n.endsWith('.json'))) { const r = await get(name.slice(0, -5)); items.push({ id: r.id, planId: r.planId, planName: r.planName, versionId: r.versionId, versionTag: r.versionTag, status: r.status, mode: r.mode, startedAt: r.startedAt, finishedAt: r.finishedAt }); }
+    return items.sort((a, b) => b.startedAt.localeCompare(a.startedAt));
+  }
+  return { execute, get, list, cancel, control, removePlan, close, resources: () => broker.snapshot(), isRunning: id => activeByPlan.has(id) };
 }

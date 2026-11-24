@@ -29,7 +29,7 @@ export function parseAuditVerdict(text) {
   } catch { return { passed: false, score: 0, findings: ['QA response must be a complete JSON verdict with passed, score and findings'] }; }
 }
 export function createCertifier(capabilities, workspaces) {
-  const requestFor = (node, env) => ({ cwd: env.snapshot.workspaceHandle.cwd, command: node.props.command, args: node.props.args || [], signal: env.signal, timeoutMs: node.props.timeoutMs || 60000,
+  const requestFor = (node, env) => ({ cwd: env.snapshot.workspaceHandle.cwd, command: node.props.command, args: node.props.args || [], signal: env.signal, onChunk: env.onChunk, timeoutMs: node.props.timeoutMs || 60000,
     permissionTier: env.snapshot.graph.workflow.permissionTier, approved: env.snapshot.approved,
     extraEnv: { VTO_ATTEMPT: String(env.attempt), VTO_RUN_ID: env.snapshot.id } });
   async function gate(node, env) {

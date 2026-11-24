@@ -5,7 +5,7 @@ import { validatePlanSchema } from '../../shared/schema.js';
 import { AppError, assertSafeId } from './errors.js';
 import { atomicWrite, readJson, withLock } from './storage.js';
 
-export function createPlanService(storageDir) {
+export function createPlanService(storageDir, { audit } = {}) {
   const directory = path.resolve(storageDir, 'plans'); const indexFile = path.join(directory, 'index.json');
   const indexLock = `${indexFile}:transaction`;
   const file = id => {
@@ -45,6 +45,7 @@ export function createPlanService(storageDir) {
       // Validate any existing files before replacing valid data in a damaged directory.
       await rebuildIndex();
       await atomicWrite(file(plan.id), plan); await rebuildIndex();
+      await audit?.append({ category: 'design', action: 'save', planId: plan.id, message: `Saved ${plan.name}` });
       return { id: plan.id, updatedAt: plan.updatedAt };
     });
   }

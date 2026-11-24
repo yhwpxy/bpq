@@ -28,6 +28,7 @@ export function createRun(inputPlan, options = {}) {
     mode: !isWorkflow(plan) || plan.nodes.some(n => n.props.capabilityId === 'simulated') ? 'simulation' : 'live',
     ...(options.versionId ? { versionId: options.versionId, versionTag: options.versionTag } : {}),
   };
+  snapshot.sessions ||= [];
   snapshot.certifications ||= [];
   snapshot.attempts ||= []; snapshot.interventions ||= []; snapshot.checkpoints ||= [];
   let abortController = new AbortController();
@@ -38,7 +39,7 @@ export function createRun(inputPlan, options = {}) {
   const inFlight = new Set(), limit = plan.meta?.maxConcurrency ?? 3;
   const unsettled = s => ['PENDING', 'READY', 'RUNNING', 'WAITING_HUMAN', 'REWOUND'].includes(s);
   function log(node, event, message, extra = {}) {
-    snapshot.logs.push({ seq: (snapshot.logs.at(-1)?.seq || 0) + 1, time: now(), nodeId: node.id, nodeName: node.props.name ?? ({ start: '开始', end: '结束', condition: '条件分支', delay: '延时' }[node.type] ?? node.type), event, message, ...extra });
+    snapshot.logs.push({ seq: (snapshot.logs.at(-1)?.seq || 0) + 1, time: now(), nodeId: node.id, nodeName: node.props.name ?? ({ start: '开始', end: '结束', condition: '条件分支', delay: '延时' }[node.type] ?? node.type), event, message, runId: snapshot.id, planId: snapshot.planId, versionId: snapshot.versionId || null, attempt: snapshot.nodeStates[node.id]?.attempt || 0, actor: ['approve', 'reject', 'override', 'pause', 'resume', 'ghost'].includes(event) ? 'local-user' : 'engine', ...extra });
   }
   function notify() {
     snapshot.graph = structuredClone(plan);
@@ -58,7 +59,7 @@ export function createRun(inputPlan, options = {}) {
     if (persist) notify();
   }
   function resolveAfterWrites() { writeChain.then(() => { if (!resolved && active === 0) { resolved = true; resolveDone(structuredClone(snapshot)); } }); }
-  function finish(status) { if (finished) return; finished = true; snapshot.status = status; snapshot.finishedAt = now(); notify(); resolveAfterWrites(); }
+  function finish(status) { if (finished) return; finished = true; snapshot.status = status; snapshot.finishedAt = now(); log(plan.nodes[0], 'run', `运行结束：${status}`, { status }); notify(); resolveAfterWrites(); }
   function failEngine(error, persist = true) {
     if (snapshot.status === 'CANCELED') return;
     generation++; abortController.abort(); finished = true;
@@ -80,13 +81,29 @@ export function createRun(inputPlan, options = {}) {
   function recordAttempt(node) {
     const number = (snapshot.nodeStates[node.id].attempt || 0) + 1;
     const attempt = { id: `attempt_${nanoid(10)}`, nodeId: node.id, number, status: 'RUNNING', startedAt: now(), finishedAt: null, input: { preview: JSON.stringify(context.outputs).slice(0, 12000), contract: node.props.inputContract || [] }, output: null };
+    if (['tool', 'agent'].includes(node.props.executorKind) || ['gate', 'qa'].includes(node.props.control)) {
+      attempt.sessionId = `session_${nanoid(10)}`;
+      snapshot.sessions.push({ id: attempt.sessionId, nodeId: node.id, attemptId: attempt.id, capabilityId: node.props.capabilityId || 'local-tool', status: 'RUNNING', startedAt: now(), messages: [], bytes: 0 });
+    }
     snapshot.attempts.push(attempt); state(node, 'RUNNING', 'start', number === 1 ? '开始执行' : `开始第 ${number} 次尝试`, { attempt: number }); return attempt;
   }
-  const endAttempt = (attempt, status, output) => Object.assign(attempt, { status, output: output ?? null, finishedAt: now() });
+  const endAttempt = (attempt, status, output) => {
+    Object.assign(attempt, { status, output: output ?? null, finishedAt: now() });
+    const session = snapshot.sessions.find(s => s.id === attempt.sessionId);
+    if (session) { session.status = status; session.finishedAt = now(); }
+  };
   async function execute(node) {
     const epoch = generation, signal = abortController.signal;
     const current = () => !finished && epoch === generation && !signal.aborted;
     let release, attempt;
+    const onChunk = (role, content) => {
+      if (!current() || !attempt?.sessionId) return;
+      const session = snapshot.sessions.find(s => s.id === attempt.sessionId);
+      if (session.messages.length >= 2000 || session.bytes >= 2097152) { session.truncated = true; return; }
+      const text = String(content).slice(0, 24000); session.bytes += Buffer.byteLength(text);
+      const message = { seq: session.messages.length + 1, role, content: text, time: now() }; session.messages.push(message);
+      log(node, 'chunk', text.slice(0, 600), { sessionId: session.id, messageSeq: message.seq, role }); notify();
+    };
     try {
       const isWorker = node.type === 'task' && (!node.props.control || ['gate', 'qa', 'ghost'].includes(node.props.control));
       if (options.broker && isWorker) { state(node, 'READY', 'ready', '等待可用资源槽'); release = await options.broker.acquire({ signal, priority: node.props.priority === 'human' }); if (!current()) return; }
@@ -100,7 +117,7 @@ export function createRun(inputPlan, options = {}) {
           snapshot.interventions.push({ id: `human_${nanoid(10)}`, kind: 'rework_limit', nodeId: node.id, status: 'open', question: '返工额度已用尽：授权额外一次或拒绝停止', createdAt: now() });
           state(node, 'WAITING_HUMAN', 'waiting_human', '返工额度已用尽'); snapshot.status = 'WAITING_HUMAN'; notify(); return;
         }
-        const result = await options.executeControl?.(node, { context, snapshot, signal, attempt: attempt.number });
+        const result = await options.executeControl?.(node, { context, snapshot, signal, attempt: attempt.number, onChunk });
         if (!current()) return;
         if (!result) throw new Error(`Control ${node.props.control} is not available`);
         if (result.checkpoint) {
@@ -121,7 +138,7 @@ export function createRun(inputPlan, options = {}) {
         for (let retry = 0; retry <= node.props.retry; retry++) {
           if (retry > 0) attempt = recordAttempt(node);
           let result;
-          if (isWorkflow(plan) && node.props.capabilityId !== 'simulated') result = await options.executeTask(node, { context, snapshot, signal, attempt: attempt.number });
+          if (isWorkflow(plan) && node.props.capabilityId !== 'simulated') result = await options.executeTask(node, { context, snapshot, signal, attempt: attempt.number, onChunk });
           else { await wait(node.props.duration, signal); if (!current()) return; result = { outcome: random() < node.props.failRate ? 'task_failure' : 'completed', output: '执行成功', mode: 'simulation' }; }
           if (!current()) return;
           if (result.outcome !== 'completed') {

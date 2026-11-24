@@ -6,7 +6,7 @@ import { validatePlan } from '../engine/validator.js';
 import { Router } from 'express';
 export const route = fn => (req, res, next) => Promise.resolve().then(() => fn(req, res)).catch(next);
 
-export function workflowRouter({ planningService, providerService, capabilityService, versionService, workspaceService, runService, security }) {
+export function workflowRouter({ planningService, providerService, capabilityService, versionService, workspaceService, runService, auditService, evidenceService, security }) {
   const router = Router();
   router.post('/goals/parse', route(async (req, res) => {
     const controller = new AbortController();
@@ -16,7 +16,7 @@ export function workflowRouter({ planningService, providerService, capabilitySer
     finally { req.off('aborted', abort); res.off('close', abort); }
   }));
   router.post('/goals/validate', route((req, res) => res.json({ goalSpec: planningService.validate(req.body) })));
-  router.post('/goals/confirm', route((req, res) => res.json({ goalSpec: planningService.confirm(req.body?.goalSpec, req.body?.id) })));
+  router.post('/goals/confirm', route(async (req, res) => { const goalSpec = planningService.confirm(req.body?.goalSpec, req.body?.id); await auditService.append({ category: 'contract', action: 'confirm-source', message: `Confirmed ${req.body.id}` }); res.json({ goalSpec }); }));
   router.use('/providers', security.requireAuth);
   router.use('/capabilities', security.requireAuth);
   router.get('/providers', route(async (_req, res) => res.json(await providerService.list())));
@@ -47,5 +47,13 @@ export function workflowRouter({ planningService, providerService, capabilitySer
   router.post('/workspaces/demo', route(async (_req, res) => res.json(await workspaceService.demo())));
   router.get('/resources', security.requireAuth, (_req, res) => res.json(runService.resources()));
   for (const action of ['pause', 'resume', 'retry', 'resolve', 'ghost', 'restore']) router.post(`/runs/:id/${action}`, security.requireAuth, route(async (req, res) => res.json(await runService.control(req.params.id, action, { ...req.body, authorized: true }))));
+  router.get('/runs', security.requireAuth, route(async (_req, res) => res.json(await runService.list())));
+  router.get('/runs/:id/sessions/:sessionId', security.requireAuth, route(async (req, res) => res.json(await evidenceService.session(req.params.id, req.params.sessionId))));
+  router.get('/runs/:id/evidence', security.requireAuth, route(async (req, res) => {
+    const evidence = await evidenceService.exportRun(req.params.id);
+    res.set('Content-Disposition', `attachment; filename="evidence-${evidence.manifest.runId}.json"`).json(evidence);
+  }));
+  router.get('/evidence/search', security.requireAuth, route(async (req, res) => res.json(await evidenceService.search(req.query.q || '', { offset: Number(req.query.offset || 0), limit: Number(req.query.limit || 40) }))));
+  router.get('/audit', security.requireAuth, route(async (req, res) => res.json(await auditService.list({ since: Number(req.query.since || 0), planId: req.query.planId, limit: Number(req.query.limit || 1000) }))));
   return router;
 }
