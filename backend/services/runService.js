@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { nanoid } from 'nanoid';
 import { createRun } from '../engine/scheduler.js';
+import { createCertifier, verifyValues } from '../engine/certifier.js';
 import { ResourceBroker } from '../engine/resourceBroker.js';
 import { validatePlan } from '../engine/validator.js';
 import { isWorkflow } from '../../shared/workflowSchema.js';
@@ -26,6 +27,7 @@ export function createRunService(storageDir, planService, options = {}) {
   const directory = path.resolve(storageDir, 'runs');
   const activeByPlan = new Map(), controllers = new Map(), finishedCache = new Map();
   const broker = options.broker || new ResourceBroker(4);
+  const certifier = createCertifier(options.capabilityService, options.workspaceService);
   const file = id => path.join(directory, `${assertSafeId(id, 40402)}.json`);
   const lock = id => `${directory}:plan:${id}`;
   async function executeTask(node, { context, snapshot, signal, attempt }) {
@@ -49,6 +51,8 @@ export function createRunService(storageDir, planService, options = {}) {
       else if (typeof parsed === c.type) values[c.name] = parsed;
       else if (c.required) return { outcome: 'task_failure', output: `Missing typed output ${c.name}` };
     }
+    const problems = await verifyValues(node.props.outputContract, values, handle.cwd);
+    if (problems.length) return { ...result, outcome: 'task_failure', output: problems.join('; ') };
     return { ...result, values };
   }
   async function executeControl(node, env) {
@@ -56,16 +60,14 @@ export function createRunService(storageDir, planService, options = {}) {
     switch (node.props.control) {
       case 'prepare': case 'join': return { outcome: 'completed', output: '契约/汇合控制完成' };
       case 'checkpoint': return { outcome: 'completed', output: '已保存独立 Git 检查点', checkpoint: { ...await options.workspaceService.checkpoint(handle, node.props.name), nodeId: node.id } };
-      case 'gate': {
-        const r = await options.capabilityService.invoke('local-tool', { cwd: handle.cwd, command: node.props.command, args: node.props.args, signal, timeoutMs: node.props.timeoutMs || 60000, permissionTier: snapshot.graph.workflow.permissionTier, approved: snapshot.approved, extraEnv: { VTO_ATTEMPT: String(attempt), VTO_RUN_ID: snapshot.id } });
-        return { ...r, output: `${node.props.demonstrationGate ? '[演示门禁，仅验证编排链路] ' : ''}${r.output}` };
-      }
+      case 'gate': return certifier.gate(node, env);
+      case 'qa': return certifier.qa(node, env);
       case 'restore': {
         const cp = snapshot.checkpoints.filter(c => c.nodeId === node.props.restoreTarget && c.kind === 'checkpoint').at(-1);
         if (!cp?.engine) return { outcome: 'task_failure', output: '恢复检查点不存在' };
         return { outcome: 'completed', restoration: await options.workspaceService.restore(handle, cp), checkpointTarget: cp };
       }
-      case 'selfcheck': { const diff = await options.workspaceService.diff(handle); return { outcome: 'completed', output: `Diff: ${diff.files.length} files`, diff }; }
+      case 'selfcheck': return certifier.selfcheck(node, env);
       default: return { outcome: 'task_failure', output: `Control ${node.props.control} is not enabled yet` };
     }
   }
@@ -96,12 +98,17 @@ export function createRunService(storageDir, planService, options = {}) {
       const errors = validatePlan(plan, { capabilities }).filter(i => !i.severity || i.severity === 'error');
       if (errors.length) throw new AppError(40002, '编排方案校验失败', errors);
       const id = `run_${nanoid(10)}`; let workspaceHandle;
+      const inputs = structuredClone(request.inputs ?? {});
+      if (!inputs || typeof inputs !== 'object' || Array.isArray(inputs) || Object.keys(inputs).some(k => ['__proto__', 'constructor', 'prototype'].includes(k))) throw new AppError(40001, 'Inputs must be a safe JSON object');
       if (isWorkflow(plan)) {
         if (!request.authorized) throw new AppError(40101, '完整工作流执行需要本机会话授权');
         const workspaceId = request.workspaceId || plan.workflow.workspaceId || (await options.workspaceService.demo()).id;
         workspaceHandle = await options.workspaceService.provision(workspaceId, id);
+        if (!Object.hasOwn(inputs, 'source') && plan.workflow.goalSpec.inputs.some(c => c.name === 'source' && c.type === 'object' && c.origin === 'suggested')) inputs.source = { workspaceId, baseSha: workspaceHandle.baseSha };
+        const inputProblems = await verifyValues(plan.workflow.goalSpec.inputs, inputs, workspaceHandle.cwd);
+        if (inputProblems.length) throw new AppError(40001, 'Required workflow inputs are missing or invalid', inputProblems);
       }
-      const controller = await makeController(plan, id, version, workspaceHandle, null, request.inputs);
+      const controller = await makeController(plan, id, version, workspaceHandle, null, inputs);
       await controller.drain(); await atomicWrite(file(id), controller.snapshot); track(controller); controller.start(); return { runId: id };
     });
   }

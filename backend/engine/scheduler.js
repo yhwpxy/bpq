@@ -28,6 +28,7 @@ export function createRun(inputPlan, options = {}) {
     mode: !isWorkflow(plan) || plan.nodes.some(n => n.props.capabilityId === 'simulated') ? 'simulation' : 'live',
     ...(options.versionId ? { versionId: options.versionId, versionTag: options.versionTag } : {}),
   };
+  snapshot.certifications ||= [];
   snapshot.attempts ||= []; snapshot.interventions ||= []; snapshot.checkpoints ||= [];
   let abortController = new AbortController();
   let active = 0, started = false, finished = false, pumping = false, paused = false, draining = false, generation = 0;
@@ -112,8 +113,9 @@ export function createRun(inputPlan, options = {}) {
           log(node, 'restore', `有界返工 ${snapshot.reworkCount}，保留 ${result.restoration.rescue.ref}`, { rescueRef: result.restoration.rescue.ref });
           notify(); return;
         }
-        if (result.outcome !== 'completed') { endAttempt(attempt, 'FAILED', result.output); state(node, 'FAILED', 'fail', result.output || '验证未通过'); settleEdges(node, 'failed'); return; }
-        endAttempt(attempt, 'SUCCESS', result.output); state(node, 'SUCCESS', 'success', result.output || '控制步骤完成'); settleEdges(node, 'active'); return;
+        if (result.certification) snapshot.certifications.push({ nodeId: node.id, attempt: attempt.number, createdAt: now(), ...result.certification });
+        if (result.outcome !== 'completed') { endAttempt(attempt, 'FAILED', result); state(node, 'FAILED', 'fail', result.output || '验证未通过'); settleEdges(node, 'failed'); return; }
+        endAttempt(attempt, 'SUCCESS', result); state(node, 'SUCCESS', 'success', result.output || '控制步骤完成'); settleEdges(node, 'active'); return;
       }
       if (node.type === 'task') {
         for (let retry = 0; retry <= node.props.retry; retry++) {
