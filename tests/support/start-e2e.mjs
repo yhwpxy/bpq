@@ -29,8 +29,9 @@ try {
       if (req.url !== '/v1/chat/completions' || req.method !== 'POST' || req.headers.authorization !== 'Bearer e2e-fixture-key') throw new Error('Unexpected provider request');
       let raw = ''; for await (const chunk of req) { raw += chunk; if (Buffer.byteLength(raw) > 1024*1024) throw new Error('Fixture input limit'); }
       const body = JSON.parse(raw);
-      if (body.model !== 'e2e-fixture-model' || body.stream !== false || body.messages?.[0]?.role !== 'system' || body.messages?.[1]?.role !== 'user' || !body.messages[0].content.includes('dependsOn')) throw new Error('Unexpected request contract');
-      res.end(JSON.stringify({ id: 'fixture-completion', choices: [{ finish_reason: 'stop', message: { role: 'assistant', content: JSON.stringify(spec) } }] }));
+      if (body.model !== 'e2e-fixture-model' || body.stream !== false || body.messages?.[0]?.role !== 'system' || body.messages?.[1]?.role !== 'user' || (!body.messages[0].content.includes('dependsOn') && !body.messages[0].content.includes('GoalSpec'))) throw new Error('Unexpected request contract');
+      const result = body.messages[0].content.includes('GoalSpec') ? { title:'自然语言契约',goal:body.messages[1].content,requirements:[{id:'FR-01',text:'处理发票'}],acceptanceCriteria:[{id:'AC-01',text:'输出核对报告',requirementRefs:['FR-01']}],inputs:[{id:'IN-01',text:'发票数组',name:'invoices',type:'array',required:true}],outputs:[{id:'OUT-01',text:'核对报告',name:'report',type:'file',required:true}],constraints:[{id:'CON-01',text:'不得修改原始文件'}],assumptions:[],modules:[] } : spec;
+    res.end(JSON.stringify({ id: 'fixture-completion', choices: [{ finish_reason: 'stop', message: { role: 'assistant', content: JSON.stringify(result) } }] }));
     } catch { res.statusCode=400;res.end(JSON.stringify({error:{message:'Invalid fixture request'}})); }
   });
   providers.push(provider); await listen(provider, 0);

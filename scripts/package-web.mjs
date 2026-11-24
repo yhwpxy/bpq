@@ -1,0 +1,20 @@
+import { mkdir, cp, readFile, writeFile, stat } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { spawn } from 'node:child_process';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const destination=path.resolve(process.argv[2]||path.join(root,'release',`vto-web-${Date.now()}`));
+try { await stat(destination); throw new Error(`Destination already exists: ${destination}`); } catch(e) { if(e.code!=='ENOENT')throw e; }
+await stat(path.join(root,'frontend','dist','index.html'));
+const run=(command,args,cwd)=>new Promise((resolve,reject)=>{const child=spawn(command,args,{cwd,stdio:'inherit',shell:false});child.on('error',reject);child.on('close',code=>code===0?resolve():reject(new Error(`${command} exited ${code}`)));});
+await mkdir(destination,{recursive:true});
+for(const dir of ['backend','shared'])await cp(path.join(root,dir),path.join(destination,dir),{recursive:true,filter:source=>!source.split(path.sep).some(p=>['storage','node_modules','.env'].includes(p))});
+await mkdir(path.join(destination,'frontend'),{recursive:true});await cp(path.join(root,'frontend','dist'),path.join(destination,'frontend','dist'),{recursive:true});
+for(const file of ['package.json','package-lock.json'])await cp(path.join(root,file),path.join(destination,file));
+await cp(path.join(root,'frontend','package.json'),path.join(destination,'frontend','package.json'));
+await run(process.platform==='win32'?'npm.cmd':'npm',['ci','--omit=dev','--ignore-scripts','--no-audit','--no-fund'],destination);
+await writeFile(path.join(destination,'start.mjs'),"import {createApp} from './backend/server.js';\nimport path from 'node:path';\nimport {fileURLToPath} from 'node:url';\nconst root=path.dirname(fileURLToPath(import.meta.url));\nconst app=createApp({storageDir:process.env.VTO_DATA_DIR||path.join(root,'data')});\nconst server=app.listen(Number(process.env.PORT||3000),'127.0.0.1',()=>console.log('VTO: http://127.0.0.1:'+server.address().port+'/#workbench'));\nconst stop=async()=>{await app.locals.services.runService.close();server.close(()=>process.exit(0));};\nprocess.once('SIGINT',stop);process.once('SIGTERM',stop);\n");
+await writeFile(path.join(destination,'start.sh'),'#!/bin/sh\ncd "$(dirname "$0")" || exit 1\nexec node start.mjs\n',{mode:0o755});
+await writeFile(path.join(destination,'start.cmd'),'@echo off\r\ncd /d "%~dp0"\r\nnode start.mjs\r\npause\r\n');
+await writeFile(path.join(destination,'README.txt'),'VTO Web bundle\nRequires Node.js >=18 and Git on PATH.\nRun: node start.mjs\nOpen http://127.0.0.1:3000/#workbench\nUse PORT and VTO_DATA_DIR to override port/data directory.\nNo Electron, SQLite, commercial model credentials or user data are included.\nModel providers can be configured from the protected workbench.\nThis directory contains installed JS runtime dependencies; release artifacts are built for browser/Node, not native desktop packaging.\n');
+console.log(`Web bundle ready: ${destination}`);

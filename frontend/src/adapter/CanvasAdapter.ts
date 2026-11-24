@@ -84,7 +84,7 @@ export class CanvasAdapter {
   private nodeConfig(n: PlanNode) {
     const condition = n.type === 'condition', color = (NODE_TYPE_COLORS as Record<string,string>)[n.type]
     const label = n.props.name || (n.type === 'condition' ? '条件判断' : (NODE_TYPE_LABELS as Record<string,string>)[n.type])
-    const detail = n.type === 'task' ? `${n.props.duration} ms · 重试 ${n.props.retry}` : condition ? n.props.expression : n.type === 'delay' ? `等待 ${n.props.wait} ms` : n.type === 'start' ? '流程入口' : '流程完成'
+    const detail = n.props.control ? `${n.props.control} · ${n.props.capabilityId || n.props.executorKind || ''}` : n.type === 'task' ? `${n.props.duration} ms · 重试 ${n.props.retry}` : condition ? n.props.expression : n.type === 'delay' ? `等待 ${n.props.wait} ms` : n.type === 'start' ? '流程入口' : '流程完成'
     const items: any[] = []
     if (n.type !== 'start') items.push({ id: 'in', group: 'in' })
     if (condition) { items.push({ id: 'true', group: 'out', attrs: { circle: { stroke: '#50a878' }, text: { text: 'T', fill: '#50a878' } } }, { id: 'false', group: 'out', attrs: { circle: { stroke: '#d48c44' }, text: { text: 'F', fill: '#d48c44' } } }) }
@@ -107,7 +107,7 @@ export class CanvasAdapter {
     const selectedIds = this.graph.getSelectedCells().map(c => c.id)
     this.graph.resetCells([
       ...plan.nodes.map(n => this.graph.createNode(this.nodeConfig(n) as any)),
-      ...plan.edges.map(e => this.graph.createEdge({ id: e.id, source: { cell: e.source, port: plan.nodes.find(n => n.id === e.source)?.type === 'condition' ? e.label : 'out' }, target: { cell: e.target, port: 'in' }, router: { name: 'manhattan', args: { padding: 20 } }, connector: { name: 'rounded', args: { radius: 10 } }, attrs: { line: { stroke: e.label === 'true' ? '#79ad94' : e.label === 'false' ? '#d5aa77' : '#a6b0c3', strokeWidth: 1.5, targetMarker: { name: 'block', width: 6, height: 5 } } }, labels: e.label ? [{ attrs: { label: { text: e.label, fill: '#6b778d', fontSize: 10 }, body: { fill: '#f5f6f8', stroke: 'none', rx: 3, ry: 3 } }, position: .4 }] : [], zIndex: 0 }))
+      ...plan.edges.map(e => this.graph.createEdge({ id: e.id, source: { cell: e.source, port: plan.nodes.find(n => n.id === e.source)?.type === 'condition' ? e.label : 'out' }, target: { cell: e.target, port: 'in' }, router: { name: 'manhattan', args: { padding: 20 } }, connector: { name: 'rounded', args: { radius: 10 } }, attrs: { line: { stroke: e.kind === 'loop' ? '#b47635' : e.kind === 'fail' ? '#ce5964' : e.label === 'true' ? '#79ad94' : e.label === 'false' ? '#d5aa77' : '#a6b0c3', strokeDasharray: e.kind === 'loop' ? '5 4' : undefined, strokeWidth: 1.5, targetMarker: { name: 'block', width: 6, height: 5 } } }, labels: e.label ? [{ attrs: { label: { text: e.label, fill: '#6b778d', fontSize: 10 }, body: { fill: '#f5f6f8', stroke: 'none', rx: 3, ry: 3 } }, position: .4 }] : [], zIndex: 0 }))
     ])
     this.graph.select(selectedIds.map(id => this.graph.getCellById(id)).filter(Boolean))
     this.syncing = false; this.paint()
@@ -122,7 +122,7 @@ export class CanvasAdapter {
       const state = this.states[node.id]?.status
       const base = (NODE_TYPE_COLORS as Record<string,string>)[model.type]
       const color = state ? (NODE_STATUS_COLORS as Record<string,string>)[state] || base : base
-      const invalid = this.issues.some(i => i.nodeId === node.id), selected = this.selected === node.id || this.graph.isSelected(node)
+      const invalid = this.issues.some(i => i.nodeId === node.id && (!i.severity || i.severity === 'error')), selected = this.selected === node.id || this.graph.isSelected(node)
       node.attr({ body: { fill: `${color}16`, stroke: invalid ? '#f56c6c' : selected ? '#4f6ef2' : `${color}b0`, strokeWidth: invalid || selected ? 2 : 1.2, filter: selected ? 'drop-shadow(0px 0px 4px rgba(79,110,242,.24))' : 'drop-shadow(0px 2px 2px rgba(34,45,75,.03))' }, icon: { fill: color } })
     })
   }

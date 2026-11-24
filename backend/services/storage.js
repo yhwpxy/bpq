@@ -1,4 +1,4 @@
-import { mkdir, open, rename, readFile, unlink } from 'node:fs/promises';
+import { mkdir, open, rename, readFile, unlink, link } from 'node:fs/promises';
 import path from 'node:path';
 import { AppError } from './errors.js';
 
@@ -41,4 +41,16 @@ export async function readJson(file, { missingCode = 40401, fallback } = {}) {
     if (error instanceof SyntaxError) throw new AppError(50000, '存储文件损坏，无法读取，请恢复备份');
     throw error;
   }
+}
+
+/** Publish once: hard-link promotion is atomic and fails if the destination exists. */
+export async function atomicCreate(file, value) {
+  await mkdir(path.dirname(file), { recursive: true });
+  const temp = `${file}.${process.pid}.${Date.now()}.new`;
+  const handle = await open(temp, 'wx', 0o600);
+  try {
+    try { await handle.writeFile(JSON.stringify(value, null, 2)); await handle.sync(); }
+    finally { await handle.close(); }
+    await link(temp, file);
+  } finally { await unlink(temp).catch(() => {}); }
 }
