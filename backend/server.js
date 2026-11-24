@@ -10,9 +10,12 @@ import { loadLlmEnvironment, readLlmConfig } from './config/llm.js';
 import { statusForCode } from './services/errors.js';
 import { createPlanningService } from './services/planningService.js';
 import { workflowRouter } from './routes/workflow.js';
+import { createProviderService } from './services/providerService.js';
+import { createCapabilityService } from './services/capabilityService.js';
+import { createLocalAuth } from './middleware/localAuth.js';
 
 const directory = path.dirname(fileURLToPath(import.meta.url));
-export function createApp({ storageDir = path.join(directory, 'storage'), runOptions, llmConfig = readLlmConfig(), fetchImpl, llmOptions } = {}) {
+export function createApp({ storageDir = path.join(directory, 'storage'), runOptions, llmConfig = readLlmConfig(), fetchImpl, llmOptions, sessionToken } = {}) {
   const app = express();
   app.disable('x-powered-by');
   app.use(cors({ origin: [/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/] }));
@@ -21,7 +24,12 @@ export function createApp({ storageDir = path.join(directory, 'storage'), runOpt
   const planService = createPlanService(storageDir); const runService = createRunService(storageDir, planService, runOptions);
   const llmDecomposeService = createLlmDecomposeService({ ...llmOptions, config: llmConfig, fetchImpl });
   const planningService = createPlanningService(llmDecomposeService);
-  app.locals.services = { planService, runService, llmDecomposeService, planningService };
+  const providerService = createProviderService(storageDir, llmConfig);
+  const capabilityService = createCapabilityService(storageDir, providerService);
+  const security = createLocalAuth(sessionToken);
+  app.locals.security = security;
+  app.locals.services = { planService, runService, llmDecomposeService, planningService, providerService, capabilityService, security };
+  app.get('/api/local-session', security.session);
   app.use('/api', workflowRouter(app.locals.services));
   app.use('/api', createApiRouter({ planService, runService, llmDecomposeService }));
   app.use(express.static(path.resolve(directory, '../frontend/dist')));
@@ -39,7 +47,7 @@ export function createApp({ storageDir = path.join(directory, 'storage'), runOpt
   return app;
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const app = createApp({ llmConfig: loadLlmEnvironment() }); const server = app.listen(3000, '0.0.0.0', () => console.log('VTO 后端已启动：http://localhost:3000'));
+  const app = createApp({ llmConfig: loadLlmEnvironment() }); const server = app.listen(3000, '127.0.0.1', () => console.log('VTO 后端已启动：http://localhost:3000'));
   const stop = async () => { await app.locals.services.runService.close(); server.close(() => process.exit(0)); };
   process.once('SIGINT', stop); process.once('SIGTERM', stop);
 }
