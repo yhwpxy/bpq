@@ -6,7 +6,7 @@ import { validatePlan } from '../engine/validator.js';
 import { Router } from 'express';
 export const route = fn => (req, res, next) => Promise.resolve().then(() => fn(req, res)).catch(next);
 
-export function workflowRouter({ planningService, providerService, capabilityService, versionService, workspaceService, security }) {
+export function workflowRouter({ planningService, providerService, capabilityService, versionService, workspaceService, runService, security }) {
   const router = Router();
   router.post('/goals/parse', route(async (req, res) => {
     const controller = new AbortController();
@@ -45,5 +45,7 @@ export function workflowRouter({ planningService, providerService, capabilitySer
   router.get('/workspaces', route(async (_req, res) => res.json(await workspaceService.list())));
   router.post('/workspaces', route(async (req, res) => res.json(await workspaceService.register(req.body))));
   router.post('/workspaces/demo', route(async (_req, res) => res.json(await workspaceService.demo())));
+  router.get('/resources', security.requireAuth, (_req, res) => res.json(runService.resources()));
+  for (const action of ['pause', 'resume', 'retry', 'resolve']) router.post(`/runs/:id/${action}`, security.requireAuth, route(async (req, res) => res.json(await runService.control(req.params.id, action, { ...req.body, authorized: true }))));
   return router;
 }

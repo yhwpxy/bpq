@@ -36,14 +36,14 @@ export function createApp({ storageDir = path.join(directory, 'storage'), runOpt
   app.locals.services = { planService, runService, llmDecomposeService, planningService, providerService, capabilityService, versionService, workspaceService, security };
   app.get('/api/local-session', security.session);
   app.use('/api', workflowRouter(app.locals.services));
-  app.use('/api', createApiRouter({ planService, runService, llmDecomposeService }));
+  app.use('/api', createApiRouter({ planService, runService, llmDecomposeService, security }));
   app.use(express.static(path.resolve(directory, '../frontend/dist')));
   app.use('/api', (_req, res) => res.status(404).json({ code: 40001, message: '接口不存在' }));
   app.use((error, req, res, _next) => {
     let code = Number(error.code);
     if (error.type === 'entity.parse.failed' || error instanceof SyntaxError) code = 40001;
     if (error.type === 'entity.too.large') code = req.path === '/api/decompose' ? 40003 : 40001;
-    if (![40001, 40002, 40003, 40401, 40402, 40901, 50000, 50201, 50301, 50401].includes(code)) code = 50000;
+    if (![40101, 40301, 40001, 40002, 40003, 40401, 40402, 40901, 50000, 50201, 50301, 50401].includes(code)) code = 50000;
     const message = error.type === 'entity.parse.failed' ? '请求 JSON 格式非法' : error.type === 'entity.too.large' ? '请求内容过大' : code === 50000 && error.code !== 50000 ? '服务器内部错误，请稍后重试' : error.message;
     const body = { code, message };
     if (error.details) body.details = error.details;

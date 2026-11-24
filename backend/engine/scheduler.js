@@ -2,32 +2,45 @@ import { nanoid } from 'nanoid';
 import { evaluateExpression, parseExpression } from './expression.js';
 import { buildGraph, topologicalLevels, validatePlan } from './validator.js';
 import { NODE_STATUS_COLORS } from '../../shared/constants.js';
+import { isWorkflow } from '../../shared/workflowSchema.js';
+import { nextFrontier, settleEdges as resolveEdges } from './frontier.js';
+import { downstream } from './graphSemantics.js';
 
-/** Separate edge outcomes preserve inactive branches and upstream failure across joins. */
+/** Legacy simulation and typed workflows share one scheduler and edge-state machine. */
 export function createRun(inputPlan, options = {}) {
-  const plan = structuredClone(inputPlan);
-  const errors = validatePlan(plan, options.validationOptions);
+  let plan = structuredClone(options.initialSnapshot?.graph || inputPlan);
+  const errors = validatePlan(plan, options.validationOptions).filter(i => !i.severity || i.severity === 'error');
   if (errors.length) throw Object.assign(new Error('编排方案校验失败'), { code: 40002, details: errors });
-  const { nodes, incoming, outgoing } = buildGraph(plan);
-  const levels = topologicalLevels(plan);
-  const ordered = [...plan.nodes].sort((a, b) => levels.get(a.id) - levels.get(b.id));
-  const expressions = new Map(plan.nodes.filter(n => n.type === 'condition').map(n => [n.id, parseExpression(n.props.expression)]));
-  const random = options.random ?? Math.random;
-  const now = () => new Date().toISOString();
-  const context = { variables: Object.create(null), outputs: Object.create(null) };
-  const edgeStates = new Map(plan.edges.map(e => [e.id, 'pending']));
-  const snapshot = {
+  let graph = buildGraph(plan), levels = topologicalLevels(plan);
+  let ordered = [...plan.nodes].sort((a, b) => levels.get(a.id) - levels.get(b.id));
+  let expressions = new Map(plan.nodes.filter(n => n.type === 'condition').map(n => [n.id, parseExpression(n.props.expression)]));
+  const random = options.random ?? Math.random, now = () => new Date().toISOString();
+  const initial = options.initialSnapshot;
+  const context = { variables: Object.assign(Object.create(null), options.inputs, initial?.runtime?.variables), outputs: Object.assign(Object.create(null), initial?.runtime?.outputs) };
+  const edgeStates = new Map(plan.edges.map(e => [e.id, initial?.runtime?.edgeStates?.[e.id] || 'pending']));
+  const snapshot = initial ? structuredClone(initial) : {
     id: options.id ?? `run_${nanoid(10)}`, planId: plan.id, planName: plan.name,
     status: 'RUNNING', startedAt: now(), finishedAt: null,
     nodeStates: Object.fromEntries(plan.nodes.map(n => [n.id, { status: 'PENDING', attempt: 0 }])),
-    logs: [], error: null, ...(options.versionId ? { versionId: options.versionId, versionTag: options.versionTag } : {}),
+    logs: [], error: null, advanced: isWorkflow(plan), attempts: [], interventions: [], checkpoints: [], reworkCount: 0,
+    workspaceHandle: options.workspaceHandle || null, approved: false,
+    mode: !isWorkflow(plan) || plan.nodes.some(n => n.props.capabilityId === 'simulated') ? 'simulation' : 'live',
+    ...(options.versionId ? { versionId: options.versionId, versionTag: options.versionTag } : {}),
   };
-  const abortController = new AbortController();
-  let active = 0; let started = false; let finished = false; let pumping = false; let writeChain = Promise.resolve(); let resolved = false;
-  let resolveDone; const done = new Promise(resolve => { resolveDone = resolve; });
-  const limit = plan.meta?.maxConcurrency ?? 3;
-  const log = (node, event, message) => snapshot.logs.push({ seq: snapshot.logs.length + 1, time: now(), nodeId: node.id, nodeName: node.props.name ?? ({ start: '开始', end: '结束', condition: '条件分支', delay: '延时' }[node.type] ?? node.type), event, message });
+  snapshot.attempts ||= []; snapshot.interventions ||= []; snapshot.checkpoints ||= [];
+  let abortController = new AbortController();
+  let active = 0, started = false, finished = false, pumping = false, paused = false, draining = false, generation = 0;
+  let writeChain = Promise.resolve(), resolved = false, resolveDone;
+  const done = new Promise(resolve => { resolveDone = resolve; });
+  const inFlight = new Set(), limit = plan.meta?.maxConcurrency ?? 3;
+  const unsettled = s => ['PENDING', 'READY', 'RUNNING', 'WAITING_HUMAN', 'REWOUND'].includes(s);
+  function log(node, event, message, extra = {}) {
+    snapshot.logs.push({ seq: (snapshot.logs.at(-1)?.seq || 0) + 1, time: now(), nodeId: node.id, nodeName: node.props.name ?? ({ start: '开始', end: '结束', condition: '条件分支', delay: '延时' }[node.type] ?? node.type), event, message, ...extra });
+  }
   function notify() {
+    snapshot.graph = structuredClone(plan);
+    snapshot.runtime = { variables: { ...context.variables }, outputs: structuredClone(context.outputs), edgeStates: Object.fromEntries(edgeStates) };
+    snapshot.resources = options.broker?.snapshot() || { maxWorkers: limit, activeWorkers: active, queued: 0 };
     if (!options.onUpdate) return;
     const copy = structuredClone(snapshot);
     writeChain = writeChain.then(() => options.onUpdate(copy)).catch(error => failEngine(error, false));
@@ -36,116 +49,160 @@ export function createRun(inputPlan, options = {}) {
     if (!Object.hasOwn(NODE_STATUS_COLORS, status)) throw new Error(`未知节点状态：${status}`);
     Object.assign(snapshot.nodeStates[node.id], { status, message }, extra);
     if (status === 'RUNNING' && !snapshot.nodeStates[node.id].startedAt) snapshot.nodeStates[node.id].startedAt = now();
-    if (!['PENDING', 'RUNNING'].includes(status)) snapshot.nodeStates[node.id].finishedAt = now();
+    if (!unsettled(status)) snapshot.nodeStates[node.id].finishedAt = now();
+    else delete snapshot.nodeStates[node.id].finishedAt;
     log(node, event, message);
     if (persist) notify();
   }
-  function resolveAfterWrites() {
-    // A persistence failure may change SUCCESS to FAILED before resolving.
-    writeChain.then(() => { if (!resolved) { resolved = true; resolveDone(structuredClone(snapshot)); } });
-  }
-  function finish(status) {
-    if (finished) return;
-    finished = true; snapshot.status = status; snapshot.finishedAt = now(); notify(); resolveAfterWrites();
-  }
+  function resolveAfterWrites() { writeChain.then(() => { if (!resolved && active === 0) { resolved = true; resolveDone(structuredClone(snapshot)); } }); }
+  function finish(status) { if (finished) return; finished = true; snapshot.status = status; snapshot.finishedAt = now(); notify(); resolveAfterWrites(); }
   function failEngine(error, persist = true) {
     if (snapshot.status === 'CANCELED') return;
-    abortController.abort(); finished = true;
+    generation++; abortController.abort(); finished = true;
     snapshot.status = 'FAILED'; snapshot.error = `引擎异常：${error.message}`; snapshot.finishedAt = now();
-    const unsettled = plan.nodes.filter(n => ['PENDING', 'RUNNING'].includes(snapshot.nodeStates[n.id].status));
-    let failed = false;
-    for (const n of unsettled) {
-      const status = !failed && snapshot.nodeStates[n.id].status === 'RUNNING' ? 'FAILED' : 'CANCELED';
-      if (status === 'FAILED') failed = true;
-      state(n, status, status === 'FAILED' ? 'fail' : 'cancel', snapshot.error, {}, false);
-    }
-    if (!unsettled.length) log(plan.nodes[0], 'fail', snapshot.error);
-    if (persist) notify();
-    resolveAfterWrites();
+    for (const attempt of snapshot.attempts) if (attempt.status === 'RUNNING') endAttempt(attempt, 'FAILED', snapshot.error);
+    const pending = plan.nodes.filter(n => unsettled(snapshot.nodeStates[n.id].status)); let failed = false;
+    for (const n of pending) { const status = !failed && snapshot.nodeStates[n.id].status === 'RUNNING' ? 'FAILED' : 'CANCELED'; if (status === 'FAILED') failed = true; state(n, status, status === 'FAILED' ? 'fail' : 'cancel', snapshot.error, {}, false); }
+    if (!pending.length) log(plan.nodes[0], 'fail', snapshot.error);
+    if (persist) notify(); resolveAfterWrites();
   }
-  function settleEdges(node, outcome, branch) {
-    for (const edge of outgoing.get(node.id)) edgeStates.set(edge.id, node.type === 'condition' && outcome === 'active' ? (edge.label === branch ? 'active' : 'inactive') : outcome);
-  }
-  function wait(ms) {
-    if (abortController.signal.aborted) return Promise.resolve();
+  const settleEdges = (node, outcome, branch) => resolveEdges(plan, edgeStates, node, outcome, branch);
+  function wait(ms, signal = abortController.signal) {
+    if (signal.aborted) return Promise.resolve();
     return new Promise(resolve => {
-      const cleanup = () => { clearTimeout(timer); abortController.signal.removeEventListener('abort', cleanup); resolve(); };
-      const timer = setTimeout(cleanup, ms);
-      abortController.signal.addEventListener('abort', cleanup, { once: true });
+      const cleanup = () => { clearTimeout(timer); signal.removeEventListener('abort', cleanup); resolve(); };
+      const timer = setTimeout(cleanup, ms); signal.addEventListener('abort', cleanup, { once: true });
     });
   }
+  function recordAttempt(node) {
+    const number = (snapshot.nodeStates[node.id].attempt || 0) + 1;
+    const attempt = { id: `attempt_${nanoid(10)}`, nodeId: node.id, number, status: 'RUNNING', startedAt: now(), finishedAt: null, input: structuredClone(context.outputs), output: null };
+    snapshot.attempts.push(attempt); state(node, 'RUNNING', 'start', number === 1 ? '开始执行' : `开始第 ${number} 次尝试`, { attempt: number }); return attempt;
+  }
+  const endAttempt = (attempt, status, output) => Object.assign(attempt, { status, output: output ?? null, finishedAt: now() });
   async function execute(node) {
+    const epoch = generation, signal = abortController.signal;
+    const current = () => !finished && epoch === generation && !signal.aborted;
+    let release, attempt;
     try {
-      state(node, 'RUNNING', 'start', '开始执行', { attempt: 1 });
+      const isWorker = node.type === 'task' && (!node.props.control || ['gate', 'qa'].includes(node.props.control));
+      if (options.broker && isWorker) { state(node, 'READY', 'ready', '等待可用资源槽'); release = await options.broker.acquire({ signal, priority: node.props.priority === 'human' }); if (!current()) return; }
+      attempt = recordAttempt(node);
+      if (node.type === 'task' && node.props.control === 'human') {
+        const intervention = { id: `human_${nanoid(10)}`, nodeId: node.id, status: 'open', question: node.props.name, createdAt: now() };
+        snapshot.interventions.push(intervention); state(node, 'WAITING_HUMAN', 'waiting_human', '等待人工决定'); snapshot.status = 'WAITING_HUMAN'; notify(); return;
+      }
+      if (node.type === 'task' && node.props.control) {
+        const result = await options.executeControl?.(node, { context, snapshot, signal, attempt: attempt.number });
+        if (!current()) return;
+        if (!result) throw new Error(`Control ${node.props.control} is not available`);
+        if (result.checkpoint) snapshot.checkpoints.push(result.checkpoint);
+        if (result.outcome !== 'completed') { endAttempt(attempt, 'FAILED', result.output); state(node, 'FAILED', 'fail', result.output || '验证未通过'); settleEdges(node, 'failed'); return; }
+        endAttempt(attempt, 'SUCCESS', result.output); state(node, 'SUCCESS', 'success', result.output || '控制步骤完成'); settleEdges(node, 'active'); return;
+      }
       if (node.type === 'task') {
-        for (let attempt = 1; attempt <= node.props.retry + 1; attempt++) {
-          snapshot.nodeStates[node.id].attempt = attempt;
-          await wait(node.props.duration);
-          if (finished) return;
-          if (random() < node.props.failRate) {
-            if (attempt <= node.props.retry) {
-              const message = `第 ${attempt} 次尝试失败，${500 * attempt}ms 后重试`;
-              snapshot.nodeStates[node.id].message = message; log(node, 'retry', message); notify();
-              await wait(500 * attempt); if (finished) return;
-              snapshot.nodeStates[node.id].attempt = attempt + 1;
-              log(node, 'start', `开始第 ${attempt + 1} 次尝试`); notify();
-            } else {
-              state(node, 'FAILED', 'fail', `重试耗尽，共尝试 ${attempt} 次`); settleEdges(node, 'failed'); return;
-            }
+        for (let retry = 0; retry <= node.props.retry; retry++) {
+          if (retry > 0) attempt = recordAttempt(node);
+          let result;
+          if (isWorkflow(plan) && node.props.capabilityId !== 'simulated') result = await options.executeTask(node, { context, snapshot, signal, attempt: attempt.number });
+          else { await wait(node.props.duration, signal); if (!current()) return; result = { outcome: random() < node.props.failRate ? 'task_failure' : 'completed', output: '执行成功', mode: 'simulation' }; }
+          if (!current()) return;
+          if (result.outcome !== 'completed') {
+            endAttempt(attempt, 'FAILED', result.output);
+            if (retry < node.props.retry) { const delay = 500 * (retry + 1); const message = `第 ${retry + 1} 次尝试失败，${delay}ms 后重试`; snapshot.nodeStates[node.id].message = message; log(node, 'retry', message); notify(); await wait(delay, signal); if (!current()) return; }
+            else { state(node, 'FAILED', 'fail', `重试耗尽，共尝试 ${retry + 1} 次${result.output ? `：${result.output}` : ''}`); settleEdges(node, 'failed'); return; }
           } else {
-            if (node.props.output) {
-              const output = { [node.props.output]: true };
-              context.variables[node.props.output] = true; context.outputs[node.id] = output;
-              snapshot.nodeStates[node.id].output = output;
-            }
-            state(node, 'SUCCESS', 'success', '执行成功'); settleEdges(node, 'active'); return;
+            const output = result.values || (node.props.output ? { [node.props.output]: true } : undefined);
+            if (output) { Object.assign(context.variables, output); context.outputs[node.id] = output; snapshot.nodeStates[node.id].output = output; }
+            endAttempt(attempt, 'SUCCESS', result); state(node, 'SUCCESS', 'success', result.output || '执行成功'); settleEdges(node, 'active'); return;
           }
         }
       } else if (node.type === 'delay') {
-        await wait(node.props.wait); if (finished) return;
-        state(node, 'SUCCESS', 'success', `等待 ${node.props.wait}ms 完成`); settleEdges(node, 'active');
+        await wait(node.props.wait, signal); if (!current()) return; endAttempt(attempt, 'SUCCESS'); state(node, 'SUCCESS', 'success', `等待 ${node.props.wait}ms 完成`); settleEdges(node, 'active');
       } else if (node.type === 'condition') {
-        const branch = String(evaluateExpression(expressions.get(node.id), context));
-        state(node, 'SUCCESS', 'success', `条件结果 ${branch}，激活 ${branch} 分支`); settleEdges(node, 'active', branch);
-      } else {
-        state(node, 'SUCCESS', 'success', node.type === 'start' ? '运行开始' : '到达结束节点'); settleEdges(node, 'active');
-      }
-    } catch (error) { failEngine(error); }
-    finally { active--; if (!finished) pump(); }
+        const branch = String(evaluateExpression(expressions.get(node.id), context)); endAttempt(attempt, 'SUCCESS', branch); state(node, 'SUCCESS', 'success', `条件结果 ${branch}，激活 ${branch} 分支`); settleEdges(node, 'active', branch);
+      } else { endAttempt(attempt, 'SUCCESS'); state(node, 'SUCCESS', 'success', node.type === 'start' ? '运行开始' : '到达结束节点'); settleEdges(node, 'active'); }
+    } catch (error) {
+      if (!current()) return;
+      if (attempt) endAttempt(attempt, 'FAILED', error.message);
+      if (isWorkflow(plan)) { state(node, 'FAILED', 'fail', error.message); settleEdges(node, 'failed'); }
+      else failEngine(error);
+    } finally {
+      if (!current() && attempt?.status === 'RUNNING') endAttempt(attempt, 'CANCELED', 'Interrupted attempt');
+      release?.(); active--; inFlight.delete(node.id); if (active === 0) draining = false;
+      if (!finished) { notify(); pump(); } else resolveAfterWrites();
+    }
   }
   function pump() {
-    if (finished || pumping) return;
+    if (finished || pumping || paused || (draining && active > 0)) return;
+    if (snapshot.interventions.some(i => i.status === 'open')) { snapshot.status = 'WAITING_HUMAN'; notify(); return; }
     pumping = true;
     try {
       let changed;
       do {
         changed = false;
+        const frontier = nextFrontier(plan, snapshot.nodeStates, edgeStates);
+        for (const skip of frontier.skipped) { const node = graph.nodes.get(skip.id); state(node, 'SKIPPED', 'skip', skip.outcome === 'failed' ? '上游失败，跳过执行' : '条件分支未激活，跳过执行'); settleEdges(node, skip.outcome); changed = true; }
+        if ([...inFlight].some(id => ['checkpoint', 'restore'].includes(graph.nodes.get(id)?.props.control))) break;
         for (const node of ordered) {
-          if (snapshot.nodeStates[node.id].status !== 'PENDING') continue;
-          const ins = incoming.get(node.id).map(e => edgeStates.get(e.id));
-          if (ins.includes('pending')) continue;
-          const upstreamFailed = ins.includes('failed') && !plan.meta?.continueOnError;
-          const inactive = ins.length > 0 && ins.every(s => s === 'inactive');
-          if (upstreamFailed || inactive) {
-            state(node, 'SKIPPED', 'skip', upstreamFailed ? '上游失败，跳过执行' : '条件分支未激活，跳过执行');
-            settleEdges(node, upstreamFailed ? 'failed' : 'inactive'); changed = true; continue;
-          }
-          if (active < limit) { active++; changed = true; void execute(node); }
+          if (!frontier.ready.includes(node.id) || inFlight.has(node.id) || snapshot.nodeStates[node.id].status !== 'PENDING') continue;
+          if (active >= limit) continue;
+          if (['checkpoint', 'restore'].includes(node.props.control) && active > 0) continue;
+          active++; inFlight.add(node.id); changed = true; void execute(node);
+          if (['checkpoint', 'restore', 'human'].includes(node.props.control)) break;
         }
-      } while (changed && !finished);
-      if (!active && !finished) {
-        if (Object.values(snapshot.nodeStates).every(s => !['PENDING', 'RUNNING'].includes(s.status))) finish(Object.values(snapshot.nodeStates).some(s => s.status === 'FAILED') ? 'FAILED' : 'SUCCESS');
+      } while (changed && !finished && !paused && snapshot.status !== 'WAITING_HUMAN');
+      if (!active && !finished && !paused && snapshot.status !== 'WAITING_HUMAN') {
+        if (Object.values(snapshot.nodeStates).every(s => !unsettled(s.status))) finish(Object.values(snapshot.nodeStates).some(s => s.status === 'FAILED') ? 'FAILED' : 'SUCCESS');
         else failEngine(new Error('调度停滞：没有可执行节点'));
       }
     } finally { pumping = false; }
   }
-  function start() { if (started || finished) return; started = true; notify(); queueMicrotask(pump); }
+  function start() { if (started || finished) return; started = true; snapshot.status = 'RUNNING'; notify(); queueMicrotask(pump); }
   function cancel() {
     if (finished) return snapshot.status;
-    finished = true; abortController.abort(); snapshot.status = 'CANCELED'; snapshot.finishedAt = now();
-    for (const node of plan.nodes) if (['PENDING', 'RUNNING'].includes(snapshot.nodeStates[node.id].status)) state(node, 'CANCELED', 'cancel', '用户停止运行');
-    notify(); resolveAfterWrites(); return 'CANCELED';
+    generation++; abortController.abort();
+    for (const attempt of snapshot.attempts) if (attempt.status === 'RUNNING') endAttempt(attempt, 'CANCELED', 'Cancelled');
+    for (const node of plan.nodes) if (unsettled(snapshot.nodeStates[node.id].status)) state(node, 'CANCELED', 'cancel', '用户停止运行');
+    for (const i of snapshot.interventions) if (i.status === 'open') i.status = 'cancelled';
+    finish('CANCELED'); return 'CANCELED';
   }
+  function pause() {
+    if (finished || paused) return snapshot.status;
+    paused = true; draining = active > 0; generation++; abortController.abort(); snapshot.status = 'PAUSED';
+    for (const attempt of snapshot.attempts) if (attempt.status === 'RUNNING') endAttempt(attempt, 'CANCELED', 'Paused');
+    for (const n of plan.nodes) if (['READY', 'RUNNING'].includes(snapshot.nodeStates[n.id].status)) state(n, 'PENDING', 'pause', '暂停，保留此前结果');
+    log(plan.nodes[0], 'pause', '运行暂停'); notify(); return snapshot.status;
+  }
+  function resume() {
+    if (finished) throw Object.assign(new Error('已结束运行不能直接恢复，请选择失败节点重试'), { code: 40901 });
+    if (!paused) return snapshot.status;
+    paused = false; abortController = new AbortController(); snapshot.status = 'RUNNING'; log(plan.nodes[0], 'resume', '运行恢复'); notify(); queueMicrotask(pump); return snapshot.status;
+  }
+  function resolveHuman(id, action, reason) {
+    if (!['approve', 'reject', 'override'].includes(action) || typeof reason !== 'string' || !reason.trim()) throw Object.assign(new Error('人工决定与理由必填'), { code: 40001 });
+    const item = snapshot.interventions.find(i => i.id === id);
+    if (!item) throw Object.assign(new Error('人工待办不存在'), { code: 40401 });
+    if (item.status !== 'open') { if (item.action === action && item.reason === reason) return; throw Object.assign(new Error('人工待办已处理'), { code: 40901 }); }
+    item.status = 'resolved'; item.action = action; item.reason = reason; item.resolvedAt = now();
+    const node = graph.nodes.get(item.nodeId), status = action === 'reject' ? 'FAILED' : action === 'override' ? 'WAIVED' : 'SUCCESS';
+    const attempt = snapshot.attempts.filter(a => a.nodeId === node.id).at(-1); if (attempt) endAttempt(attempt, status, reason);
+    state(node, status, action, reason); settleEdges(node, action === 'reject' ? 'failed' : 'active');
+    if (action === 'reject') { generation++; abortController.abort(); for (const n of plan.nodes) if (unsettled(snapshot.nodeStates[n.id].status)) state(n, 'CANCELED', 'cancel', '人工拒绝，停止后续任务'); finish('FAILED'); }
+    else { snapshot.approved = true; if (!paused) snapshot.status = 'RUNNING'; notify(); queueMicrotask(pump); }
+  }
+  function retry(nodeId) {
+    if (active || snapshot.interventions.some(i => i.status === 'open')) throw Object.assign(new Error('请等待活动任务或人工待办结束'), { code: 40901 });
+    const targets = nodeId ? [nodeId] : plan.nodes.filter(n => snapshot.nodeStates[n.id].status === 'FAILED').map(n => n.id);
+    if (!targets.length || targets.some(id => snapshot.nodeStates[id]?.status !== 'FAILED')) throw Object.assign(new Error('只能重试失败节点'), { code: 40901 });
+    const reset = downstream(plan, targets);
+    for (const n of plan.nodes) if (reset.has(n.id)) { snapshot.nodeStates[n.id].status = 'PENDING'; delete snapshot.nodeStates[n.id].output; delete snapshot.nodeStates[n.id].finishedAt; delete context.outputs[n.id]; for (const e of plan.edges.filter(e => e.source === n.id)) edgeStates.set(e.id, 'pending'); }
+    context.variables = Object.assign(Object.create(null), ...Object.values(context.outputs));
+    finished = false; paused = false; started = true; generation++; abortController = new AbortController(); snapshot.status = 'RUNNING'; snapshot.finishedAt = null; snapshot.error = null;
+    log(graph.nodes.get(targets[0]), 'retry', '人工重试失败节点，保留历史尝试'); notify(); queueMicrotask(pump);
+  }
+  function drain() { return writeChain; }
+  notify();
   if (options.autoStart !== false) start();
-  return { snapshot, done, cancel, start, context };
+  return { snapshot, done, cancel, start, context, pause, resume, resolveHuman, retry, drain };
 }
