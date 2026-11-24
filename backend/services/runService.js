@@ -26,13 +26,15 @@ export function createRunService(storageDir, planService, options = {}) {
   const activeByPlan = new Map(); const controllers = new Map(); const finishedCache = new Map();
   const file = id => path.join(directory, `${assertSafeId(id, 40402)}.json`);
   const lock = id => `${directory}:plan:${id}`;
-  async function execute(planId) {
+  async function execute(planId, request = {}) {
     assertSafeId(planId);
     return withLock(lock(planId), async () => {
       if (activeByPlan.has(planId)) throw new AppError(40901, '方案正在执行中');
-      const plan = await planService.get(planId);
+      const version = options.versionService ? await options.versionService.forExecution(planId, request?.versionId) : null;
+      const plan = version?.plan ?? await planService.get(planId);
+      if (plan.workflow) throw new AppError(50301, '完整工作流运行控制尚未启用');
       const controller = createRun(plan, {
-        ...options, id: `run_${nanoid(10)}`, autoStart: false,
+        ...options, versionId: version?.id, versionTag: version?.tag, id: `run_${nanoid(10)}`, autoStart: false,
         onUpdate: snapshot => atomicWrite(file(snapshot.id), snapshot),
       });
       const id = controller.snapshot.id;

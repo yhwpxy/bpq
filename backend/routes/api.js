@@ -26,7 +26,7 @@ export function createApiRouter({ planService, runService, llmDecomposeService }
   router.get('/plans', asyncRoute(async (_req, res) => { res.json(await planService.list()); }));
   router.get('/plans/:id', asyncRoute(async (req, res) => { res.json(await planService.get(req.params.id)); }));
   router.delete('/plans/:id', asyncRoute(async (req, res) => { res.json(await runService.removePlan(req.params.id)); }));
-  router.post('/plans/:id/execute', asyncRoute(async (req, res) => { res.json(await runService.execute(req.params.id)); }));
+  router.post('/plans/:id/execute', asyncRoute(async (req, res) => { res.json(await runService.execute(req.params.id, req.body)); }));
   router.get('/runs/:runId', asyncRoute(async (req, res) => {
     const raw = req.query.since;
     if (raw !== undefined && (typeof raw !== 'string' || !/^\d+$/.test(raw))) throw new AppError(40001, 'since 必须是非负整数');

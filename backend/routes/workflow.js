@@ -1,9 +1,12 @@
+import { changeImpact } from '../engine/changeImpact.js';
+import { validatePlanSchema } from '../../shared/schema.js';
+import { AppError } from '../services/errors.js';
 import { compileWorkflow } from '../engine/workflowCompiler.js';
 import { validatePlan } from '../engine/validator.js';
 import { Router } from 'express';
 export const route = fn => (req, res, next) => Promise.resolve().then(() => fn(req, res)).catch(next);
 
-export function workflowRouter({ planningService, providerService, capabilityService, security }) {
+export function workflowRouter({ planningService, providerService, capabilityService, versionService, security }) {
   const router = Router();
   router.post('/goals/parse', route(async (req, res) => {
     const controller = new AbortController();
@@ -29,5 +32,14 @@ export function workflowRouter({ planningService, providerService, capabilitySer
   router.post('/workflows/validate', security.requireAuth, route(async (req, res) => {
     res.json({ diagnostics: validatePlan(req.body, { capabilities: await capabilityService.list() }) });
   }));
+  router.post('/workflows/impact', security.requireAuth, route((req, res) => {
+    if (validatePlanSchema(req.body?.before).length || validatePlanSchema(req.body?.after).length) throw new AppError(40001, 'Invalid impact comparison plans');
+    res.json(changeImpact(req.body.before, req.body.after));
+  }));
+  router.get('/plans/:id/versions', security.requireAuth, route(async (req, res) => res.json(await versionService.list(req.params.id))));
+  router.get('/plans/:id/versions/:versionId', security.requireAuth, route(async (req, res) => res.json(await versionService.get(req.params.id, req.params.versionId))));
+  router.get('/plans/:id/trial', security.requireAuth, route(async (req, res) => res.json(await versionService.report(req.params.id))));
+  router.post('/plans/:id/trial', security.requireAuth, route(async (req, res) => res.json(await versionService.trial(req.params.id, req.body))));
+  router.post('/plans/:id/versions', security.requireAuth, route(async (req, res) => res.json(await versionService.confirm(req.params.id, req.body?.digest))));
   return router;
 }

@@ -12,6 +12,7 @@ import { createPlanningService } from './services/planningService.js';
 import { workflowRouter } from './routes/workflow.js';
 import { createProviderService } from './services/providerService.js';
 import { createCapabilityService } from './services/capabilityService.js';
+import { createVersionService } from './services/versionService.js';
 import { createLocalAuth } from './middleware/localAuth.js';
 
 const directory = path.dirname(fileURLToPath(import.meta.url));
@@ -21,14 +22,16 @@ export function createApp({ storageDir = path.join(directory, 'storage'), runOpt
   app.use(cors({ origin: [/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/] }));
   // 200KB applies to the decoded specification text; escaping may enlarge JSON.
   app.use(express.json({ limit: '2mb', strict: true }));
-  const planService = createPlanService(storageDir); const runService = createRunService(storageDir, planService, runOptions);
+  const planService = createPlanService(storageDir);
   const llmDecomposeService = createLlmDecomposeService({ ...llmOptions, config: llmConfig, fetchImpl });
   const planningService = createPlanningService(llmDecomposeService);
   const providerService = createProviderService(storageDir, llmConfig);
   const capabilityService = createCapabilityService(storageDir, providerService);
+  const versionService = createVersionService(storageDir, planService, capabilityService);
+  const runService = createRunService(storageDir, planService, { ...runOptions, versionService, capabilityService });
   const security = createLocalAuth(sessionToken);
   app.locals.security = security;
-  app.locals.services = { planService, runService, llmDecomposeService, planningService, providerService, capabilityService, security };
+  app.locals.services = { planService, runService, llmDecomposeService, planningService, providerService, capabilityService, versionService, security };
   app.get('/api/local-session', security.session);
   app.use('/api', workflowRouter(app.locals.services));
   app.use('/api', createApiRouter({ planService, runService, llmDecomposeService }));

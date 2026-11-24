@@ -20,7 +20,7 @@ export function createRun(inputPlan, options = {}) {
     id: options.id ?? `run_${nanoid(10)}`, planId: plan.id, planName: plan.name,
     status: 'RUNNING', startedAt: now(), finishedAt: null,
     nodeStates: Object.fromEntries(plan.nodes.map(n => [n.id, { status: 'PENDING', attempt: 0 }])),
-    logs: [], error: null,
+    logs: [], error: null, ...(options.versionId ? { versionId: options.versionId, versionTag: options.versionTag } : {}),
   };
   const abortController = new AbortController();
   let active = 0; let started = false; let finished = false; let pumping = false; let writeChain = Promise.resolve(); let resolved = false;
