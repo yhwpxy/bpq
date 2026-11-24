@@ -8,6 +8,8 @@ import { createApiRouter } from './routes/api.js';
 import { createLlmDecomposeService } from './services/llmDecomposeService.js';
 import { loadLlmEnvironment, readLlmConfig } from './config/llm.js';
 import { statusForCode } from './services/errors.js';
+import { createPlanningService } from './services/planningService.js';
+import { workflowRouter } from './routes/workflow.js';
 
 const directory = path.dirname(fileURLToPath(import.meta.url));
 export function createApp({ storageDir = path.join(directory, 'storage'), runOptions, llmConfig = readLlmConfig(), fetchImpl, llmOptions } = {}) {
@@ -18,7 +20,9 @@ export function createApp({ storageDir = path.join(directory, 'storage'), runOpt
   app.use(express.json({ limit: '2mb', strict: true }));
   const planService = createPlanService(storageDir); const runService = createRunService(storageDir, planService, runOptions);
   const llmDecomposeService = createLlmDecomposeService({ ...llmOptions, config: llmConfig, fetchImpl });
-  app.locals.services = { planService, runService, llmDecomposeService };
+  const planningService = createPlanningService(llmDecomposeService);
+  app.locals.services = { planService, runService, llmDecomposeService, planningService };
+  app.use('/api', workflowRouter(app.locals.services));
   app.use('/api', createApiRouter({ planService, runService, llmDecomposeService }));
   app.use(express.static(path.resolve(directory, '../frontend/dist')));
   app.use('/api', (_req, res) => res.status(404).json({ code: 40001, message: '接口不存在' }));
