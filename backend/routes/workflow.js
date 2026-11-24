@@ -68,5 +68,13 @@ export function workflowRouter({ planningService, providerService, capabilitySer
     for (const c of await capabilityService.list()) result.capabilities.push({ id: c.id, ...await capabilityService.probe(c.id) });
     res.json(result);
   }));
+  router.post('/workflows/demo', security.requireAuth, route(async (req, res) => {
+    const workspace = await workspaceService.demo();
+    const goal = await planningService.parse({ text: '# 报告交付演示 / Report delivery demo\n## 目标\n在独立工作区中生成两份报告并通过文件校验。\n## 功能需求\n- FR-01: 生成第一份报告\n- FR-02: 生成第二份报告\n## 验收标准\n- AC-01: FR-01 报告文件包含 verified=true\n- AC-02: FR-02 报告文件包含 verified=true' });
+    const plan = compileWorkflow(goal, { capabilityId: 'local-tool', human: req.body?.human !== false, permissionTier: req.body?.human === false ? 'supervised' : 'strict', command: process.execPath, args: ['tools/verify.cjs', '--fail-once'] }, await capabilityService.list());
+    plan.workflow.workspaceId = workspace.id;
+    for (const n of plan.nodes.filter(n => n.props.capabilityId === 'local-tool')) { n.props.command = process.execPath; n.props.args = ['tools/deliver.cjs', n.props.requirementRefs[0].toLowerCase()]; n.props.duration = 0; }
+    res.json({ plan, workspace });
+  }));
   return router;
 }

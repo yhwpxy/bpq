@@ -6,7 +6,7 @@ import { createWorkspaceService } from '../backend/services/workspaceService.js'
 import { runProcess } from '../backend/sandbox/processRunner.js';
 let dir, service, workspace;
 beforeEach(async () => { dir = await mkdtemp(path.join(os.tmpdir(), 'vto-workspace-')); service = createWorkspaceService(dir); workspace = await service.demo(); });
-afterEach(async () => { await rm(dir, { recursive: true, force: true }); });
+afterEach(async () => { await rm(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 }); });
 it('registers an actual repository and provisions independent run branches', async () => {
   const a = await service.provision(workspace.id, 'run_a'), b = await service.provision(workspace.id, 'run_b');
   await writeFile(path.join(a.cwd, 'result.txt'), 'run a');

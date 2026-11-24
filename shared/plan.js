@@ -23,6 +23,11 @@ export function autoLayout(plan) {
  const queue=result.nodes.filter(n=>!degrees.get(n.id)).map(n=>n.id);let visited=0;
  while(queue.length){const id=queue.shift();visited++;for(const target of outgoing.get(id)){levels.set(target,Math.max(levels.get(target),levels.get(id)+1));degrees.set(target,degrees.get(target)-1);if(degrees.get(target)===0)queue.push(target);}}
  if(visited!==result.nodes.length) throw new Error('存在循环依赖，请先移除环路再自动布局');
+ if(result.workflow?.format==='twin-1'){
+  const ordered=[...result.nodes].sort((a,b)=>levels.get(a.id)-levels.get(b.id));
+  ordered.forEach((n,index)=>{const row=Math.floor(index/4),column=index%4;n.x=60+(row%2===0?column:3-column)*185;n.y=60+row*115;});
+  return result;
+ }
  // Align branch tails at their common join, preserving topological direction.
  // Only move a predecessor whose outgoing paths all permit the same later row.
  const joins=result.nodes.filter(n=>incoming.get(n.id).length>1).sort((a,b)=>levels.get(b.id)-levels.get(a.id));
@@ -48,7 +53,7 @@ export function connectionError(plan,source,target,label,ignoreEdgeId) {
  if(source===target) return '不能连接节点自身';
  const from=plan.nodes.find(n=>n.id===source), to=plan.nodes.find(n=>n.id===target);
  if(!from||!to) return '连接两端的节点必须存在';
- const edges=plan.edges.filter(e=>e.id!==ignoreEdgeId);
+ const edges=plan.edges.filter(e=>e.id!==ignoreEdgeId&&isForward(plan,e));
  if(edges.some(e=>e.source===source&&e.target===target)) return '这两个节点之间已经存在连线';
  if(to.type==='start') return '开始节点没有入端口';
  if(from.type==='end') return '结束节点没有出端口';
