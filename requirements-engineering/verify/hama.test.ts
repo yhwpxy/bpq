@@ -144,6 +144,116 @@ function finding(severity: string) {
     owner: '技术负责人', verification: '同时提交两笔末席报名只有一笔成功'};
 }
 
+test('discussion failures expose validation details and corrected retries can continue', async t => {
+  for (const scenario of [
+    {name: 'agenda', detail: 'baseId 必须逐一覆盖'},
+    {name: 'critique', detail: '质疑目标必须是其他角色的本轮提案'},
+    {name: 'schema', detail: '$.proposal: invalid text length or format'},
+    {name: 'source', detail: '提案须引用已存在的来源'},
+    {name: 'json', detail: 'JSON 解析失败'},
+    {name: 'recovery', detail: '$.proposal: invalid text length or format'},
+  ]) {
+    await t.test(scenario.name, async () => {
+      const temporary = mkdtempDisposableSync(join(tmpdir(), 'hama-propose-'));
+      let proposalCalls = 0;
+      let agendaCalls = 0;
+      let critiqueCalls = 0;
+      let productCritiqueCalls = 0;
+      let payloadError: unknown;
+      const fake = createServer(async (req, res) => {
+        try {
+          const chunks = [];
+          for await (const chunk of req) chunks.push(chunk);
+          const body = JSON.parse(Buffer.concat(chunks).toString());
+          assert.equal(body.model, 'deepseek-flash');
+          assert.deepEqual(body.response_format, {type: 'json_object'});
+          assert.deepEqual(body.thinking, {type: 'disabled'});
+          assert.equal(body.tools, undefined);
+          assert.equal(body.frequency_penalty, undefined);
+          assert.equal(body.presence_penalty, undefined);
+          const role = /^角色：(.+?)。/.exec(body.messages[0].content)![1]!;
+          const {context: data, validationFeedback} = JSON.parse(body.messages[1].content);
+          const operation = identify(role, data);
+          let value = campusResponder({role, operation, data});
+          let content: string | undefined;
+          if (operation === 'agenda' && scenario.name === 'agenda') {
+            agendaCalls++;
+            if (agendaCalls > 1) {
+              assert.ok(validationFeedback.includes('issues 必须恰好 4 项'));
+              assert.ok(validationFeedback.includes('baseId 必须逐一覆盖：browse, register, capacity, mobile'));
+              assert.ok(validationFeedback.includes('owner 只允许：product, architecture'));
+            }
+            const agenda = value as {issues: object[]};
+            value = {issues: [...agenda.issues, {baseId: 'cross-role-conflict', title: '额外议题', owner: 'product', blockers: []}]};
+          }
+          if (operation === 'critique') critiqueCalls++;
+          if (operation === 'critique' && role === 'product' && scenario.name === 'critique') {
+            productCritiqueCalls++;
+            if (productCritiqueCalls > 1) {
+              assert.ok(validationFeedback.includes('当前作者为 product，objections[].roleId 只允许：architecture'));
+            }
+            value = {objections: [{roleId: 'product', issue: '质疑自己', reason: '错误目标', suggestion: '应指向其他角色'}]};
+          }
+          if (operation === 'propose' && role === 'product' && data.issue.id === 'issue-browse') {
+            assert.deepEqual(data.allowedSourceIds, data.evidence.source.map((source: {id: string}) => source.id));
+            assert.ok(body.messages[0].content.includes('sources 只能选择 allowedSourceIds'));
+            proposalCalls++;
+            if (proposalCalls > 1) assert.ok(validationFeedback.includes(scenario.detail));
+            if (scenario.name === 'source' && proposalCalls > 1) {
+              assert.ok(validationFeedback.includes('无效 ID：unknown-source'));
+              assert.ok(validationFeedback.includes(`sources 只允许：${data.allowedSourceIds.join(', ')}`));
+            }
+            if (!['agenda', 'critique'].includes(scenario.name) && (scenario.name !== 'recovery' || proposalCalls === 1)) {
+              if (scenario.name === 'json') content = 'not JSON';
+              else if (scenario.name === 'source') value = {...value as object, sources: ['unknown-source']};
+              else value = {...value as object, proposal: null};
+            }
+          }
+          res.writeHead(200, {'Content-Type': 'application/json'});
+          res.end(JSON.stringify({choices: [{message: {content: content ?? JSON.stringify(value),
+            reasoning_content: '推理内容不是 JSON，不应参与正文校验。'}}]}));
+        } catch (error) {
+          payloadError = error;
+          res.writeHead(500).end();
+        }
+      });
+      await new Promise<void>(resolve => fake.listen(0, '127.0.0.1', resolve));
+      const runtime = await createOrchestratorRuntime({dataDir: temporary.path, seedSample: false});
+      try {
+        const address = fake.address();
+        assert.ok(address && typeof address === 'object');
+        runtime.vault.setApiKey('deepseek', 'local-fixture-secret');
+        runtime.store.updateProviderBaseUrl('deepseek', `http://127.0.0.1:${address.port}/v1`);
+        const started = await request<RunView>(runtime, '/api/hama/runs', {
+          ...input, mode: 'live', providerId: 'deepseek', model: 'deepseek-flash', roles: rolesDefault.slice(0, 2),
+        }, 201);
+        const id = started.detail.run.id;
+        await decide(runtime, await wait(runtime, id, v => v.gate?.kind === 'clarification'), 'clarify', '复用校园账号');
+        if (scenario.name === 'recovery') {
+          await wait(runtime, id, v => v.gate?.kind === 'approval');
+          assert.equal(proposalCalls, 2);
+          assert.ok(critiqueCalls > 0);
+        } else {
+          const failed = await wait(runtime, id, v => v.detail.run.status === 'failed');
+          const attempt = failed.detail.attempts.find(a => a.status === 'failed')!;
+          const failedAgent = scenario.name === 'agenda' ? 'Moderator / agenda' :
+            scenario.name === 'critique' ? 'product / critique' : 'product / propose';
+          assert.ok(attempt.errorMessage.includes(`Agent ${failedAgent}`));
+          assert.ok(attempt.errorMessage.includes('invalid_output，已尝试 3 次'));
+          assert.ok(attempt.errorMessage.includes(scenario.detail), attempt.errorMessage);
+          assert.equal(scenario.name === 'agenda' ? agendaCalls : scenario.name === 'critique' ? productCritiqueCalls : proposalCalls, 3);
+          if (scenario.name !== 'critique') assert.equal(critiqueCalls, 0);
+        }
+        assert.equal(payloadError, undefined);
+      } finally {
+        await runtime.stop();
+        await new Promise<void>((resolve, reject) => fake.close(error => error ? reject(error) : resolve()));
+        temporary.remove();
+      }
+    });
+  }
+});
+
 test('HTTP model adapter, selective A/B/C rework, technical retry, and structured baseline handoff', async () => {
   const temporary = mkdtempDisposableSync(join(tmpdir(), 'hama-live-'));
   const dataDir = temporary.path;
@@ -164,6 +274,7 @@ test('HTTP model adapter, selective A/B/C rework, technical retry, and structure
       assert.equal(req.headers.authorization, 'Bearer local-fixture-secret');
       assert.equal(body.model, 'gpt-hama-fixture');
       assert.equal(body.tools, undefined);
+      assert.equal(body.response_format, undefined);
       const role = /^角色：(.+?)。/.exec(body.messages[0].content)![1]!;
       const data = JSON.parse(body.messages[1].content).context;
       const operation = identify(role, data);

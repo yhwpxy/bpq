@@ -753,6 +753,9 @@ export async function runNativeApiCapability(
           max_tokens: maxTokens,
           messages,
         };
+        if (req.responseFormat) {
+          requestBody['response_format'] = {type: req.responseFormat};
+        }
         if (provider.providerId === 'deepseek' && effectiveModel === 'deepseek-flash') {
           requestBody['thinking'] = {type: 'disabled'};
         } else if (useLowReasoning) {

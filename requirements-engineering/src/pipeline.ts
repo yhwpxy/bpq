@@ -55,7 +55,7 @@ function sourceMaterial(input: StartInput) {
 
 function validateRelations(map: DependencyMap, baseIds: string[]): void {
   for (const row of map.relations) requireValid(row.from !== row.to && baseIds.includes(row.from) &&
-    baseIds.includes(row.to), '依赖关系必须连接两条不同的基础需求');
+    baseIds.includes(row.to), `依赖关系必须连接两条不同的基础需求；收到 ${row.from} → ${row.to}；允许的基础需求 ID：${baseIds.join(', ')}`);
 }
 
 function noteDependencyCycles(map: DependencyMap): DependencyMap {
@@ -171,7 +171,7 @@ export class HamaPipeline {
       agendaSchema, value => {
         requireValid(value.issues.length === baseIds.length && unique(value.issues.map(i => i.baseId)) &&
           value.issues.every(i => baseIds.includes(i.baseId) && roles.some(role => role.id === i.owner)),
-          '每条基础需求应有唯一议题及已启用的责任角色');
+          `每条基础需求应有唯一议题及已启用的责任角色；issues 必须恰好 ${baseIds.length} 项；baseId 必须逐一覆盖：${baseIds.join(', ')}；owner 只允许：${roles.map(role => role.id).join(', ')}`);
       });
     const board: Board = history ? {
       appliedReworkId: targetedRework?.id ?? history.appliedReworkId,
@@ -191,19 +191,20 @@ export class HamaPipeline {
     const cycleRound = issue.cycleRound + 1;
     const previous = this.db.latest<Discussion>(this.id, 'discussion', issue.id);
     const feedback = this.db.latest<Rework>(this.id, 'rework')?.data;
-    const shared = {issue, round, evidence: intake.data, dependency, previous, feedback, clarifications,
+    const allowedSourceIds = intake.data.source.map(source => source.id);
+    const shared = {issue, round, evidence: intake.data, dependency, previous, feedback, clarifications, allowedSourceIds,
       base: intake.data.intake.requirements.find(row => row.id === issue.baseId)};
     const proposals = await Promise.allSettled(roles.map(async role => ({
       roleId: role.id, ...await this.call('propose', role.id, shared, proposalDraftSchema,
-        value => requireValid(value.sources.every(id => intake.data.source.some(source => source.id === id)),
-          '提案须引用已存在的来源'), role.instructions),
+        value => requireValid(value.sources.every(id => allowedSourceIds.includes(id)),
+          `提案须引用已存在的来源；无效 ID：${value.sources.filter(id => !allowedSourceIds.includes(id)).join(', ')}；sources 只允许：${allowedSourceIds.join(', ')}`), role.instructions),
     })));
     const drafts = unwrap(proposals);
     const critiques = unwrap(await Promise.allSettled(roles.map(async role => {
       const peers = drafts.filter(draft => draft.roleId !== role.id);
       return {roleId: role.id, ...await this.call('critique', role.id, {...shared, own: drafts.find(d => d.roleId === role.id), peers},
         critiqueSchema, value => requireValid(value.objections.every(row => peers.some(peer => peer.roleId === row.roleId)),
-          '质疑目标必须是其他角色的本轮提案'), role.instructions)};
+          `质疑目标必须是其他角色的本轮提案；当前作者为 ${role.id}，objections[].roleId 只允许：${peers.map(peer => peer.roleId).join(', ')}`), role.instructions)};
     })));
     const conclusion = await this.call('refine', 'Moderator', {...shared, drafts, critiques}, localConsensusSchema, value => {
       requireValid(value.state !== 'resolved' || (value.candidate && value.blockers.length === 0), '达成共识必须具备方案且无阻塞');

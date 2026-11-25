@@ -17,6 +17,31 @@ npm run start:web
 
 真实运行选用「基础设施与模型池」中已配置密钥的 OpenAI 兼容或 Anthropic 模型提供商，并填写模型 ID。默认有产品、架构、开发、体验、质量五个讨论角色，可编辑、移除或添加角色。模型通过现有 CapabilityHub 走无工具的文本生成模式。每个响应使用本地 JSON Schema 和交接规则校验，每次调用含首轮在内最多三次尝试，每次请求超时 60 秒。技术故障后可以重试失败节点，或结束该运行。
 
+## 配置 DeepSeek 真实模型
+
+截至 2026-11-25，官方 `/models` 返回 `deepseek-flash` 和 `deepseek-v4-pro`。本项目用 `deepseek-flash` 完成真实验证；不要照旧教程把 `deepseek-chat` 当作独立的当前模型。本次实测该名称也被服务端映射为 `deepseek-flash`。
+
+- 提供商：`deepseek`（页面名称 DeepSeek）。
+- 协议：OpenAI compatible。
+- Base URL：`https://api.deepseek.com/v1`。
+- 模型 ID：`deepseek-flash`。现有适配器对此配置发送 `thinking: {type: 'disabled'}`，HAMA 调用另启用 `response_format: {type: 'json_object'}`。使用回答正文 `content`，不把 `reasoning_content` 拼入 JSON；本地 Schema 和业务校验仍然执行。
+
+在仓库根目录新建 `.env`，只在本地填入自己的密钥：
+
+```dotenv
+DEEPSEEK_API_KEY=你的密钥
+```
+
+`.env` 已被 Git 忽略，不要提交，也不要把真实密钥复制进日志、文档或测试。根目录的 `npm run dev`、`npm run start:web` 和 `npm run start:desktop` 会加载这个文件。首次使用先执行 `npm run setup`、`npm run build`。
+
+也可以在「基础设施与模型池 → 能力与模型接入 → 模型供应与密钥保险库」找到 DeepSeek，输入 API Key 并保存。页面显示该提供商的 Base URL 和模型 ID；地址默认已经是上述地址。密钥保存到宿主数据目录的 `secrets.json`，优先于环境变量；提供商地址及模型目录保存在同目录的 `orchestrator.sqlite` 的 `model_providers` 表。Web 默认目录是 `workflow-orchestrator/.orchestrator/`，桌面默认在 Electron 用户数据目录的 `state/` 下，均可通过 `ORCH_DATA_DIR` 指定。不要把本地数据目录提交到 Git。
+
+然后在「需求工程」中填写项目 ID 和中文 Idea，运行模式选「真实模型」，提供商选 DeepSeek，模型 ID 填 `deepseek-flash`，启动运行。按实际提示提交澄清答复、审批候选方案、确认 PRD 并发布基线。默认五个讨论角色无需修改。
+
+`invalid_output` 表示响应已经返回，但没有通过 JSON 或业务校验，不等同于密钥或网络失败。节点错误会显示最后一次校验原因。例如 `sources` 只能引用原始资料 ID，不能引用人工决定、需求或问题 ID；议程必须逐一覆盖基础需求，不能新增 ID。模型会收到允许引用的 ID 和具体纠错提示，契约本身没有放宽。
+
+官方依据：[模型与价格](https://api-docs.deepseek.com/quick_start/pricing)、[思考模式](https://api-docs.deepseek.com/guides/thinking_mode)、[JSON 输出](https://api-docs.deepseek.com/guides/json_mode)。模型名称与参数会变化，配置其他模型前请以官方文档及 `/models` 实测为准。
+
 ## 七个阶段
 
 | 阶段 | 运行逻辑和工件 |

@@ -37,6 +37,7 @@ export interface CapabilityInvocationRequest {
   readonly fileScope: readonly string[];
   readonly readOnly: boolean;
   readonly textOnly?: boolean;
+  readonly responseFormat?: 'json_object';
   readonly providerId?: string;
   readonly maxOutputTokens?: number;
   readonly timeoutMs?: number;
