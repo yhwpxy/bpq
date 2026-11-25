@@ -1,28 +1,24 @@
 {
-  "name": "visual-task-orchestrator",
-  "version": "1.0.0",
+  "name": "bpq",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
-  "workspaces": [
-    "backend",
-    "frontend"
-  ],
-  "scripts": {
-    "dev": "node scripts/dev.mjs",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "build": "npm run build --workspace frontend",
-    "check": "npm test && npm run build",
-    "test:e2e": "npm run build && playwright test"
-  },
+  "description": "BPQ：需求工程、软件设计与工作流编排工作台",
   "engines": {
-    "node": ">=18"
+    "node": ">=24.4.0"
   },
-  "dependencies": {
-    "nanoid": "^5.0.7"
-  },
-  "devDependencies": {
-    "vitest": "~1.6.1",
-    "@playwright/test": "^1.51.0"
+  "scripts": {
+    "setup": "npm --prefix workflow-orchestrator ci",
+    "typecheck": "npm --prefix workflow-orchestrator run typecheck",
+    "build": "npm --prefix workflow-orchestrator run build",
+    "start": "npm --prefix workflow-orchestrator run start:web",
+    "start:web": "npm --prefix workflow-orchestrator run start:web",
+    "start:desktop": "npm --prefix workflow-orchestrator start",
+    "dev": "npm --prefix workflow-orchestrator run dev",
+    "test": "node scripts/check.mjs tests",
+    "check": "node scripts/check.mjs",
+    "verify:reference": "node scripts/verify-reference.mjs",
+    "verify:parity": "node scripts/verify-parity.mjs",
+    "package:release": "npm --prefix workflow-orchestrator run package:release"
   }
 }

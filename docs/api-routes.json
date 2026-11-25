@@ -1,0 +1,302 @@
+[
+  {
+    "method": "GET",
+    "path": "/api/health",
+    "sourceLine": 417
+  },
+  {
+    "method": "GET",
+    "path": "/api/events",
+    "sourceLine": 430
+  },
+  {
+    "method": "POST",
+    "path": "/api/designs/:id/revisions/:revision/handoff",
+    "sourceLine": 453
+  },
+  {
+    "method": "GET",
+    "path": "/api/designs/:id/revisions/:revision/handoff",
+    "sourceLine": 457
+  },
+  {
+    "method": "GET",
+    "path": "/api/workflows/:id/design-handoff",
+    "sourceLine": 462
+  },
+  {
+    "method": "GET",
+    "path": "/api/designs/:id/revisions/:revision/pm-input",
+    "sourceLine": 468
+  },
+  {
+    "method": "GET",
+    "path": "/api/designs",
+    "sourceLine": 475
+  },
+  {
+    "method": "GET",
+    "path": "/api/designs/:id/revisions",
+    "sourceLine": 478
+  },
+  {
+    "method": "GET",
+    "path": "/api/designs/:id/revisions/:revision",
+    "sourceLine": 481
+  },
+  {
+    "method": "POST",
+    "path": "/api/designs/:id/revisions/:revision/review",
+    "sourceLine": 484
+  },
+  {
+    "method": "POST",
+    "path": "/api/designs/:id/revisions",
+    "sourceLine": 487
+  },
+  {
+    "method": "POST",
+    "path": "/api/designs/:id/generate",
+    "sourceLine": 512
+  },
+  {
+    "method": "GET",
+    "path": "/api/designs/:id/generations",
+    "sourceLine": 516
+  },
+  {
+    "method": "GET",
+    "path": "/api/design-workspaces/:id",
+    "sourceLine": 523
+  },
+  {
+    "method": "POST",
+    "path": "/api/designs",
+    "sourceLine": 527
+  },
+  {
+    "method": "GET",
+    "path": "/api/designs/:id",
+    "sourceLine": 531
+  },
+  {
+    "method": "GET",
+    "path": "/api/hama/runs",
+    "sourceLine": 540
+  },
+  {
+    "method": "POST",
+    "path": "/api/hama/runs",
+    "sourceLine": 542
+  },
+  {
+    "method": "GET",
+    "path": "/api/hama/runs/:id",
+    "sourceLine": 544
+  },
+  {
+    "method": "POST",
+    "path": "/api/hama/runs/:id/gates/:id",
+    "sourceLine": 546
+  },
+  {
+    "method": "GET",
+    "path": "/api/hama/baselines/:id",
+    "sourceLine": 548
+  },
+  {
+    "method": "GET",
+    "path": "/api/hama/baselines",
+    "sourceLine": 550
+  },
+  {
+    "method": "GET",
+    "path": "/api/bootstrap",
+    "sourceLine": 563
+  },
+  {
+    "method": "POST",
+    "path": "/api/workspaces",
+    "sourceLine": 568
+  },
+  {
+    "method": "POST",
+    "path": "/api/workflows/import-requirements",
+    "sourceLine": 586
+  },
+  {
+    "method": "GET",
+    "path": "/api/workflows/:id/export",
+    "sourceLine": 647
+  },
+  {
+    "method": "POST",
+    "path": "/api/workflows/:id/review-anchor",
+    "sourceLine": 672
+  },
+  {
+    "method": "GET",
+    "path": "/api/workflows/:id",
+    "sourceLine": 696
+  },
+  {
+    "method": "POST",
+    "path": "/api/workflows/:id/spec",
+    "sourceLine": 706
+  },
+  {
+    "method": "POST",
+    "path": "/api/workflows/:id/draft-graph",
+    "sourceLine": 719
+  },
+  {
+    "method": "POST",
+    "path": "/api/workflows/:id/replan",
+    "sourceLine": 730
+  },
+  {
+    "method": "POST",
+    "path": "/api/workflows/:id/trial",
+    "sourceLine": 740
+  },
+  {
+    "method": "POST",
+    "path": "/api/workflows/:id/confirm-version",
+    "sourceLine": 747
+  },
+  {
+    "method": "POST",
+    "path": "/api/runs",
+    "sourceLine": 760
+  },
+  {
+    "method": "GET",
+    "path": "/api/runs/:id",
+    "sourceLine": 775
+  },
+  {
+    "method": "POST",
+    "path": "/api/runs/:id/pause",
+    "sourceLine": 782
+  },
+  {
+    "method": "POST",
+    "path": "/api/runs/:id/resume",
+    "sourceLine": 792
+  },
+  {
+    "method": "POST",
+    "path": "/api/runs/:id/cancel",
+    "sourceLine": 802
+  },
+  {
+    "method": "POST",
+    "path": "/api/runs/:id/retry-node",
+    "sourceLine": 812
+  },
+  {
+    "method": "POST",
+    "path": "/api/runs/:id/ghost-node",
+    "sourceLine": 828
+  },
+  {
+    "method": "POST",
+    "path": "/api/runs/:id/restore",
+    "sourceLine": 856
+  },
+  {
+    "method": "POST",
+    "path": "/api/nodes/:id/collapse",
+    "sourceLine": 872
+  },
+  {
+    "method": "POST",
+    "path": "/api/interventions/:id/resolve",
+    "sourceLine": 884
+  },
+  {
+    "method": "POST",
+    "path": "/api/capabilities",
+    "sourceLine": 903
+  },
+  {
+    "method": "POST",
+    "path": "/api/capabilities/:id/probe",
+    "sourceLine": 915
+  },
+  {
+    "method": "POST",
+    "path": "/api/capabilities/:id/toggle",
+    "sourceLine": 934
+  },
+  {
+    "method": "POST",
+    "path": "/api/providers/:id/secret",
+    "sourceLine": 957
+  },
+  {
+    "method": "GET",
+    "path": "/api/sessions/:id",
+    "sourceLine": 976
+  },
+  {
+    "method": "GET",
+    "path": "/api/evidence/search",
+    "sourceLine": 985
+  },
+  {
+    "method": "GET",
+    "path": "/api/ddd-terms",
+    "sourceLine": 992
+  },
+  {
+    "method": "POST",
+    "path": "/api/ddd-terms",
+    "sourceLine": 1000
+  },
+  {
+    "method": "POST",
+    "path": "/api/ddd-terms/:id/delete",
+    "sourceLine": 1025
+  },
+  {
+    "method": "GET",
+    "path": "/api/skills",
+    "sourceLine": 1033
+  },
+  {
+    "method": "POST",
+    "path": "/api/skills",
+    "sourceLine": 1038
+  },
+  {
+    "method": "POST",
+    "path": "/api/dream/consolidate",
+    "sourceLine": 1062
+  },
+  {
+    "method": "GET",
+    "path": "/api/mcp-servers",
+    "sourceLine": 1072
+  },
+  {
+    "method": "POST",
+    "path": "/api/mcp-servers",
+    "sourceLine": 1077
+  },
+  {
+    "method": "POST",
+    "path": "/api/mcp-servers/:id/probe",
+    "sourceLine": 1098
+  },
+  {
+    "method": "POST",
+    "path": "/api/constitution",
+    "sourceLine": 1132
+  },
+  {
+    "method": "POST",
+    "path": "/api/doctor",
+    "sourceLine": 1155
+  }
+]
