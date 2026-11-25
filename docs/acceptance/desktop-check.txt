@@ -1,0 +1,9 @@
+
+> bpq@0.2.0 start:desktop
+> npm --prefix workflow-orchestrator start
+
+
+> workflow-orchestrator@0.2.0 start
+> node --env-file-if-exists=../.env scripts/start.mjs
+
+../.env not found. Continuing without it.

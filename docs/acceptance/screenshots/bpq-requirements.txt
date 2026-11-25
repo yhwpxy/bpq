@@ -1,0 +1,72 @@
+Browser tab: 1, Title: "Workflow Orchestrator — Requirements-to-Execution Control Plane", URL: "http://127.0.0.1:4190/?apiBaseUrl=http%3A%2F%2F127.0.0.1%3A4190&token=REDACTED".
+0 AXWebArea Workflow Orchestrator — Requirements-to-Execution Control Plane, URL: 127.0.0.1:4190/?apiBaseUrl=http%3A%2F%2F127.0.0.1%3A4190&token=REDACTED
+	1 container root
+		2 container
+			3 text WO Workflow Orchestrator
+			4 button 需求工程
+				5 image
+				6 text 需求工程
+			7 button 编排设计台
+				8 image
+				9 text 编排设计台
+			10 button 实时编排控制台
+				11 image
+				12 text 实时编排控制台
+			13 button 基础设施与模型池
+				14 image
+				15 text 基础设施与模型池
+			16 button 版本与日志审计
+				17 image
+				18 text 版本与日志审计
+			19 text 槽位 0 / 4 ● 实时连接
+			20 button 检索, Help: Ctrl+K
+				21 image
+				22 text 检索
+			23 button 中文/EN
+				24 image
+				25 text 中文/EN
+		26 container
+			27 heading HAMA-Loop 需求工程, Value: 1
+				28 text HAMA-Loop 需求工程
+			29 text 从 Idea 出发，协同评审方案与需求，发布正式需求基线。
+			30 button (disabled) 新建运行
+			31 heading 需求运行, Value: 2
+				32 text 需求运行
+			33 text 暂无需求运行
+			34 heading 创建需求工程运行, Value: 2
+				35 text 创建需求工程运行
+			36 button 载入校园演示
+			37 container
+				38 text 项目 ID
+				39 text field (settable) 项目 ID
+			40 container
+				41 text 项目名称
+				42 text field (settable) 项目名称
+			43 container
+				44 text 运行模式
+				45 pop up button (collapsed, settable) 运行模式, Value: 真实模型, Secondary Actions: Expand
+					46 menu
+						47 (selected) 真实模型
+						48 校园演示（模拟 Agent）
+			49 container
+				50 text 基线版本来源
+				51 pop up button (collapsed, settable) 基线版本来源, Value: 首次建立基线, Secondary Actions: Expand
+					52 menu
+						53 (selected) 首次建立基线
+			54 container
+				55 text 模型提供商
+				56 pop up button (collapsed, settable) 模型提供商, Value: 选择已配置提供商, Secondary Actions: Expand
+					57 menu
+						58 (selected) 选择已配置提供商
+			59 container
+				60 text 模型 ID
+				61 combo box (settable) 模型 ID
+			62 text 请先在「基础设施与模型池」配置模型提供商密钥。
+			63 container
+				64 text 初始 Idea
+				65 text entry area (settable) 初始 Idea
+			66 button (collapsed) 背景、补充资料与运行设置, Secondary Actions: Expand
+				67 text 背景、补充资料与运行设置
+			68 button (disabled) 启动 HAMA-Loop
+
+The focused UI element is 4 button 需求工程

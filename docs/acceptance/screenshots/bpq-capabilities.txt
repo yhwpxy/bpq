@@ -1,0 +1,105 @@
+Browser tab: 1, Title: "Workflow Orchestrator — Requirements-to-Execution Control Plane", URL: "http://127.0.0.1:4190/?apiBaseUrl=http%3A%2F%2F127.0.0.1%3A4190&token=REDACTED".
+0 AXWebArea Workflow Orchestrator — Requirements-to-Execution Control Plane, URL: 127.0.0.1:4190/?apiBaseUrl=http%3A%2F%2F127.0.0.1%3A4190&token=REDACTED
+	1 container root
+		2 container
+			3 text WO Workflow Orchestrator
+			4 button 需求工程
+				5 image
+				6 text 需求工程
+			7 button 编排设计台
+				8 image
+				9 text 编排设计台
+			10 button 实时编排控制台
+				11 image
+				12 text 实时编排控制台
+			13 button 基础设施与模型池
+				14 image
+				15 text 基础设施与模型池
+			16 button 版本与日志审计
+				17 image
+				18 text 版本与日志审计
+			19 text 槽位 0 / 4 ● 实时连接
+			20 button 检索, Help: Ctrl+K
+				21 image
+				22 text 检索
+			23 button 中文/EN
+				24 image
+				25 text 中文/EN
+		26 container
+			27 heading 基础设施与模型池, Value: 2
+				28 image
+				29 text 基础设施与模型池
+			30 text 管理智能体灵魂指令、模型供应凭证、技能库睡眠整合、工具协议与领域统一语言。
+			31 button 执行睡眠进化整合
+			32 button 环境体检
+				33 image
+				34 text 环境体检
+			35 text OpenCode Go 未配置 · 离线降级 deepseek-flash 代理通道已就绪 Git 隔离沙箱引擎就绪 在右侧模型密钥池填入凭证或登录后即可启用实时大模型推理。
+			36 button 1. 能力与模型接入 (7)
+				37 text 1. 能力与模型接入
+				38 text  (
+				39 text 7
+				40 text )
+			41 button 2. 技能库与睡眠整合 (4)
+				42 text 2. 技能库与睡眠整合
+				43 text  (
+				44 text 4
+				45 text )
+			46 button 3. 工具协议与领域术语 (2 / 4)
+				47 text 3. 工具协议与领域术语
+				48 text  (
+				49 text 2
+				50 text  / 
+				51 text 4
+				52 text )
+			53 text 能力注册与熔断监控 claude-code 智能体 熔断 : 熔断 Claude Code CLI Architecture Review & Independent QA Audit  ·  探测 : Not probed yet 灵魂指令 :  Principal reviewer: challenge edge cases and audit deliverables strictly against GoalSpec.
+			54 button 灵魂指令
+			55 button 探测
+			56 button 启用
+			57 text codex 智能体 熔断 : 熔断 Codex CLI Architecture Decomposition & Precision Implementation  ·  探测 : Not probed yet 灵魂指令 :  Methodical staff engineer: enforce type invariants and minimal diff blast radius.
+			58 button 灵魂指令
+			59 button 探测
+			60 button 启用
+			61 text control:plane 控制流 熔断 : 闭合 Twin-Graph Control Coordinator Start, Decision Routing, Join Barrier, Git Checkpoint & Rewind  ·  探测 : Built-in deterministic/API capability ready 灵魂指令 :  Orchestrate conditional branches, parallel synchronization joins, and atomic worktree checkpoints.
+			62 button 灵魂指令
+			63 button 探测
+			64 button 禁用
+			65 text human:reviewer 人工 熔断 : 闭合 Human Gate & Approval Reviewer Interactive Decision Checkpoints & Clarification Sign-Off  ·  探测 : Built-in deterministic/API capability ready 灵魂指令 :  Pause downstream graph edges cleanly until human reviewer approves, rejects, or overrides.
+			66 button 灵魂指令
+			67 button 探测
+			68 button 禁用
+			69 text kimi-acp 智能体 熔断 : 熔断 Kimi Code (ACP) Long-Context Multi-File Synthesis via JSON-RPC 2.0 ACP Stdio  ·  探测 : Not probed yet 灵魂指令 :  Cross-module ACP specialist integrating streamed tool progress and structured handoffs.
+			70 button 灵魂指令
+			71 button 探测
+			72 button 启用
+			73 text native-api 智能体 熔断 : 闭合 Native Multi-Provider Agent Runner Direct Commercial API Tool-Loop & Deterministic Workspace Slice Agent  ·  探测 : Built-in deterministic/API capability ready 灵魂指令 :  Execute scoped software engineering tasks with strict I/O contracts, worktree confinement, and fail-closed QA evaluation.
+			74 button 灵魂指令
+			75 button 探测
+			76 button 禁用
+			77 text tool:shell 工具 熔断 : 闭合 Sandboxed Command & Gate Runner Deterministic Verification, Build, Test & Sanity Command Runner  ·  探测 : Built-in deterministic/API capability ready 灵魂指令 :  Execute workspace-confined deterministic shell checks without shell injection; fail closed on non-zero exit codes.
+			78 button 灵魂指令
+			79 button 探测
+			80 button 禁用
+			81 text 注册自定义能力
+			82 text field (settable)
+			83 text field (settable)
+			84 pop up button (collapsed, settable) Value: 工具, Secondary Actions: Expand
+				85 menu
+					86 (selected) 工具
+					87 智能体
+			88 text field (settable)
+			89 button (disabled) 注册
+			90 text 模型供应与密钥保险库 密钥持久化在主机安全文件，永不进入 SQLite 转录日志；未配密钥时自动降级为确定性本地执行以保障演示和离线验证。 OpenCode Go (直连订阅) 未配置 https://opencode.ai/inference/go/openai/v1  ·  deepseek-v4.1-flash, deepseek-v4-pro
+			91 text field (settable)
+			92 button 保存
+			93 text DeepSeek Official 未配置 https://api.deepseek.com/v1  ·  deepseek-flash
+			94 text field (settable)
+			95 button 保存
+			96 text OpenAI / Compatible Gateway 未配置 https://api.openai.com/v1  ·  gpt-5, gpt-5-mini
+			97 text field (settable)
+			98 button 保存
+			99 text Anthropic Messages 未配置 https://api.anthropic.com/v1  ·  claude-sonnet-4-5, claude-opus-4-6
+			100 text field (settable)
+			101 button 保存
+
+The focused UI element is 13 button 基础设施与模型池

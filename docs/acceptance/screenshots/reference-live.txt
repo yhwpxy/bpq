@@ -1,0 +1,30 @@
+Browser tab: 2, Title: "Workflow Orchestrator — Requirements-to-Execution Control Plane", URL: "http://127.0.0.1:4191/?apiBaseUrl=http%3A%2F%2F127.0.0.1%3A4191&token=REDACTED".
+0 AXWebArea Workflow Orchestrator — Requirements-to-Execution Control Plane, URL: 127.0.0.1:4191/?apiBaseUrl=http%3A%2F%2F127.0.0.1%3A4191&token=REDACTED
+	1 container root
+		2 container
+			3 text WO Workflow Orchestrator
+			4 button 需求工程
+				5 image
+				6 text 需求工程
+			7 button 编排设计台
+				8 image
+				9 text 编排设计台
+			10 button 实时编排控制台
+				11 image
+				12 text 实时编排控制台
+			13 button 基础设施与模型池
+				14 image
+				15 text 基础设施与模型池
+			16 button 版本与日志审计
+				17 image
+				18 text 版本与日志审计
+			19 text 槽位 0 / 4 ● 实时连接
+			20 button 检索, Help: Ctrl+K
+				21 image
+				22 text 检索
+			23 button 中文/EN
+				24 image
+				25 text 中文/EN
+		26 text 暂无运行实例。请先在“编排设计台”校验、锁定版本并点击“发布并实时执行”。
+
+The focused UI element is 10 button 实时编排控制台

@@ -1,0 +1,3198 @@
+[
+  {
+    "type": "table",
+    "name": "audit_ledger",
+    "tbl_name": "audit_ledger",
+    "sql": "CREATE TABLE audit_ledger (\n  id TEXT PRIMARY KEY,\n  workflow_id TEXT,\n  run_id TEXT,\n  category TEXT NOT NULL,\n  author TEXT NOT NULL,\n  title TEXT NOT NULL,\n  detail TEXT NOT NULL,\n  created_at TEXT NOT NULL\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "workflow_id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "run_id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "category",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "author",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "title",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "detail",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "created_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": []
+  },
+  {
+    "type": "table",
+    "name": "audit_ledger_fts",
+    "tbl_name": "audit_ledger_fts",
+    "sql": "CREATE VIRTUAL TABLE audit_ledger_fts USING fts5(\n  id UNINDEXED,\n  title,\n  detail,\n  content=audit_ledger,\n  content_rowid=rowid,\n  tokenize='unicode61 remove_diacritics 1'\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 1,
+        "name": "title",
+        "type": "",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "detail",
+        "type": "",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": []
+  },
+  {
+    "type": "table",
+    "name": "audit_ledger_fts_config",
+    "tbl_name": "audit_ledger_fts_config",
+    "sql": "CREATE TABLE 'audit_ledger_fts_config'(k PRIMARY KEY, v) WITHOUT ROWID",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "k",
+        "type": "",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "v",
+        "type": "",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": []
+  },
+  {
+    "type": "table",
+    "name": "audit_ledger_fts_data",
+    "tbl_name": "audit_ledger_fts_data",
+    "sql": "CREATE TABLE 'audit_ledger_fts_data'(id INTEGER PRIMARY KEY, block BLOB)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "block",
+        "type": "BLOB",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": []
+  },
+  {
+    "type": "table",
+    "name": "audit_ledger_fts_docsize",
+    "tbl_name": "audit_ledger_fts_docsize",
+    "sql": "CREATE TABLE 'audit_ledger_fts_docsize'(id INTEGER PRIMARY KEY, sz BLOB)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "sz",
+        "type": "BLOB",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": []
+  },
+  {
+    "type": "table",
+    "name": "audit_ledger_fts_idx",
+    "tbl_name": "audit_ledger_fts_idx",
+    "sql": "CREATE TABLE 'audit_ledger_fts_idx'(segid, term, pgno, PRIMARY KEY(segid, term)) WITHOUT ROWID",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "segid",
+        "type": "",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "term",
+        "type": "",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 2
+      },
+      {
+        "cid": 2,
+        "name": "pgno",
+        "type": "",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": []
+  },
+  {
+    "type": "table",
+    "name": "capabilities",
+    "tbl_name": "capabilities",
+    "sql": "CREATE TABLE capabilities (\n  id TEXT PRIMARY KEY,\n  manifest_json TEXT NOT NULL,\n  enabled INTEGER NOT NULL DEFAULT 1,\n  probe_ok INTEGER,\n  probe_message TEXT NOT NULL DEFAULT 'Ready',\n  probed_at TEXT,\n  updated_at TEXT NOT NULL\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "manifest_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "enabled",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "1",
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "probe_ok",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "probe_message",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'Ready'",
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "probed_at",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "updated_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": []
+  },
+  {
+    "type": "table",
+    "name": "checkpoints",
+    "tbl_name": "checkpoints",
+    "sql": "CREATE TABLE checkpoints (\n  id TEXT PRIMARY KEY,\n  run_id TEXT NOT NULL REFERENCES workflow_runs(id) ON DELETE CASCADE,\n  node_id TEXT NOT NULL,\n  label TEXT NOT NULL,\n  git_commit_sha TEXT NOT NULL,\n  git_tag TEXT NOT NULL,\n  rescue_ref TEXT,\n  completed_node_count INTEGER NOT NULL DEFAULT 0,\n  total_node_count INTEGER NOT NULL DEFAULT 0,\n  engine_snapshot_json TEXT NOT NULL DEFAULT '{}',\n  created_at TEXT NOT NULL\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "run_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "node_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "label",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "git_commit_sha",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "git_tag",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "rescue_ref",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "completed_node_count",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "total_node_count",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 9,
+        "name": "engine_snapshot_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'{}'",
+        "pk": 0
+      },
+      {
+        "cid": 10,
+        "name": "created_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "workflow_runs",
+        "from": "run_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "CASCADE",
+        "match": "NONE"
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "constitution_rules",
+    "tbl_name": "constitution_rules",
+    "sql": "CREATE TABLE constitution_rules (\n  id TEXT PRIMARY KEY,\n  markdown TEXT NOT NULL,\n  blocked_commands_json TEXT NOT NULL DEFAULT '[]',\n  updated_at TEXT NOT NULL\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "markdown",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "blocked_commands_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'[]'",
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "updated_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": []
+  },
+  {
+    "type": "table",
+    "name": "design_decisions",
+    "tbl_name": "design_decisions",
+    "sql": "CREATE TABLE design_decisions (\n        decision_id TEXT PRIMARY KEY, design_id TEXT NOT NULL, revision INTEGER NOT NULL,\n        expected_hash TEXT NOT NULL, actor TEXT NOT NULL, action TEXT NOT NULL,\n        findings_json TEXT NOT NULL, scope TEXT NOT NULL, decided_at TEXT NOT NULL,\n        FOREIGN KEY(design_id, revision) REFERENCES design_revisions(design_id, revision)\n      )",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "decision_id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "design_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "revision",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "expected_hash",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "actor",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "action",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "findings_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "scope",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "decided_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "design_revisions",
+        "from": "design_id",
+        "to": "design_id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 0,
+        "seq": 1,
+        "table": "design_revisions",
+        "from": "revision",
+        "to": "revision",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "design_handoffs",
+    "tbl_name": "design_handoffs",
+    "sql": "CREATE TABLE design_handoffs (\n        design_id TEXT NOT NULL, revision INTEGER NOT NULL, workspace_id TEXT NOT NULL REFERENCES workspaces(id),\n        workflow_id TEXT NOT NULL UNIQUE REFERENCES workflows(id), created_at TEXT NOT NULL, content_sha256 TEXT, pm_report_id TEXT, status TEXT NOT NULL DEFAULT 'pending_review', diagnostics_json TEXT NOT NULL DEFAULT '[]', receipt_json TEXT,\n        PRIMARY KEY(design_id, revision, workspace_id),\n        FOREIGN KEY(design_id, revision) REFERENCES design_revisions(design_id, revision)\n      )",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "design_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "revision",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 2
+      },
+      {
+        "cid": 2,
+        "name": "workspace_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 3
+      },
+      {
+        "cid": 3,
+        "name": "workflow_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "created_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "content_sha256",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "pm_report_id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "status",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'pending_review'",
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "diagnostics_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'[]'",
+        "pk": 0
+      },
+      {
+        "cid": 9,
+        "name": "receipt_json",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "design_revisions",
+        "from": "design_id",
+        "to": "design_id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 0,
+        "seq": 1,
+        "table": "design_revisions",
+        "from": "revision",
+        "to": "revision",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 1,
+        "seq": 0,
+        "table": "workflows",
+        "from": "workflow_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 2,
+        "seq": 0,
+        "table": "workspaces",
+        "from": "workspace_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "design_revisions",
+    "tbl_name": "design_revisions",
+    "sql": "CREATE TABLE design_revisions (\n        design_id TEXT NOT NULL, revision INTEGER NOT NULL CHECK(revision > 0), parent_revision INTEGER,\n        baseline_id TEXT NOT NULL, project_id TEXT NOT NULL, baseline_revision INTEGER NOT NULL,\n        baseline_sha256 TEXT NOT NULL, workspace_id TEXT NOT NULL REFERENCES workspaces(id), source_commit TEXT,\n        schema_version INTEGER NOT NULL CHECK(schema_version=1), input_json TEXT NOT NULL, body_json TEXT NOT NULL,\n        content_sha256 TEXT NOT NULL CHECK(length(content_sha256)=64),\n        state TEXT NOT NULL CHECK(state IN ('draft','in_review','changes_requested','confirmed')),\n        created_at TEXT NOT NULL, metadata_json TEXT NOT NULL, review_markdown TEXT NOT NULL, pm_markdown TEXT NOT NULL,\n        diagnostics_json TEXT NOT NULL,\n        PRIMARY KEY(design_id, revision),\n        FOREIGN KEY(design_id, parent_revision) REFERENCES design_revisions(design_id, revision)\n      )",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "design_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "revision",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 2
+      },
+      {
+        "cid": 2,
+        "name": "parent_revision",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "baseline_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "project_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "baseline_revision",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "baseline_sha256",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "workspace_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "source_commit",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 9,
+        "name": "schema_version",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 10,
+        "name": "input_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 11,
+        "name": "body_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 12,
+        "name": "content_sha256",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 13,
+        "name": "state",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 14,
+        "name": "created_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 15,
+        "name": "metadata_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 16,
+        "name": "review_markdown",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 17,
+        "name": "pm_markdown",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 18,
+        "name": "diagnostics_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "design_revisions",
+        "from": "design_id",
+        "to": "design_id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 0,
+        "seq": 1,
+        "table": "design_revisions",
+        "from": "parent_revision",
+        "to": "revision",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 1,
+        "seq": 0,
+        "table": "workspaces",
+        "from": "workspace_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "domain_terms",
+    "tbl_name": "domain_terms",
+    "sql": "CREATE TABLE domain_terms (\n  id TEXT PRIMARY KEY,\n  workspace_id TEXT NOT NULL,\n  bounded_context TEXT NOT NULL,\n  canonical_term TEXT NOT NULL,\n  local_label TEXT NOT NULL DEFAULT '',\n  definition TEXT NOT NULL DEFAULT '',\n  forbidden_aliases_json TEXT NOT NULL DEFAULT '[]',\n  created_at TEXT NOT NULL,\n  updated_at TEXT NOT NULL\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "workspace_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "bounded_context",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "canonical_term",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "local_label",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "''",
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "definition",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "''",
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "forbidden_aliases_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'[]'",
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "created_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "updated_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": []
+  },
+  {
+    "type": "table",
+    "name": "goal_specs",
+    "tbl_name": "goal_specs",
+    "sql": "CREATE TABLE goal_specs (\n  workflow_id TEXT PRIMARY KEY REFERENCES workflows(id) ON DELETE CASCADE,\n  payload_json TEXT NOT NULL,\n  updated_at TEXT NOT NULL\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "workflow_id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "payload_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "updated_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "workflows",
+        "from": "workflow_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "CASCADE",
+        "match": "NONE"
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "graph_edges",
+    "tbl_name": "graph_edges",
+    "sql": "CREATE TABLE graph_edges (\n  id TEXT PRIMARY KEY,\n  scope_id TEXT NOT NULL,\n  source_node_id TEXT NOT NULL,\n  target_node_id TEXT NOT NULL,\n  kind TEXT NOT NULL,\n  label TEXT NOT NULL DEFAULT '',\n  condition_expr TEXT\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "scope_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "source_node_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "target_node_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "kind",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "label",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "''",
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "condition_expr",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": []
+  },
+  {
+    "type": "table",
+    "name": "graph_nodes",
+    "tbl_name": "graph_nodes",
+    "sql": "CREATE TABLE graph_nodes (\n  id TEXT PRIMARY KEY,\n  scope_id TEXT NOT NULL,\n  code TEXT NOT NULL,\n  parent_wbs_id TEXT,\n  container_node_id TEXT,\n  phase_id TEXT,\n  phase_title TEXT NOT NULL DEFAULT '',\n  depth INTEGER NOT NULL DEFAULT 1,\n  kind TEXT NOT NULL,\n  executor_kind TEXT NOT NULL DEFAULT 'agent',\n  capability_id TEXT NOT NULL DEFAULT 'native-api',\n  assigned_role TEXT NOT NULL DEFAULT 'worker',\n  assigned_model TEXT,\n  title TEXT NOT NULL,\n  description TEXT NOT NULL DEFAULT '',\n  planning_rationale TEXT NOT NULL DEFAULT '',\n  requirement_refs_json TEXT NOT NULL DEFAULT '[]',\n  input_contract TEXT NOT NULL DEFAULT '',\n  output_contract TEXT NOT NULL DEFAULT '',\n  file_scope_json TEXT NOT NULL DEFAULT '[]',\n  gate_command TEXT,\n  branch_condition TEXT,\n  status TEXT NOT NULL DEFAULT 'pending',\n  attempt_count INTEGER NOT NULL DEFAULT 0,\n  max_attempts INTEGER NOT NULL DEFAULT 3,\n  collapsed INTEGER NOT NULL DEFAULT 0,\n  position_x REAL NOT NULL DEFAULT 0,\n  position_y REAL NOT NULL DEFAULT 0,\n  width REAL NOT NULL DEFAULT 220,\n  height REAL NOT NULL DEFAULT 76,\n  output_summary TEXT NOT NULL DEFAULT '',\n  restore_target_checkpoint_id TEXT,\n  updated_at TEXT NOT NULL\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "scope_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "code",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "parent_wbs_id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "container_node_id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "phase_id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "phase_title",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "''",
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "depth",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "1",
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "kind",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 9,
+        "name": "executor_kind",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'agent'",
+        "pk": 0
+      },
+      {
+        "cid": 10,
+        "name": "capability_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'native-api'",
+        "pk": 0
+      },
+      {
+        "cid": 11,
+        "name": "assigned_role",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'worker'",
+        "pk": 0
+      },
+      {
+        "cid": 12,
+        "name": "assigned_model",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 13,
+        "name": "title",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 14,
+        "name": "description",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "''",
+        "pk": 0
+      },
+      {
+        "cid": 15,
+        "name": "planning_rationale",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "''",
+        "pk": 0
+      },
+      {
+        "cid": 16,
+        "name": "requirement_refs_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'[]'",
+        "pk": 0
+      },
+      {
+        "cid": 17,
+        "name": "input_contract",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "''",
+        "pk": 0
+      },
+      {
+        "cid": 18,
+        "name": "output_contract",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "''",
+        "pk": 0
+      },
+      {
+        "cid": 19,
+        "name": "file_scope_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'[]'",
+        "pk": 0
+      },
+      {
+        "cid": 20,
+        "name": "gate_command",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 21,
+        "name": "branch_condition",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 22,
+        "name": "status",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'pending'",
+        "pk": 0
+      },
+      {
+        "cid": 23,
+        "name": "attempt_count",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 24,
+        "name": "max_attempts",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "3",
+        "pk": 0
+      },
+      {
+        "cid": 25,
+        "name": "collapsed",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 26,
+        "name": "position_x",
+        "type": "REAL",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 27,
+        "name": "position_y",
+        "type": "REAL",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 28,
+        "name": "width",
+        "type": "REAL",
+        "notnull": 1,
+        "dflt_value": "220",
+        "pk": 0
+      },
+      {
+        "cid": 29,
+        "name": "height",
+        "type": "REAL",
+        "notnull": 1,
+        "dflt_value": "76",
+        "pk": 0
+      },
+      {
+        "cid": 30,
+        "name": "output_summary",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "''",
+        "pk": 0
+      },
+      {
+        "cid": 31,
+        "name": "restore_target_checkpoint_id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 32,
+        "name": "updated_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": []
+  },
+  {
+    "type": "table",
+    "name": "hama_artifacts",
+    "tbl_name": "hama_artifacts",
+    "sql": "CREATE TABLE hama_artifacts (\n        id TEXT PRIMARY KEY, run_id TEXT NOT NULL REFERENCES hama_runs(run_id),\n        attempt_id TEXT NOT NULL REFERENCES node_attempts(id), kind TEXT NOT NULL, subject TEXT NOT NULL,\n        revision INTEGER NOT NULL, payload TEXT NOT NULL,\n        UNIQUE(run_id, kind, subject, revision)\n      )",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "run_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "attempt_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "kind",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "subject",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "revision",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "payload",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "node_attempts",
+        "from": "attempt_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 1,
+        "seq": 0,
+        "table": "hama_runs",
+        "from": "run_id",
+        "to": "run_id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "hama_baselines",
+    "tbl_name": "hama_baselines",
+    "sql": "CREATE TABLE hama_baselines (\n        id TEXT PRIMARY KEY, project_id TEXT NOT NULL, mode TEXT NOT NULL,\n        revision INTEGER NOT NULL, run_id TEXT NOT NULL UNIQUE REFERENCES hama_runs(run_id),\n        payload TEXT NOT NULL, UNIQUE(project_id, mode, revision)\n      )",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "project_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "mode",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "revision",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "run_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "payload",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "hama_runs",
+        "from": "run_id",
+        "to": "run_id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "hama_gates",
+    "tbl_name": "hama_gates",
+    "sql": "CREATE TABLE hama_gates (\n        id TEXT PRIMARY KEY REFERENCES interventions(id), run_id TEXT NOT NULL REFERENCES hama_runs(run_id),\n        payload TEXT NOT NULL, decision TEXT, submitted TEXT\n      )",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "run_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "payload",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "decision",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "submitted",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "hama_runs",
+        "from": "run_id",
+        "to": "run_id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      },
+      {
+        "id": 1,
+        "seq": 0,
+        "table": "interventions",
+        "from": "id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "hama_runs",
+    "tbl_name": "hama_runs",
+    "sql": "CREATE TABLE hama_runs (\n        run_id TEXT PRIMARY KEY REFERENCES workflow_runs(id),\n        project_id TEXT NOT NULL, mode TEXT NOT NULL, payload TEXT NOT NULL\n      )",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "run_id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "project_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "mode",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "payload",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "workflow_runs",
+        "from": "run_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION",
+        "match": "NONE"
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "impact_reports",
+    "tbl_name": "impact_reports",
+    "sql": "CREATE TABLE impact_reports (\n  workflow_id TEXT PRIMARY KEY REFERENCES workflows(id) ON DELETE CASCADE,\n  payload_json TEXT NOT NULL,\n  analyzed_at TEXT NOT NULL\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "workflow_id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "payload_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "analyzed_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "workflows",
+        "from": "workflow_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "CASCADE",
+        "match": "NONE"
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "interventions",
+    "tbl_name": "interventions",
+    "sql": "CREATE TABLE interventions (\n  id TEXT PRIMARY KEY,\n  run_id TEXT NOT NULL REFERENCES workflow_runs(id) ON DELETE CASCADE,\n  node_id TEXT,\n  kind TEXT NOT NULL,\n  question TEXT NOT NULL,\n  context_snippet TEXT NOT NULL DEFAULT '',\n  options_json TEXT NOT NULL DEFAULT '[]',\n  recommended_index INTEGER NOT NULL DEFAULT 0,\n  downstream_blocked_count INTEGER NOT NULL DEFAULT 1,\n  estimated_read_seconds INTEGER NOT NULL DEFAULT 25,\n  status TEXT NOT NULL DEFAULT 'open',\n  resolution TEXT,\n  created_at TEXT NOT NULL,\n  resolved_at TEXT\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "run_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "node_id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "kind",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "question",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "context_snippet",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "''",
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "options_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'[]'",
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "recommended_index",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "downstream_blocked_count",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "1",
+        "pk": 0
+      },
+      {
+        "cid": 9,
+        "name": "estimated_read_seconds",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "25",
+        "pk": 0
+      },
+      {
+        "cid": 10,
+        "name": "status",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'open'",
+        "pk": 0
+      },
+      {
+        "cid": 11,
+        "name": "resolution",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 12,
+        "name": "created_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 13,
+        "name": "resolved_at",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "workflow_runs",
+        "from": "run_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "CASCADE",
+        "match": "NONE"
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "mcp_servers",
+    "tbl_name": "mcp_servers",
+    "sql": "CREATE TABLE mcp_servers (\n  id TEXT PRIMARY KEY,\n  name TEXT NOT NULL,\n  transport TEXT NOT NULL DEFAULT 'http',\n  endpoint_or_command TEXT NOT NULL,\n  description TEXT NOT NULL DEFAULT '',\n  enabled INTEGER NOT NULL DEFAULT 1,\n  tools_count INTEGER NOT NULL DEFAULT 0,\n  status TEXT NOT NULL DEFAULT 'ready',\n  updated_at TEXT NOT NULL\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "name",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "transport",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'http'",
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "endpoint_or_command",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "description",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "''",
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "enabled",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "1",
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "tools_count",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "status",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'ready'",
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "updated_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": []
+  },
+  {
+    "type": "table",
+    "name": "meta_kv",
+    "tbl_name": "meta_kv",
+    "sql": "CREATE TABLE meta_kv (\n  key TEXT PRIMARY KEY,\n  value_json TEXT NOT NULL,\n  updated_at TEXT NOT NULL\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "key",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "value_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "updated_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": []
+  },
+  {
+    "type": "table",
+    "name": "model_providers",
+    "tbl_name": "model_providers",
+    "sql": "CREATE TABLE model_providers (\n  id TEXT PRIMARY KEY,\n  name TEXT NOT NULL,\n  protocol TEXT NOT NULL,\n  base_url TEXT NOT NULL,\n  models_json TEXT NOT NULL,\n  updated_at TEXT NOT NULL\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "name",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "protocol",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "base_url",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "models_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "updated_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": []
+  },
+  {
+    "type": "table",
+    "name": "node_attempts",
+    "tbl_name": "node_attempts",
+    "sql": "CREATE TABLE node_attempts (\n  id TEXT PRIMARY KEY,\n  run_id TEXT NOT NULL REFERENCES workflow_runs(id) ON DELETE CASCADE,\n  node_id TEXT NOT NULL,\n  node_code TEXT NOT NULL,\n  attempt_number INTEGER NOT NULL,\n  executor_kind TEXT NOT NULL,\n  capability_id TEXT NOT NULL,\n  model TEXT NOT NULL DEFAULT '',\n  status TEXT NOT NULL,\n  exit_code INTEGER,\n  duration_sec REAL NOT NULL DEFAULT 0,\n  input_snapshot_json TEXT NOT NULL DEFAULT '{}',\n  output_summary TEXT NOT NULL DEFAULT '',\n  error_message TEXT NOT NULL DEFAULT '',\n  session_id TEXT,\n  started_at TEXT NOT NULL,\n  finished_at TEXT\n, input_tokens INTEGER NOT NULL DEFAULT 0, cached_tokens INTEGER NOT NULL DEFAULT 0, output_tokens INTEGER NOT NULL DEFAULT 0, cost_usd REAL NOT NULL DEFAULT 0)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "run_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "node_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "node_code",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "attempt_number",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "executor_kind",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "capability_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "model",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "''",
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "status",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 9,
+        "name": "exit_code",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 10,
+        "name": "duration_sec",
+        "type": "REAL",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 11,
+        "name": "input_snapshot_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'{}'",
+        "pk": 0
+      },
+      {
+        "cid": 12,
+        "name": "output_summary",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "''",
+        "pk": 0
+      },
+      {
+        "cid": 13,
+        "name": "error_message",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "''",
+        "pk": 0
+      },
+      {
+        "cid": 14,
+        "name": "session_id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 15,
+        "name": "started_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 16,
+        "name": "finished_at",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 17,
+        "name": "input_tokens",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 18,
+        "name": "cached_tokens",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 19,
+        "name": "output_tokens",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 20,
+        "name": "cost_usd",
+        "type": "REAL",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "workflow_runs",
+        "from": "run_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "CASCADE",
+        "match": "NONE"
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "pm_reports",
+    "tbl_name": "pm_reports",
+    "sql": "CREATE TABLE pm_reports (\n  workflow_id TEXT PRIMARY KEY REFERENCES workflows(id) ON DELETE CASCADE,\n  payload_json TEXT NOT NULL,\n  created_at TEXT NOT NULL\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "workflow_id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "payload_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "created_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "workflows",
+        "from": "workflow_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "CASCADE",
+        "match": "NONE"
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "session_messages",
+    "tbl_name": "session_messages",
+    "sql": "CREATE TABLE session_messages (\n  id TEXT PRIMARY KEY,\n  session_id TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,\n  seq INTEGER NOT NULL,\n  role TEXT NOT NULL,\n  content TEXT NOT NULL,\n  tool_name TEXT,\n  is_error INTEGER NOT NULL DEFAULT 0,\n  input_tokens INTEGER NOT NULL DEFAULT 0,\n  cached_tokens INTEGER NOT NULL DEFAULT 0,\n  output_tokens INTEGER NOT NULL DEFAULT 0,\n  created_at TEXT NOT NULL\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "session_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "seq",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "role",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "content",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "tool_name",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "is_error",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "input_tokens",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "cached_tokens",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 9,
+        "name": "output_tokens",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 10,
+        "name": "created_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "sessions",
+        "from": "session_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "CASCADE",
+        "match": "NONE"
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "session_messages_fts",
+    "tbl_name": "session_messages_fts",
+    "sql": "CREATE VIRTUAL TABLE session_messages_fts USING fts5(\n  id UNINDEXED,\n  session_id UNINDEXED,\n  content,\n  content=session_messages,\n  content_rowid=rowid,\n  tokenize='unicode61 remove_diacritics 1'\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 1,
+        "name": "session_id",
+        "type": "",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "content",
+        "type": "",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": []
+  },
+  {
+    "type": "table",
+    "name": "session_messages_fts_config",
+    "tbl_name": "session_messages_fts_config",
+    "sql": "CREATE TABLE 'session_messages_fts_config'(k PRIMARY KEY, v) WITHOUT ROWID",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "k",
+        "type": "",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "v",
+        "type": "",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": []
+  },
+  {
+    "type": "table",
+    "name": "session_messages_fts_data",
+    "tbl_name": "session_messages_fts_data",
+    "sql": "CREATE TABLE 'session_messages_fts_data'(id INTEGER PRIMARY KEY, block BLOB)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "block",
+        "type": "BLOB",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": []
+  },
+  {
+    "type": "table",
+    "name": "session_messages_fts_docsize",
+    "tbl_name": "session_messages_fts_docsize",
+    "sql": "CREATE TABLE 'session_messages_fts_docsize'(id INTEGER PRIMARY KEY, sz BLOB)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "INTEGER",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "sz",
+        "type": "BLOB",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": []
+  },
+  {
+    "type": "table",
+    "name": "session_messages_fts_idx",
+    "tbl_name": "session_messages_fts_idx",
+    "sql": "CREATE TABLE 'session_messages_fts_idx'(segid, term, pgno, PRIMARY KEY(segid, term)) WITHOUT ROWID",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "segid",
+        "type": "",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "term",
+        "type": "",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 2
+      },
+      {
+        "cid": 2,
+        "name": "pgno",
+        "type": "",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": []
+  },
+  {
+    "type": "table",
+    "name": "sessions",
+    "tbl_name": "sessions",
+    "sql": "CREATE TABLE sessions (\n  id TEXT PRIMARY KEY,\n  run_id TEXT,\n  node_id TEXT,\n  capability_id TEXT NOT NULL,\n  model TEXT NOT NULL,\n  role TEXT NOT NULL,\n  started_at TEXT NOT NULL,\n  ended_at TEXT,\n  status TEXT NOT NULL DEFAULT 'running'\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "run_id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "node_id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "capability_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "model",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "role",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "started_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "ended_at",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "status",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'running'",
+        "pk": 0
+      }
+    ],
+    "foreignKeys": []
+  },
+  {
+    "type": "table",
+    "name": "skills",
+    "tbl_name": "skills",
+    "sql": "CREATE TABLE skills (\n  id TEXT PRIMARY KEY,\n  slug TEXT NOT NULL UNIQUE,\n  title TEXT NOT NULL,\n  category TEXT NOT NULL DEFAULT 'governance',\n  content TEXT NOT NULL,\n  times_used INTEGER NOT NULL DEFAULT 0,\n  stability_hours REAL NOT NULL DEFAULT 24,\n  created_at TEXT NOT NULL,\n  updated_at TEXT NOT NULL\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "slug",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "title",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "category",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'governance'",
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "content",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "times_used",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "stability_hours",
+        "type": "REAL",
+        "notnull": 1,
+        "dflt_value": "24",
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "created_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "updated_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": []
+  },
+  {
+    "type": "table",
+    "name": "trial_reports",
+    "tbl_name": "trial_reports",
+    "sql": "CREATE TABLE trial_reports (\n  id TEXT PRIMARY KEY,\n  workflow_id TEXT NOT NULL REFERENCES workflows(id) ON DELETE CASCADE,\n  payload_json TEXT NOT NULL,\n  ran_at TEXT NOT NULL\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "workflow_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "payload_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "ran_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "workflows",
+        "from": "workflow_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "CASCADE",
+        "match": "NONE"
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "validation_reports",
+    "tbl_name": "validation_reports",
+    "sql": "CREATE TABLE validation_reports (\n  workflow_id TEXT PRIMARY KEY REFERENCES workflows(id) ON DELETE CASCADE,\n  payload_json TEXT NOT NULL,\n  checked_at TEXT NOT NULL\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "workflow_id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "payload_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "checked_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "workflows",
+        "from": "workflow_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "CASCADE",
+        "match": "NONE"
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "workflow_runs",
+    "tbl_name": "workflow_runs",
+    "sql": "CREATE TABLE workflow_runs (\n  id TEXT PRIMARY KEY,\n  workflow_id TEXT NOT NULL REFERENCES workflows(id) ON DELETE CASCADE,\n  version_id TEXT NOT NULL REFERENCES workflow_versions(id) ON DELETE RESTRICT,\n  version_tag TEXT NOT NULL,\n  title TEXT NOT NULL,\n  status TEXT NOT NULL DEFAULT 'queued',\n  permission_tier TEXT NOT NULL DEFAULT 'supervised',\n  worktree_path TEXT NOT NULL DEFAULT '',\n  git_branch TEXT NOT NULL DEFAULT '',\n  base_commit_sha TEXT NOT NULL DEFAULT '',\n  verify_command TEXT NOT NULL,\n  max_rework_iterations INTEGER NOT NULL DEFAULT 3,\n  rework_count INTEGER NOT NULL DEFAULT 0,\n  total_nodes INTEGER NOT NULL DEFAULT 0,\n  completed_nodes INTEGER NOT NULL DEFAULT 0,\n  failed_nodes INTEGER NOT NULL DEFAULT 0,\n  skipped_nodes INTEGER NOT NULL DEFAULT 0,\n  started_at TEXT NOT NULL,\n  finished_at TEXT,\n  updated_at TEXT NOT NULL\n, budget_usd_limit REAL NOT NULL DEFAULT 2.5, spent_usd REAL NOT NULL DEFAULT 0, total_input_tokens INTEGER NOT NULL DEFAULT 0, total_cached_tokens INTEGER NOT NULL DEFAULT 0, total_output_tokens INTEGER NOT NULL DEFAULT 0)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "workflow_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "version_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "version_tag",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "title",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "status",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'queued'",
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "permission_tier",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'supervised'",
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "worktree_path",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "''",
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "git_branch",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "''",
+        "pk": 0
+      },
+      {
+        "cid": 9,
+        "name": "base_commit_sha",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "''",
+        "pk": 0
+      },
+      {
+        "cid": 10,
+        "name": "verify_command",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 11,
+        "name": "max_rework_iterations",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "3",
+        "pk": 0
+      },
+      {
+        "cid": 12,
+        "name": "rework_count",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 13,
+        "name": "total_nodes",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 14,
+        "name": "completed_nodes",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 15,
+        "name": "failed_nodes",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 16,
+        "name": "skipped_nodes",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 17,
+        "name": "started_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 18,
+        "name": "finished_at",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 19,
+        "name": "updated_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 20,
+        "name": "budget_usd_limit",
+        "type": "REAL",
+        "notnull": 1,
+        "dflt_value": "2.5",
+        "pk": 0
+      },
+      {
+        "cid": 21,
+        "name": "spent_usd",
+        "type": "REAL",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 22,
+        "name": "total_input_tokens",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 23,
+        "name": "total_cached_tokens",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 24,
+        "name": "total_output_tokens",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "workflow_versions",
+        "from": "version_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "RESTRICT",
+        "match": "NONE"
+      },
+      {
+        "id": 1,
+        "seq": 0,
+        "table": "workflows",
+        "from": "workflow_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "CASCADE",
+        "match": "NONE"
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "workflow_versions",
+    "tbl_name": "workflow_versions",
+    "sql": "CREATE TABLE workflow_versions (\n  id TEXT PRIMARY KEY,\n  workflow_id TEXT NOT NULL REFERENCES workflows(id) ON DELETE CASCADE,\n  version_number INTEGER NOT NULL,\n  version_tag TEXT NOT NULL,\n  label TEXT NOT NULL,\n  payload_json TEXT NOT NULL,\n  frozen_by TEXT NOT NULL,\n  created_at TEXT NOT NULL\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "workflow_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "version_number",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "version_tag",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "label",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "payload_json",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "frozen_by",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "created_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "workflows",
+        "from": "workflow_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "CASCADE",
+        "match": "NONE"
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "workflows",
+    "tbl_name": "workflows",
+    "sql": "CREATE TABLE workflows (\n  id TEXT PRIMARY KEY,\n  workspace_id TEXT NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,\n  code TEXT NOT NULL,\n  title TEXT NOT NULL,\n  description TEXT NOT NULL DEFAULT '',\n  status TEXT NOT NULL DEFAULT 'draft',\n  current_version_number INTEGER NOT NULL DEFAULT 0,\n  permission_tier TEXT NOT NULL DEFAULT 'supervised',\n  verify_command TEXT NOT NULL,\n  max_rework_iterations INTEGER NOT NULL DEFAULT 3,\n  created_at TEXT NOT NULL,\n  updated_at TEXT NOT NULL\n, customization_json TEXT, last_human_reviewed_at TEXT, spaced_review_count INTEGER NOT NULL DEFAULT 0)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "workspace_id",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "code",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "title",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "description",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "''",
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "status",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'draft'",
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "current_version_number",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      },
+      {
+        "cid": 7,
+        "name": "permission_tier",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'supervised'",
+        "pk": 0
+      },
+      {
+        "cid": 8,
+        "name": "verify_command",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 9,
+        "name": "max_rework_iterations",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "3",
+        "pk": 0
+      },
+      {
+        "cid": 10,
+        "name": "created_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 11,
+        "name": "updated_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 12,
+        "name": "customization_json",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 13,
+        "name": "last_human_reviewed_at",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 14,
+        "name": "spaced_review_count",
+        "type": "INTEGER",
+        "notnull": 1,
+        "dflt_value": "0",
+        "pk": 0
+      }
+    ],
+    "foreignKeys": [
+      {
+        "id": 0,
+        "seq": 0,
+        "table": "workspaces",
+        "from": "workspace_id",
+        "to": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "CASCADE",
+        "match": "NONE"
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "workspaces",
+    "tbl_name": "workspaces",
+    "sql": "CREATE TABLE workspaces (\n  id TEXT PRIMARY KEY,\n  name TEXT NOT NULL,\n  root_path TEXT NOT NULL,\n  default_branch TEXT NOT NULL DEFAULT 'main',\n  verify_command TEXT NOT NULL,\n  description TEXT NOT NULL DEFAULT '',\n  created_at TEXT NOT NULL\n)",
+    "columns": [
+      {
+        "cid": 0,
+        "name": "id",
+        "type": "TEXT",
+        "notnull": 0,
+        "dflt_value": null,
+        "pk": 1
+      },
+      {
+        "cid": 1,
+        "name": "name",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 2,
+        "name": "root_path",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 3,
+        "name": "default_branch",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "'main'",
+        "pk": 0
+      },
+      {
+        "cid": 4,
+        "name": "verify_command",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      },
+      {
+        "cid": 5,
+        "name": "description",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": "''",
+        "pk": 0
+      },
+      {
+        "cid": 6,
+        "name": "created_at",
+        "type": "TEXT",
+        "notnull": 1,
+        "dflt_value": null,
+        "pk": 0
+      }
+    ],
+    "foreignKeys": []
+  }
+]

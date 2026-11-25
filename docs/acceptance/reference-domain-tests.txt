@@ -1,0 +1,36 @@
+(node:4068) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ demo requires human gates, resumes after restart, and publishes immutable versions (733.315166ms)
+✔ HTTP model adapter, selective A/B/C rework, technical retry, and structured baseline handoff (1252.89825ms)
+(node:4069) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ published PRD → generated design → confirmed revision → real PM receipt across projects and baseline revisions (2438.377125ms)
+(node:4070) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ reference validation locates AC gaps, NFR coverage, unsafe paths, overlapping writes, assumptions and dependency failures (9.931459ms)
+✔ real no-tool model adapter and HTTP generation: new CLI, existing service, failed attempts and feedback retry (594.625125ms)
+(node:4071) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ baseline digest, approval references and AC provenance reject corrupt input (2.164167ms)
+✔ committed inventory, conceptual drafts, failures, immutable source facts and recovery (622.663875ms)
+(node:4072) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ canonical hash, durable review, technical rework, rollback, immutable history and cross-baseline lineage (471.751625ms)
+✔ HTTP revisions: adoption, concurrent stale decisions, blockers, concept commit binding and reopening after host restart (588.9215ms)
+(node:4073) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ atomic HTTP handoff: failed ledger write rolls back all PM artifacts; concurrent retries commit once, broadcast after commit, and recover after source drift/restart (1889.503667ms)
+✔ missing reports and input mismatches keep a pending ledger; queries recover the original workflow without another import (780.761209ms)
+(node:4074) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ legacy confirmed snapshots project without changing frozen body, digest or confirmation Markdown (7.6895ms)
+✔ design checks validate their source and ownership; changes require a new confirmed digest (4.297125ms)
+✔ HTTP PM input preserves original IDs, priority projection, cross-module NFR, contracts and check provenance without creating workflows (580.142ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3580.042333

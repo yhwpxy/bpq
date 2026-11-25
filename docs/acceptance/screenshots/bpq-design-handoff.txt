@@ -1,0 +1,288 @@
+Browser tab: 3, Title: "Workflow Orchestrator — Requirements-to-Execution Control Plane", URL: "http://127.0.0.1:4193/?apiBaseUrl=http%3A%2F%2F127.0.0.1%3A4193&token=REDACTED".
+0 AXWebArea Workflow Orchestrator — Requirements-to-Execution Control Plane, URL: 127.0.0.1:4193/?apiBaseUrl=http%3A%2F%2F127.0.0.1%3A4193&token=REDACTED
+	1 container root
+		2 container
+			3 text WO Workflow Orchestrator
+			4 button 需求工程
+				5 image
+				6 text 需求工程
+			7 button 编排设计台
+				8 image
+				9 text 编排设计台
+			10 button 实时编排控制台
+				11 image
+				12 text 实时编排控制台
+			13 button 基础设施与模型池
+				14 image
+				15 text 基础设施与模型池
+			16 button 版本与日志审计
+				17 image
+				18 text 版本与日志审计
+			19 text 槽位 0 / 4 ● 实时连接
+			20 button 检索, Help: Ctrl+K
+				21 image
+				22 text 检索
+			23 button 中文/EN
+				24 image
+				25 text 中文/EN
+		26 container
+			27 pop up button (collapsed, settable) Value: WF-002 · 文本非空行统计工具软件设计, Secondary Actions: Expand
+				28 menu
+					29 (selected) WF-002 · 文本非空行统计工具软件设计
+					30 WF-001 · 文本非空行统计工具
+			31 text 已通过校验 2 需求  · 4 验收  ·  4 术语 全栈标准研发流程
+			32 button 导入设计规格
+				33 image
+				34 text 导入设计规格
+			35 button 导出编排方案
+			36 button 隔离试运行
+			37 button 锁定不可变版本
+				38 image
+				39 text 锁定不可变版本
+			40 button 发布并实时执行
+				41 image
+				42 text 发布并实时执行
+			245 text 软件设计交接  ·  PM 已签收 design-e3b47a3c-333c-4db9-aa26-808e7df4e4d0  / v 1  ·  7b68160a7d237fbdbeff72e26e0601ff7e4d5df2e081f09df64e6a953a08525a 原始 PM 报告 ： pm-b72e6e40  ·  目标提交 ： 554efe9354ad66d4b394cc5357a1484114d42895
+			43 button (collapsed) 查看交接报告与核对诊断, Secondary Actions: Expand
+				246 text 查看交接报告与核对诊断
+			44 button 1. 规格目标与需求追踪
+			45 button 2. 任务拆解与双态编排图
+			46 button 3. 三级校验与试运行报告 (1)
+			47 container
+				48 container
+					49 image
+						247 container Edge from start-607049b7 to p1t1-6cdba957
+							248 text 初始化
+					50 image
+						249 container Edge from p1t1-6cdba957 to p1ckpt-2d2deac3
+							250 text 检查点
+					51 image
+						251 container Edge from p1ckpt-2d2deac3 to p2t1-2cae91e3
+							252 text 分支 1
+					52 image
+						253 container Edge from p1ckpt-2d2deac3 to p2t2-4d79c490
+							254 text 分支 2
+					53 image
+						255 container Edge from p2t1-2cae91e3 to p2d1-2c614ba8
+							256 text 路由
+					54 image
+						257 container Edge from p2d1-2c614ba8 to p2std-6ae89b3b
+							258 text 标准
+					55 image
+						259 container Edge from p2d1-2c614ba8 to p2ext-e5de3423
+							260 text 扩展
+					56 image
+						261 container Edge from p2t2-4d79c490 to p2sec-438b7c78
+					57 image
+						262 container Edge from p2std-6ae89b3b to p2sec-438b7c78
+							263 text 汇合
+					58 image
+						264 container Edge from p2ext-e5de3423 to p2sec-438b7c78
+					59 image
+						265 container Edge from p2sec-438b7c78 to p2join-2cbdfb14
+							266 text 放行
+					60 image
+						267 container Edge from p2join-2cbdfb14 to p2ckpt-c2c4ab67
+							268 text 检查点
+					61 image
+						269 container Edge from p2ckpt-c2c4ab67 to p3gate-c26512fd
+							270 text 验证
+					62 image
+						271 container Edge from p3gate-c26512fd to p3sc-896ae4b7
+							272 text 通过
+					63 image
+						273 container Edge from p3gate-c26512fd to p3rst-45bc5d21
+							274 text 失败回退
+					64 image
+						275 container Edge from p3sc-896ae4b7 to p3qa-32473218
+							276 text 审校
+					65 image
+						277 container Edge from p3qa-32473218 to p3ckpt-0d15152f
+							278 text 通过
+					66 image
+						279 container Edge from p3qa-32473218 to p3rst-45bc5d21
+							280 text 审校退回
+					67 image
+						281 container Edge from p3rst-45bc5d21 to p3gate-c26512fd
+							282 text 返工
+					68 image
+						283 container Edge from p3ckpt-0d15152f to p3done-b6a44727
+							284 text 交付
+					69 container
+						70 text Phase 1 · Design Spec & Contracts
+						71 text 0
+						72 text /
+						73 text 2
+					74 container
+						75 text Phase 2 · Parallel Tasks (2 streams)
+						76 text 0
+						77 text /
+						78 text 7
+					79 container
+						80 text Phase 3 · Verification & Recovery
+						81 text 0
+						82 text /
+						83 text 6
+					84 container
+						85 text START
+						86 text 控制流
+						87 text Workflow Start
+						88 text control:plane
+						89 text FR-75b955fe0e1a99fbbb8f
+					90 container
+						91 text P1.T1
+						92 text 智能体
+						93 text Lock Interfaces & Shared Schemas
+						94 text native-api
+						95 text FR-75b955fe0e1a99fbbb8f,NFR-68a355bd9a1aa462a58d
+					96 container
+						97 text P1.CKPT
+						98 text 检查点
+						99 text Phase 1 基线物理检查点
+						100 text control:plane
+						101 text FR-75b955fe0e1a99fbbb8f
+					102 container
+						103 text P2.T1
+						104 text 智能体
+						105 text 命令行入口
+						106 text native-api
+						107 text FR-75b955fe0e1a99fbbb8f
+					108 container
+						109 text P2.T2
+						110 text 智能体
+						111 text 流式计数逻辑
+						112 text native-api
+						113 text FR-75b955fe0e1a99fbbb8f,NFR-68a355bd9a1aa462a58d
+					114 container
+						115 text P2.D1
+						116 text 路由裁决
+						117 text Execution Profile Router
+						118 text control:plane
+						119 text FR-75b955fe0e1a99fbbb8f
+					120 container
+						121 text P2.STD
+						122 text 智能体
+						123 text Standard Integration & Docs
+						124 text native-api
+						125 text FR-75b955fe0e1a99fbbb8f
+					126 container
+						127 text P2.EXT
+						128 text 智能体
+						129 text Extended Contract & Stress Pass
+						130 text native-api
+						131 text NFR-68a355bd9a1aa462a58d
+					132 container
+						133 text P2.SEC
+						134 text 智能体
+						135 text Security & Guardrail Scan
+						136 text native-api
+						137 text FR-75b955fe0e1a99fbbb8f,NFR-68a355bd9a1aa462a58d
+					138 container
+						139 text P2.JOIN
+						140 text 控制流
+						141 text Phase 2 Join Barrier
+						142 text control:plane
+						143 text FR-75b955fe0e1a99fbbb8f,NFR-68a355bd9a1aa462a58d
+					144 container
+						145 text P2.CKPT
+						146 text 检查点
+						147 text Phase 2 集成物理检查点
+						148 text control:plane
+						149 text FR-75b955fe0e1a99fbbb8f,NFR-68a355bd9a1aa462a58d
+					150 container
+						151 text P3.GATE
+						152 text 工具
+						153 text Deterministic Shell Gate
+						154 text tool:shell
+						155 text AC-87b89be3d72b4d847e19,AC-04aeb19bcfcdea2c75f8
+					156 container
+						157 text P3.SC
+						158 text 工具
+						159 text Diff, AC & DDD Drift Check
+						160 text tool:shell
+						161 text AC-87b89be3d72b4d847e19,AC-04aeb19bcfcdea2c75f8
+					162 container
+						163 text P3.QA
+						164 text 智能体
+						165 text Independent QA Audit
+						166 text native-api
+						167 text AC-87b89be3d72b4d847e19,AC-04aeb19bcfcdea2c75f8
+					168 container
+						169 text P3.CKPT
+						170 text 检查点
+						171 text Physical Git Checkpoint
+						172 text control:plane
+						173 text AC-87b89be3d72b4d847e19
+					174 container
+						175 text P3.RST
+						176 text 回退恢复
+						177 text Bounded Rescue Rewind
+						178 text control:plane
+						179 text AC-87b89be3d72b4d847e19
+					180 container
+						181 text DONE
+						182 text 控制流
+						183 text Certified Release Complete
+						184 text control:plane
+						185 text AC-87b89be3d72b4d847e19,AC-04aeb19bcfcdea2c75f8
+				186 image
+				187 container Control Panel
+					188 button Zoom In
+						189 image
+					190 button (disabled) Zoom Out
+						191 image
+					192 button Fit View
+						193 image
+				194 image Mini Map
+				195 link Description: React Flow attribution, Value: reactflow.dev/?utm_source=attribution
+			196 text 双态节点配置器
+			197 button 由规格重生成
+			198 container
+				199 text P1.T1 任务
+			200 container
+				201 text 节点名称
+				202 text field (settable) 节点名称, Value: Lock Interfaces & Shared Schemas
+			203 container
+				204 text 执行者类型
+				205 pop up button (collapsed, settable) 执行者类型, Value: 智能体, Secondary Actions: Expand
+					206 menu
+						207 (selected) 智能体
+						208 工具
+						209 人工
+						210 控制流
+			211 container
+				212 text 绑定能力
+				213 pop up button (collapsed, settable) 绑定能力, Value: native-api, Secondary Actions: Expand
+					214 menu
+						215 claude-code · 已禁用
+						216 codex · 已禁用
+						217 control:plane
+						218 human:reviewer
+						219 kimi-acp · 已禁用
+						220 (selected) native-api
+						221 tool:shell
+			222 container
+				223 text 规划依据
+				224 text entry area (settable) 规划依据, Value: Defining shared contracts upfront prevents merge conflicts across PM-decomposed parallel tasks.
+			225 container
+				226 text 映射需求
+				227 text field (settable) 映射需求, Value: FR-75b955fe0e1a99fbbb8f, NFR-68a355bd9a1aa462a58d
+			228 container
+				229 text 输入契约
+				230 text field (settable) 输入契约, Value: Baseline Commit Anchor
+			231 container
+				232 text 输出契约
+				233 text field (settable) 输出契约, Value: Verified Shared Contracts
+			234 container
+				235 text 影响范围
+				236 text field (settable) 影响范围, Value: src/shared/**
+			237 container
+				238 text 验证命令
+				239 text field (settable) 验证命令
+			240 button 保存节点修改并分析影响
+			241 text 人工新增子任务节点
+			242 text field (settable) P2.CUSTOM
+			243 text field (settable)
+			244 button (disabled) 添加
+
+The focused UI element is 0 AXWebArea Workflow Orchestrator — Requirements-to-Execution Control Plane, URL: 127.0.0.1:4193/?apiBaseUrl=http%3A%2F%2F127.0.0.1%3A4193&token=REDACTED
