@@ -1,0 +1,3638 @@
+{
+  "caseId": "counter-v1",
+  "baseline": {
+    "schemaVersion": 1,
+    "id": "baseline-run-8d4b1432",
+    "projectId": "acceptance-counter",
+    "revision": 1,
+    "parentId": null,
+    "mode": "live",
+    "approvedPrd": {
+      "id": "prd-4775653e-6ade-43d2-8dfe-7832c2be6cd8",
+      "kind": "prd",
+      "revision": 1,
+      "hash": "6cf17bf67d6b550dae9254e6fb96144c80ae58f11bf776da01b19aaaf077f710"
+    },
+    "approval": {
+      "targetId": "proposal-fe8cd48d-10b5-471d-a37e-e76da146aa95",
+      "targetHash": "a29d764210765431d68dc1e7a4ed5e95e355fcebd8be90d1f1af908651149a43",
+      "actor": "验收脚本模拟审批人",
+      "action": "approve",
+      "feedback": "",
+      "scope": "local",
+      "issueIds": [],
+      "id": "int-81c9c8dd",
+      "gateKind": "approval",
+      "targetRevision": 1,
+      "decidedAt": "2026-11-24T06:59:28.346Z"
+    },
+    "confirmation": {
+      "targetId": "prd-4775653e-6ade-43d2-8dfe-7832c2be6cd8",
+      "targetHash": "6cf17bf67d6b550dae9254e6fb96144c80ae58f11bf776da01b19aaaf077f710",
+      "actor": "验收脚本模拟审批人",
+      "action": "confirm",
+      "feedback": "",
+      "scope": "local",
+      "issueIds": [],
+      "id": "int-61d5884b",
+      "gateKind": "confirmation",
+      "targetRevision": 1,
+      "decidedAt": "2026-11-24T06:59:28.396Z"
+    },
+    "prd": {
+      "title": "文本非空行统计工具",
+      "revision": 1,
+      "proposal": {
+        "id": "proposal-fe8cd48d-10b5-471d-a37e-e76da146aa95",
+        "kind": "proposal",
+        "revision": 1,
+        "hash": "a29d764210765431d68dc1e7a4ed5e95e355fcebd8be90d1f1af908651149a43"
+      },
+      "approvalId": "int-81c9c8dd",
+      "sections": {
+        "goals": [
+          "统计本地文本文件的非空行数"
+        ],
+        "summary": "[counter-v1] 文本非空行统计工具",
+        "approach": [
+          "文件按 UTF-8 解码；按换行读取；trim 后非空则计数"
+        ],
+        "scope": [
+          {
+            "key": "count",
+            "kind": "functional",
+            "title": "统计非空行",
+            "decision": "输入文本文件路径，输出非空行数，文件不存在时报告错误",
+            "issueIds": [
+              "issue-count"
+            ]
+          },
+          {
+            "key": "stream",
+            "kind": "nonfunctional",
+            "title": "流式内存限制",
+            "decision": "流式读取文本，峰值内存不超过 64 MiB",
+            "issueIds": [
+              "issue-stream"
+            ]
+          }
+        ],
+        "outOfScope": [
+          "未列出的扩展功能"
+        ],
+        "constraints": [
+          "提供命令行接口，不引入 Web 页面或数据库"
+        ],
+        "tradeoffs": [],
+        "risks": [],
+        "unresolved": [],
+        "businessRules": [
+          "文件按 UTF-8 解码；按换行读取；trim 后非空则计数"
+        ],
+        "externalDependencies": []
+      },
+      "background": "[counter-v1] 统计本地文本文件的非空行数",
+      "scenarios": [
+        "统计本地文本文件的非空行数"
+      ],
+      "requirements": [
+        {
+          "id": "FR-75b955fe0e1a99fbbb8f",
+          "scopeKey": "count",
+          "kind": "functional",
+          "title": "统计非空行",
+          "description": "输入文本文件路径，输出非空行数，文件不存在时报告错误",
+          "value": "为脚本提供可复核的统计结果",
+          "priority": "must",
+          "dependencies": [],
+          "constraints": [
+            "UTF-8 编码；trim 后长度为零的行不计数"
+          ],
+          "state": "baselined",
+          "acceptance": [
+            {
+              "id": "AC-87b89be3d72b4d847e19",
+              "given": "文件含两行文本、一行空行和一行仅空白字符",
+              "when": "运行非空行统计",
+              "then": "输出非空行数 2"
+            },
+            {
+              "id": "AC-04aeb19bcfcdea2c75f8",
+              "given": "存在一个空文件",
+              "when": "运行非空行统计",
+              "then": "输出非空行数 0"
+            },
+            {
+              "id": "AC-6f57220981ef5b582ae0",
+              "given": "文件路径不存在",
+              "when": "运行非空行统计",
+              "then": "报告文件不存在"
+            }
+          ]
+        },
+        {
+          "id": "NFR-68a355bd9a1aa462a58d",
+          "scopeKey": "stream",
+          "kind": "nonfunctional",
+          "title": "流式内存限制",
+          "description": "流式读取文本，峰值内存不超过 64 MiB",
+          "value": "避免大文件耗尽内存",
+          "priority": "should",
+          "dependencies": [
+            "FR-75b955fe0e1a99fbbb8f"
+          ],
+          "constraints": [
+            "禁止一次加载整个文件"
+          ],
+          "state": "baselined",
+          "acceptance": [
+            {
+              "id": "AC-331462af863cf21e8c92",
+              "given": "一个 1 GiB UTF-8 文本文件",
+              "when": "统计非空行并采集峰值内存",
+              "then": "结果正确且峰值内存不超过 64 MiB"
+            }
+          ]
+        }
+      ],
+      "changes": [
+        "初版草案"
+      ],
+      "trace": [
+        {
+          "issueIds": [
+            "issue-count"
+          ],
+          "ideaAndDocumentIds": [
+            "idea-1"
+          ],
+          "proposal": {
+            "id": "proposal-fe8cd48d-10b5-471d-a37e-e76da146aa95",
+            "kind": "proposal",
+            "revision": 1,
+            "hash": "a29d764210765431d68dc1e7a4ed5e95e355fcebd8be90d1f1af908651149a43"
+          },
+          "scopeKey": "count",
+          "approvalId": "int-81c9c8dd",
+          "requirementId": "FR-75b955fe0e1a99fbbb8f",
+          "acceptanceIds": [
+            "AC-87b89be3d72b4d847e19",
+            "AC-04aeb19bcfcdea2c75f8",
+            "AC-6f57220981ef5b582ae0"
+          ]
+        },
+        {
+          "issueIds": [
+            "issue-stream"
+          ],
+          "ideaAndDocumentIds": [
+            "idea-1"
+          ],
+          "proposal": {
+            "id": "proposal-fe8cd48d-10b5-471d-a37e-e76da146aa95",
+            "kind": "proposal",
+            "revision": 1,
+            "hash": "a29d764210765431d68dc1e7a4ed5e95e355fcebd8be90d1f1af908651149a43"
+          },
+          "scopeKey": "stream",
+          "approvalId": "int-81c9c8dd",
+          "requirementId": "NFR-68a355bd9a1aa462a58d",
+          "acceptanceIds": [
+            "AC-331462af863cf21e8c92"
+          ]
+        }
+      ]
+    },
+    "sha256": "1ac6e5d59f2d18b4cbb997c8b440158e2e5ebf7c6ed8cc5f5cb14e268fc12757"
+  },
+  "input": {
+    "designId": "design-d18a7274-6419-44ce-ae20-691ad28d35bc",
+    "revision": 1,
+    "state": "draft",
+    "stage": "input_ready",
+    "createdAt": "2026-11-24T06:59:29.107Z",
+    "contentSha256": "73a9c8c699fa4d11d254c2df1511f5d0f4f7079daad46fccf9f02827afd5b2d8",
+    "baselineRef": {
+      "id": "baseline-run-8d4b1432",
+      "projectId": "acceptance-counter",
+      "revision": 1,
+      "sha256": "1ac6e5d59f2d18b4cbb997c8b440158e2e5ebf7c6ed8cc5f5cb14e268fc12757",
+      "schemaVersion": 1,
+      "mode": "live"
+    },
+    "baseline": {
+      "schemaVersion": 1,
+      "id": "baseline-run-8d4b1432",
+      "projectId": "acceptance-counter",
+      "revision": 1,
+      "parentId": null,
+      "mode": "live",
+      "approvedPrd": {
+        "id": "prd-4775653e-6ade-43d2-8dfe-7832c2be6cd8",
+        "kind": "prd",
+        "revision": 1,
+        "hash": "6cf17bf67d6b550dae9254e6fb96144c80ae58f11bf776da01b19aaaf077f710"
+      },
+      "approval": {
+        "targetId": "proposal-fe8cd48d-10b5-471d-a37e-e76da146aa95",
+        "targetHash": "a29d764210765431d68dc1e7a4ed5e95e355fcebd8be90d1f1af908651149a43",
+        "actor": "验收脚本模拟审批人",
+        "action": "approve",
+        "feedback": "",
+        "scope": "local",
+        "issueIds": [],
+        "id": "int-81c9c8dd",
+        "gateKind": "approval",
+        "targetRevision": 1,
+        "decidedAt": "2026-11-24T06:59:28.346Z"
+      },
+      "confirmation": {
+        "targetId": "prd-4775653e-6ade-43d2-8dfe-7832c2be6cd8",
+        "targetHash": "6cf17bf67d6b550dae9254e6fb96144c80ae58f11bf776da01b19aaaf077f710",
+        "actor": "验收脚本模拟审批人",
+        "action": "confirm",
+        "feedback": "",
+        "scope": "local",
+        "issueIds": [],
+        "id": "int-61d5884b",
+        "gateKind": "confirmation",
+        "targetRevision": 1,
+        "decidedAt": "2026-11-24T06:59:28.396Z"
+      },
+      "prd": {
+        "title": "文本非空行统计工具",
+        "revision": 1,
+        "proposal": {
+          "id": "proposal-fe8cd48d-10b5-471d-a37e-e76da146aa95",
+          "kind": "proposal",
+          "revision": 1,
+          "hash": "a29d764210765431d68dc1e7a4ed5e95e355fcebd8be90d1f1af908651149a43"
+        },
+        "approvalId": "int-81c9c8dd",
+        "sections": {
+          "goals": [
+            "统计本地文本文件的非空行数"
+          ],
+          "summary": "[counter-v1] 文本非空行统计工具",
+          "approach": [
+            "文件按 UTF-8 解码；按换行读取；trim 后非空则计数"
+          ],
+          "scope": [
+            {
+              "key": "count",
+              "kind": "functional",
+              "title": "统计非空行",
+              "decision": "输入文本文件路径，输出非空行数，文件不存在时报告错误",
+              "issueIds": [
+                "issue-count"
+              ]
+            },
+            {
+              "key": "stream",
+              "kind": "nonfunctional",
+              "title": "流式内存限制",
+              "decision": "流式读取文本，峰值内存不超过 64 MiB",
+              "issueIds": [
+                "issue-stream"
+              ]
+            }
+          ],
+          "outOfScope": [
+            "未列出的扩展功能"
+          ],
+          "constraints": [
+            "提供命令行接口，不引入 Web 页面或数据库"
+          ],
+          "tradeoffs": [],
+          "risks": [],
+          "unresolved": [],
+          "businessRules": [
+            "文件按 UTF-8 解码；按换行读取；trim 后非空则计数"
+          ],
+          "externalDependencies": []
+        },
+        "background": "[counter-v1] 统计本地文本文件的非空行数",
+        "scenarios": [
+          "统计本地文本文件的非空行数"
+        ],
+        "requirements": [
+          {
+            "id": "FR-75b955fe0e1a99fbbb8f",
+            "scopeKey": "count",
+            "kind": "functional",
+            "title": "统计非空行",
+            "description": "输入文本文件路径，输出非空行数，文件不存在时报告错误",
+            "value": "为脚本提供可复核的统计结果",
+            "priority": "must",
+            "dependencies": [],
+            "constraints": [
+              "UTF-8 编码；trim 后长度为零的行不计数"
+            ],
+            "state": "baselined",
+            "acceptance": [
+              {
+                "id": "AC-87b89be3d72b4d847e19",
+                "given": "文件含两行文本、一行空行和一行仅空白字符",
+                "when": "运行非空行统计",
+                "then": "输出非空行数 2"
+              },
+              {
+                "id": "AC-04aeb19bcfcdea2c75f8",
+                "given": "存在一个空文件",
+                "when": "运行非空行统计",
+                "then": "输出非空行数 0"
+              },
+              {
+                "id": "AC-6f57220981ef5b582ae0",
+                "given": "文件路径不存在",
+                "when": "运行非空行统计",
+                "then": "报告文件不存在"
+              }
+            ]
+          },
+          {
+            "id": "NFR-68a355bd9a1aa462a58d",
+            "scopeKey": "stream",
+            "kind": "nonfunctional",
+            "title": "流式内存限制",
+            "description": "流式读取文本，峰值内存不超过 64 MiB",
+            "value": "避免大文件耗尽内存",
+            "priority": "should",
+            "dependencies": [
+              "FR-75b955fe0e1a99fbbb8f"
+            ],
+            "constraints": [
+              "禁止一次加载整个文件"
+            ],
+            "state": "baselined",
+            "acceptance": [
+              {
+                "id": "AC-331462af863cf21e8c92",
+                "given": "一个 1 GiB UTF-8 文本文件",
+                "when": "统计非空行并采集峰值内存",
+                "then": "结果正确且峰值内存不超过 64 MiB"
+              }
+            ]
+          }
+        ],
+        "changes": [
+          "初版草案"
+        ],
+        "trace": [
+          {
+            "issueIds": [
+              "issue-count"
+            ],
+            "ideaAndDocumentIds": [
+              "idea-1"
+            ],
+            "proposal": {
+              "id": "proposal-fe8cd48d-10b5-471d-a37e-e76da146aa95",
+              "kind": "proposal",
+              "revision": 1,
+              "hash": "a29d764210765431d68dc1e7a4ed5e95e355fcebd8be90d1f1af908651149a43"
+            },
+            "scopeKey": "count",
+            "approvalId": "int-81c9c8dd",
+            "requirementId": "FR-75b955fe0e1a99fbbb8f",
+            "acceptanceIds": [
+              "AC-87b89be3d72b4d847e19",
+              "AC-04aeb19bcfcdea2c75f8",
+              "AC-6f57220981ef5b582ae0"
+            ]
+          },
+          {
+            "issueIds": [
+              "issue-stream"
+            ],
+            "ideaAndDocumentIds": [
+              "idea-1"
+            ],
+            "proposal": {
+              "id": "proposal-fe8cd48d-10b5-471d-a37e-e76da146aa95",
+              "kind": "proposal",
+              "revision": 1,
+              "hash": "a29d764210765431d68dc1e7a4ed5e95e355fcebd8be90d1f1af908651149a43"
+            },
+            "scopeKey": "stream",
+            "approvalId": "int-81c9c8dd",
+            "requirementId": "NFR-68a355bd9a1aa462a58d",
+            "acceptanceIds": [
+              "AC-331462af863cf21e8c92"
+            ]
+          }
+        ]
+      },
+      "sha256": "1ac6e5d59f2d18b4cbb997c8b440158e2e5ebf7c6ed8cc5f5cb14e268fc12757"
+    },
+    "workspace": {
+      "workspaceId": "ws-88011696",
+      "name": "文本非空行统计工具",
+      "sourceCommit": "4ee2cce7f1b53fc0004d1dd322c3533ea4bd1fae",
+      "existingPaths": [
+        "README.md"
+      ],
+      "entryPoints": [],
+      "manifests": [],
+      "dependencies": [],
+      "testCommands": [
+        {
+          "directory": ".",
+          "command": "node --test",
+          "source": "workspace.verifyCommand（配置值，尚未执行）"
+        }
+      ],
+      "proposedPaths": [],
+      "notes": [
+        "清单及依赖取自目标提交，未提交或未跟踪文件不计入该版本。",
+        "输入阶段尚未推导拟新增路径；生成后的拟建工件见设计正文 modules.files 中 action=create 的条目。"
+      ]
+    },
+    "reviewEligible": true,
+    "blockers": []
+  },
+  "generation": {
+    "generationId": "generation-693d7b96-4710-41ad-a77c-64ceec8e1429",
+    "designId": "design-d18a7274-6419-44ce-ae20-691ad28d35bc",
+    "revision": 1,
+    "createdAt": "2026-11-24T06:59:29.111Z",
+    "input": {
+      "designId": "design-d18a7274-6419-44ce-ae20-691ad28d35bc",
+      "revision": 1,
+      "state": "draft",
+      "stage": "input_ready",
+      "createdAt": "2026-11-24T06:59:29.107Z",
+      "contentSha256": "73a9c8c699fa4d11d254c2df1511f5d0f4f7079daad46fccf9f02827afd5b2d8",
+      "baselineRef": {
+        "id": "baseline-run-8d4b1432",
+        "projectId": "acceptance-counter",
+        "revision": 1,
+        "sha256": "1ac6e5d59f2d18b4cbb997c8b440158e2e5ebf7c6ed8cc5f5cb14e268fc12757",
+        "schemaVersion": 1,
+        "mode": "live"
+      },
+      "baseline": {
+        "schemaVersion": 1,
+        "id": "baseline-run-8d4b1432",
+        "projectId": "acceptance-counter",
+        "revision": 1,
+        "parentId": null,
+        "mode": "live",
+        "approvedPrd": {
+          "id": "prd-4775653e-6ade-43d2-8dfe-7832c2be6cd8",
+          "kind": "prd",
+          "revision": 1,
+          "hash": "6cf17bf67d6b550dae9254e6fb96144c80ae58f11bf776da01b19aaaf077f710"
+        },
+        "approval": {
+          "targetId": "proposal-fe8cd48d-10b5-471d-a37e-e76da146aa95",
+          "targetHash": "a29d764210765431d68dc1e7a4ed5e95e355fcebd8be90d1f1af908651149a43",
+          "actor": "验收脚本模拟审批人",
+          "action": "approve",
+          "feedback": "",
+          "scope": "local",
+          "issueIds": [],
+          "id": "int-81c9c8dd",
+          "gateKind": "approval",
+          "targetRevision": 1,
+          "decidedAt": "2026-11-24T06:59:28.346Z"
+        },
+        "confirmation": {
+          "targetId": "prd-4775653e-6ade-43d2-8dfe-7832c2be6cd8",
+          "targetHash": "6cf17bf67d6b550dae9254e6fb96144c80ae58f11bf776da01b19aaaf077f710",
+          "actor": "验收脚本模拟审批人",
+          "action": "confirm",
+          "feedback": "",
+          "scope": "local",
+          "issueIds": [],
+          "id": "int-61d5884b",
+          "gateKind": "confirmation",
+          "targetRevision": 1,
+          "decidedAt": "2026-11-24T06:59:28.396Z"
+        },
+        "prd": {
+          "title": "文本非空行统计工具",
+          "revision": 1,
+          "proposal": {
+            "id": "proposal-fe8cd48d-10b5-471d-a37e-e76da146aa95",
+            "kind": "proposal",
+            "revision": 1,
+            "hash": "a29d764210765431d68dc1e7a4ed5e95e355fcebd8be90d1f1af908651149a43"
+          },
+          "approvalId": "int-81c9c8dd",
+          "sections": {
+            "goals": [
+              "统计本地文本文件的非空行数"
+            ],
+            "summary": "[counter-v1] 文本非空行统计工具",
+            "approach": [
+              "文件按 UTF-8 解码；按换行读取；trim 后非空则计数"
+            ],
+            "scope": [
+              {
+                "key": "count",
+                "kind": "functional",
+                "title": "统计非空行",
+                "decision": "输入文本文件路径，输出非空行数，文件不存在时报告错误",
+                "issueIds": [
+                  "issue-count"
+                ]
+              },
+              {
+                "key": "stream",
+                "kind": "nonfunctional",
+                "title": "流式内存限制",
+                "decision": "流式读取文本，峰值内存不超过 64 MiB",
+                "issueIds": [
+                  "issue-stream"
+                ]
+              }
+            ],
+            "outOfScope": [
+              "未列出的扩展功能"
+            ],
+            "constraints": [
+              "提供命令行接口，不引入 Web 页面或数据库"
+            ],
+            "tradeoffs": [],
+            "risks": [],
+            "unresolved": [],
+            "businessRules": [
+              "文件按 UTF-8 解码；按换行读取；trim 后非空则计数"
+            ],
+            "externalDependencies": []
+          },
+          "background": "[counter-v1] 统计本地文本文件的非空行数",
+          "scenarios": [
+            "统计本地文本文件的非空行数"
+          ],
+          "requirements": [
+            {
+              "id": "FR-75b955fe0e1a99fbbb8f",
+              "scopeKey": "count",
+              "kind": "functional",
+              "title": "统计非空行",
+              "description": "输入文本文件路径，输出非空行数，文件不存在时报告错误",
+              "value": "为脚本提供可复核的统计结果",
+              "priority": "must",
+              "dependencies": [],
+              "constraints": [
+                "UTF-8 编码；trim 后长度为零的行不计数"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-87b89be3d72b4d847e19",
+                  "given": "文件含两行文本、一行空行和一行仅空白字符",
+                  "when": "运行非空行统计",
+                  "then": "输出非空行数 2"
+                },
+                {
+                  "id": "AC-04aeb19bcfcdea2c75f8",
+                  "given": "存在一个空文件",
+                  "when": "运行非空行统计",
+                  "then": "输出非空行数 0"
+                },
+                {
+                  "id": "AC-6f57220981ef5b582ae0",
+                  "given": "文件路径不存在",
+                  "when": "运行非空行统计",
+                  "then": "报告文件不存在"
+                }
+              ]
+            },
+            {
+              "id": "NFR-68a355bd9a1aa462a58d",
+              "scopeKey": "stream",
+              "kind": "nonfunctional",
+              "title": "流式内存限制",
+              "description": "流式读取文本，峰值内存不超过 64 MiB",
+              "value": "避免大文件耗尽内存",
+              "priority": "should",
+              "dependencies": [
+                "FR-75b955fe0e1a99fbbb8f"
+              ],
+              "constraints": [
+                "禁止一次加载整个文件"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-331462af863cf21e8c92",
+                  "given": "一个 1 GiB UTF-8 文本文件",
+                  "when": "统计非空行并采集峰值内存",
+                  "then": "结果正确且峰值内存不超过 64 MiB"
+                }
+              ]
+            }
+          ],
+          "changes": [
+            "初版草案"
+          ],
+          "trace": [
+            {
+              "issueIds": [
+                "issue-count"
+              ],
+              "ideaAndDocumentIds": [
+                "idea-1"
+              ],
+              "proposal": {
+                "id": "proposal-fe8cd48d-10b5-471d-a37e-e76da146aa95",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "a29d764210765431d68dc1e7a4ed5e95e355fcebd8be90d1f1af908651149a43"
+              },
+              "scopeKey": "count",
+              "approvalId": "int-81c9c8dd",
+              "requirementId": "FR-75b955fe0e1a99fbbb8f",
+              "acceptanceIds": [
+                "AC-87b89be3d72b4d847e19",
+                "AC-04aeb19bcfcdea2c75f8",
+                "AC-6f57220981ef5b582ae0"
+              ]
+            },
+            {
+              "issueIds": [
+                "issue-stream"
+              ],
+              "ideaAndDocumentIds": [
+                "idea-1"
+              ],
+              "proposal": {
+                "id": "proposal-fe8cd48d-10b5-471d-a37e-e76da146aa95",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "a29d764210765431d68dc1e7a4ed5e95e355fcebd8be90d1f1af908651149a43"
+              },
+              "scopeKey": "stream",
+              "approvalId": "int-81c9c8dd",
+              "requirementId": "NFR-68a355bd9a1aa462a58d",
+              "acceptanceIds": [
+                "AC-331462af863cf21e8c92"
+              ]
+            }
+          ]
+        },
+        "sha256": "1ac6e5d59f2d18b4cbb997c8b440158e2e5ebf7c6ed8cc5f5cb14e268fc12757"
+      },
+      "workspace": {
+        "workspaceId": "ws-88011696",
+        "name": "文本非空行统计工具",
+        "sourceCommit": "4ee2cce7f1b53fc0004d1dd322c3533ea4bd1fae",
+        "existingPaths": [
+          "README.md"
+        ],
+        "entryPoints": [],
+        "manifests": [],
+        "dependencies": [],
+        "testCommands": [
+          {
+            "directory": ".",
+            "command": "node --test",
+            "source": "workspace.verifyCommand（配置值，尚未执行）"
+          }
+        ],
+        "proposedPaths": [],
+        "notes": [
+          "清单及依赖取自目标提交，未提交或未跟踪文件不计入该版本。",
+          "输入阶段尚未推导拟新增路径；生成后的拟建工件见设计正文 modules.files 中 action=create 的条目。"
+        ]
+      },
+      "reviewEligible": true,
+      "blockers": []
+    },
+    "request": {
+      "expectedHash": "73a9c8c699fa4d11d254c2df1511f5d0f4f7079daad46fccf9f02827afd5b2d8",
+      "providerId": "openai",
+      "model": "acceptance-fixture",
+      "feedback": "按本项目原始需求推导具体契约，保留未知项和来源"
+    },
+    "status": "ready",
+    "body": {
+      "schemaVersion": 1,
+      "title": "文本非空行统计工具软件设计",
+      "goal": "统计本地文本文件的非空行数",
+      "inputs": [
+        "UTF-8 文件路径参数"
+      ],
+      "outputs": [
+        "stdout 非空行数或 stderr 错误"
+      ],
+      "modules": [
+        {
+          "id": "entry",
+          "name": "命令行入口",
+          "layer": "integration",
+          "responsibility": "接收文件路径，调用计数函数，成功向 stdout 输出整数和换行；失败向 stderr 输出错误并非零退出",
+          "inputs": [
+            "UTF-8 文件路径参数"
+          ],
+          "outputs": [
+            "stdout 非空行数或 stderr 错误"
+          ],
+          "requirementIds": [
+            "FR-75b955fe0e1a99fbbb8f"
+          ],
+          "dependsOn": [
+            "core"
+          ],
+          "files": [
+            {
+              "path": "src/cli.ts",
+              "action": "create"
+            }
+          ]
+        },
+        {
+          "id": "core",
+          "name": "流式计数逻辑",
+          "layer": "backend",
+          "responsibility": "以流方式按 UTF-8 逐行读取；使用 trim 后长度判断空白行；累计非空行数，不保留完整文件",
+          "inputs": [
+            "文件路径"
+          ],
+          "outputs": [
+            "Promise<number> 非负行数"
+          ],
+          "requirementIds": [
+            "FR-75b955fe0e1a99fbbb8f",
+            "NFR-68a355bd9a1aa462a58d"
+          ],
+          "dependsOn": [],
+          "files": [
+            {
+              "path": "src/count.ts",
+              "action": "create"
+            }
+          ]
+        }
+      ],
+      "interfaces": [
+        {
+          "id": "operation",
+          "provider": "core",
+          "consumers": [
+            "entry"
+          ],
+          "kind": "function",
+          "input": "countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件",
+          "result": "返回非负整数；CLI 将其写入 stdout 并追加换行",
+          "failure": "文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数",
+          "sideEffects": "只读取指定文件，不修改输入文件"
+        }
+      ],
+      "dataRules": [
+        "文件按 UTF-8 解码；按换行读取；trim 后非空则计数",
+        "逐行解码和计数；trim 后为空的行不计数；文件句柄在结束或失败时关闭"
+      ],
+      "constraints": [
+        "提供命令行接口，不引入 Web 页面或数据库",
+        "UTF-8 编码；trim 后长度为零的行不计数",
+        "禁止一次加载整个文件"
+      ],
+      "quality": [
+        {
+          "requirementId": "NFR-68a355bd9a1aa462a58d",
+          "moduleIds": [
+            "core"
+          ],
+          "method": "准备：一个 1 GiB UTF-8 文本文件；执行：统计非空行并采集峰值内存；记录可观察结果",
+          "passCondition": "结果正确且峰值内存不超过 64 MiB"
+        }
+      ],
+      "decisions": [
+        {
+          "id": "module-boundary",
+          "decision": "将 CLI 格式化和流式文件计数分开",
+          "rationale": "明确实现职责、跨模块契约和验证入口",
+          "alternatives": [
+            "把所有职责放在单个入口中"
+          ],
+          "requirementIds": [
+            "FR-75b955fe0e1a99fbbb8f",
+            "NFR-68a355bd9a1aa462a58d"
+          ],
+          "evidence": [
+            "FR-75b955fe0e1a99fbbb8f",
+            "NFR-68a355bd9a1aa462a58d"
+          ]
+        }
+      ],
+      "assumptions": [],
+      "trace": [
+        {
+          "requirementId": "FR-75b955fe0e1a99fbbb8f",
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-87b89be3d72b4d847e19",
+              "method": "准备夹具：文件含两行文本、一行空行和一行仅空白字符；运行非空行统计；断言：输出非空行数 2",
+              "expectedEvidence": "输出非空行数 2"
+            },
+            {
+              "acceptanceId": "AC-04aeb19bcfcdea2c75f8",
+              "method": "准备夹具：存在一个空文件；运行非空行统计；断言：输出非空行数 0",
+              "expectedEvidence": "输出非空行数 0"
+            },
+            {
+              "acceptanceId": "AC-6f57220981ef5b582ae0",
+              "method": "准备夹具：文件路径不存在；运行非空行统计；断言：报告文件不存在",
+              "expectedEvidence": "报告文件不存在"
+            }
+          ]
+        },
+        {
+          "requirementId": "NFR-68a355bd9a1aa462a58d",
+          "moduleIds": [
+            "core"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-331462af863cf21e8c92",
+              "method": "准备夹具：一个 1 GiB UTF-8 文本文件；统计非空行并采集峰值内存；断言：结果正确且峰值内存不超过 64 MiB",
+              "expectedEvidence": "结果正确且峰值内存不超过 64 MiB"
+            }
+          ]
+        }
+      ],
+      "unresolved": [
+        {
+          "id": "other-io-codes",
+          "question": "除文件不存在外的读取错误使用哪个具体非零退出码？该细分值后续确认，当前保证失败为非零退出。",
+          "owner": "接口负责人",
+          "requirementIds": [
+            "FR-75b955fe0e1a99fbbb8f"
+          ],
+          "blocking": false
+        }
+      ],
+      "designChecks": [
+        {
+          "id": "DC-operation-failure",
+          "source": {
+            "kind": "interface",
+            "id": "operation"
+          },
+          "rationale": "核对设计新增的跨模块失败契约",
+          "requirementIds": [
+            "FR-75b955fe0e1a99fbbb8f"
+          ],
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "method": "向入口注入失败并核对调用方可见行为：文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数",
+          "expectedEvidence": "文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数"
+        }
+      ]
+    },
+    "contentSha256": "f6065ea5947ac17a58503c1865415e7e0f6b2df49d66d59c84d361c75affeebe",
+    "reviewMarkdown": "# 文本非空行统计工具软件设计\n\n## 目标\n统计本地文本文件的非空行数\n\n## 输入\n- UTF-8 文件路径参数\n\n## 输出\n- stdout 非空行数或 stderr 错误\n\n## 需求\n- FR-01 [FR-75b955fe0e1a99fbbb8f] 输入文本文件路径，输出非空行数，文件不存在时报告错误 优先级 must\n- FR-02 [NFR-68a355bd9a1aa462a58d] 流式读取文本，峰值内存不超过 64 MiB 优先级 should\n\n## 模块\n- 命令行入口: 接收文件路径，调用计数函数，成功向 stdout 输出整数和换行；失败向 stderr 输出错误并非零退出；依赖 core；接口 operation: countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件 → 返回非负整数；CLI 将其写入 stdout 并追加换行；失败 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；覆盖 FR-01 (`src/cli.ts`)\n- 流式计数逻辑: 以流方式按 UTF-8 逐行读取；使用 trim 后长度判断空白行；累计非空行数，不保留完整文件；依赖 无；接口 operation: countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件 → 返回非负整数；CLI 将其写入 stdout 并追加换行；失败 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；覆盖 FR-01, FR-02 (`src/count.ts`)\n\n## 约束\n- 提供命令行接口，不引入 Web 页面或数据库\n- FR-75b955fe0e1a99fbbb8f: UTF-8 编码；trim 后长度为零的行不计数\n- NFR-68a355bd9a1aa462a58d: 禁止一次加载整个文件\n- 提供命令行接口，不引入 Web 页面或数据库\n- UTF-8 编码；trim 后长度为零的行不计数\n- 禁止一次加载整个文件\n\n## 领域规则\n- 文件按 UTF-8 解码；按换行读取；trim 后非空则计数\n- 文件按 UTF-8 解码；按换行读取；trim 后非空则计数\n- 逐行解码和计数；trim 后为空的行不计数；文件句柄在结束或失败时关闭\n\n## 验收\n- AC-01 FR-01 [AC-87b89be3d72b4d847e19] Given 文件含两行文本、一行空行和一行仅空白字符; When 运行非空行统计; Then 输出非空行数 2; 验证 准备夹具：文件含两行文本、一行空行和一行仅空白字符；运行非空行统计；断言：输出非空行数 2; 证据 输出非空行数 2\n- AC-02 FR-01 [AC-04aeb19bcfcdea2c75f8] Given 存在一个空文件; When 运行非空行统计; Then 输出非空行数 0; 验证 准备夹具：存在一个空文件；运行非空行统计；断言：输出非空行数 0; 证据 输出非空行数 0\n- AC-03 FR-01 [AC-6f57220981ef5b582ae0] Given 文件路径不存在; When 运行非空行统计; Then 报告文件不存在; 验证 准备夹具：文件路径不存在；运行非空行统计；断言：报告文件不存在; 证据 报告文件不存在\n- AC-04 FR-02 [AC-331462af863cf21e8c92] Given 一个 1 GiB UTF-8 文本文件; When 统计非空行并采集峰值内存; Then 结果正确且峰值内存不超过 64 MiB; 验证 准备夹具：一个 1 GiB UTF-8 文本文件；统计非空行并采集峰值内存；断言：结果正确且峰值内存不超过 64 MiB; 证据 结果正确且峰值内存不超过 64 MiB\n\n## 假设\n\n\n\n## 来源记录\n- 基线 baseline-run-8d4b1432 / acceptance-counter / v1 / 1ac6e5d59f2d18b4cbb997c8b440158e2e5ebf7c6ed8cc5f5cb14e268fc12757\n- 目标 ws-88011696 / 4ee2cce7f1b53fc0004d1dd322c3533ea4bd1fae\n- 范围外 未列出的扩展功能\n\n## modules\n\n```json\n[\n  {\n    \"id\": \"entry\",\n    \"name\": \"命令行入口\",\n    \"layer\": \"integration\",\n    \"responsibility\": \"接收文件路径，调用计数函数，成功向 stdout 输出整数和换行；失败向 stderr 输出错误并非零退出\",\n    \"inputs\": [\n      \"UTF-8 文件路径参数\"\n    ],\n    \"outputs\": [\n      \"stdout 非空行数或 stderr 错误\"\n    ],\n    \"requirementIds\": [\n      \"FR-75b955fe0e1a99fbbb8f\"\n    ],\n    \"dependsOn\": [\n      \"core\"\n    ],\n    \"files\": [\n      {\n        \"path\": \"src/cli.ts\",\n        \"action\": \"create\"\n      }\n    ]\n  },\n  {\n    \"id\": \"core\",\n    \"name\": \"流式计数逻辑\",\n    \"layer\": \"backend\",\n    \"responsibility\": \"以流方式按 UTF-8 逐行读取；使用 trim 后长度判断空白行；累计非空行数，不保留完整文件\",\n    \"inputs\": [\n      \"文件路径\"\n    ],\n    \"outputs\": [\n      \"Promise<number> 非负行数\"\n    ],\n    \"requirementIds\": [\n      \"FR-75b955fe0e1a99fbbb8f\",\n      \"NFR-68a355bd9a1aa462a58d\"\n    ],\n    \"dependsOn\": [],\n    \"files\": [\n      {\n        \"path\": \"src/count.ts\",\n        \"action\": \"create\"\n      }\n    ]\n  }\n]\n```\n\n## interfaces\n\n```json\n[\n  {\n    \"id\": \"operation\",\n    \"provider\": \"core\",\n    \"consumers\": [\n      \"entry\"\n    ],\n    \"kind\": \"function\",\n    \"input\": \"countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件\",\n    \"result\": \"返回非负整数；CLI 将其写入 stdout 并追加换行\",\n    \"failure\": \"文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数\",\n    \"sideEffects\": \"只读取指定文件，不修改输入文件\"\n  }\n]\n```\n\n## quality\n\n```json\n[\n  {\n    \"requirementId\": \"NFR-68a355bd9a1aa462a58d\",\n    \"moduleIds\": [\n      \"core\"\n    ],\n    \"method\": \"准备：一个 1 GiB UTF-8 文本文件；执行：统计非空行并采集峰值内存；记录可观察结果\",\n    \"passCondition\": \"结果正确且峰值内存不超过 64 MiB\"\n  }\n]\n```\n\n## decisions\n\n```json\n[\n  {\n    \"id\": \"module-boundary\",\n    \"decision\": \"将 CLI 格式化和流式文件计数分开\",\n    \"rationale\": \"明确实现职责、跨模块契约和验证入口\",\n    \"alternatives\": [\n      \"把所有职责放在单个入口中\"\n    ],\n    \"requirementIds\": [\n      \"FR-75b955fe0e1a99fbbb8f\",\n      \"NFR-68a355bd9a1aa462a58d\"\n    ],\n    \"evidence\": [\n      \"FR-75b955fe0e1a99fbbb8f\",\n      \"NFR-68a355bd9a1aa462a58d\"\n    ]\n  }\n]\n```\n\n## assumptions\n\n```json\n[]\n```\n\n## trace\n\n```json\n[\n  {\n    \"requirementId\": \"FR-75b955fe0e1a99fbbb8f\",\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-87b89be3d72b4d847e19\",\n        \"method\": \"准备夹具：文件含两行文本、一行空行和一行仅空白字符；运行非空行统计；断言：输出非空行数 2\",\n        \"expectedEvidence\": \"输出非空行数 2\"\n      },\n      {\n        \"acceptanceId\": \"AC-04aeb19bcfcdea2c75f8\",\n        \"method\": \"准备夹具：存在一个空文件；运行非空行统计；断言：输出非空行数 0\",\n        \"expectedEvidence\": \"输出非空行数 0\"\n      },\n      {\n        \"acceptanceId\": \"AC-6f57220981ef5b582ae0\",\n        \"method\": \"准备夹具：文件路径不存在；运行非空行统计；断言：报告文件不存在\",\n        \"expectedEvidence\": \"报告文件不存在\"\n      }\n    ]\n  },\n  {\n    \"requirementId\": \"NFR-68a355bd9a1aa462a58d\",\n    \"moduleIds\": [\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-331462af863cf21e8c92\",\n        \"method\": \"准备夹具：一个 1 GiB UTF-8 文本文件；统计非空行并采集峰值内存；断言：结果正确且峰值内存不超过 64 MiB\",\n        \"expectedEvidence\": \"结果正确且峰值内存不超过 64 MiB\"\n      }\n    ]\n  }\n]\n```\n\n## unresolved\n\n```json\n[\n  {\n    \"id\": \"other-io-codes\",\n    \"question\": \"除文件不存在外的读取错误使用哪个具体非零退出码？该细分值后续确认，当前保证失败为非零退出。\",\n    \"owner\": \"接口负责人\",\n    \"requirementIds\": [\n      \"FR-75b955fe0e1a99fbbb8f\"\n    ],\n    \"blocking\": false\n  }\n]\n```\n\n## 设计补充检查（独立于 HAMA 原始 AC）\n\n```json\n[\n  {\n    \"id\": \"DC-operation-failure\",\n    \"source\": {\n      \"kind\": \"interface\",\n      \"id\": \"operation\"\n    },\n    \"rationale\": \"核对设计新增的跨模块失败契约\",\n    \"requirementIds\": [\n      \"FR-75b955fe0e1a99fbbb8f\"\n    ],\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"method\": \"向入口注入失败并核对调用方可见行为：文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数\",\n    \"expectedEvidence\": \"文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数\"\n  }\n]\n```",
+    "pmMarkdown": "# 文本非空行统计工具软件设计\n\n## 目标\n统计本地文本文件的非空行数\n\n## 输入\n- UTF-8 文件路径参数\n\n## 输出\n- stdout 非空行数或 stderr 错误\n\n## 需求\n- FR-01 [FR-75b955fe0e1a99fbbb8f] 输入文本文件路径，输出非空行数，文件不存在时报告错误 优先级 must\n- FR-02 [NFR-68a355bd9a1aa462a58d] 流式读取文本，峰值内存不超过 64 MiB 优先级 should\n\n## 模块\n- 命令行入口: 接收文件路径，调用计数函数，成功向 stdout 输出整数和换行；失败向 stderr 输出错误并非零退出；依赖 core；接口 operation: countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件 → 返回非负整数；CLI 将其写入 stdout 并追加换行；失败 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；覆盖 FR-01 (`src/cli.ts`)\n- 流式计数逻辑: 以流方式按 UTF-8 逐行读取；使用 trim 后长度判断空白行；累计非空行数，不保留完整文件；依赖 无；接口 operation: countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件 → 返回非负整数；CLI 将其写入 stdout 并追加换行；失败 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；覆盖 FR-01, FR-02 (`src/count.ts`)\n\n## 约束\n- 提供命令行接口，不引入 Web 页面或数据库\n- FR-75b955fe0e1a99fbbb8f: UTF-8 编码；trim 后长度为零的行不计数\n- NFR-68a355bd9a1aa462a58d: 禁止一次加载整个文件\n- 提供命令行接口，不引入 Web 页面或数据库\n- UTF-8 编码；trim 后长度为零的行不计数\n- 禁止一次加载整个文件\n\n## 领域规则\n- 文件按 UTF-8 解码；按换行读取；trim 后非空则计数\n- 文件按 UTF-8 解码；按换行读取；trim 后非空则计数\n- 逐行解码和计数；trim 后为空的行不计数；文件句柄在结束或失败时关闭\n\n## 验收\n- AC-01 FR-01 [AC-87b89be3d72b4d847e19] Given 文件含两行文本、一行空行和一行仅空白字符; When 运行非空行统计; Then 输出非空行数 2; 验证 准备夹具：文件含两行文本、一行空行和一行仅空白字符；运行非空行统计；断言：输出非空行数 2; 证据 输出非空行数 2\n- AC-02 FR-01 [AC-04aeb19bcfcdea2c75f8] Given 存在一个空文件; When 运行非空行统计; Then 输出非空行数 0; 验证 准备夹具：存在一个空文件；运行非空行统计；断言：输出非空行数 0; 证据 输出非空行数 0\n- AC-03 FR-01 [AC-6f57220981ef5b582ae0] Given 文件路径不存在; When 运行非空行统计; Then 报告文件不存在; 验证 准备夹具：文件路径不存在；运行非空行统计；断言：报告文件不存在; 证据 报告文件不存在\n- AC-04 FR-02 [AC-331462af863cf21e8c92] Given 一个 1 GiB UTF-8 文本文件; When 统计非空行并采集峰值内存; Then 结果正确且峰值内存不超过 64 MiB; 验证 准备夹具：一个 1 GiB UTF-8 文本文件；统计非空行并采集峰值内存；断言：结果正确且峰值内存不超过 64 MiB; 证据 结果正确且峰值内存不超过 64 MiB\n\n## 假设\n\n",
+    "diagnostics": [],
+    "reviewEligible": true
+  },
+  "draft": {
+    "designId": "design-d18a7274-6419-44ce-ae20-691ad28d35bc",
+    "revision": 1,
+    "parentRevision": null,
+    "state": "draft",
+    "schemaVersion": 1,
+    "input": {
+      "designId": "design-d18a7274-6419-44ce-ae20-691ad28d35bc",
+      "revision": 1,
+      "state": "draft",
+      "stage": "input_ready",
+      "createdAt": "2026-11-24T06:59:29.107Z",
+      "contentSha256": "73a9c8c699fa4d11d254c2df1511f5d0f4f7079daad46fccf9f02827afd5b2d8",
+      "baselineRef": {
+        "id": "baseline-run-8d4b1432",
+        "projectId": "acceptance-counter",
+        "revision": 1,
+        "sha256": "1ac6e5d59f2d18b4cbb997c8b440158e2e5ebf7c6ed8cc5f5cb14e268fc12757",
+        "schemaVersion": 1,
+        "mode": "live"
+      },
+      "baseline": {
+        "schemaVersion": 1,
+        "id": "baseline-run-8d4b1432",
+        "projectId": "acceptance-counter",
+        "revision": 1,
+        "parentId": null,
+        "mode": "live",
+        "approvedPrd": {
+          "id": "prd-4775653e-6ade-43d2-8dfe-7832c2be6cd8",
+          "kind": "prd",
+          "revision": 1,
+          "hash": "6cf17bf67d6b550dae9254e6fb96144c80ae58f11bf776da01b19aaaf077f710"
+        },
+        "approval": {
+          "targetId": "proposal-fe8cd48d-10b5-471d-a37e-e76da146aa95",
+          "targetHash": "a29d764210765431d68dc1e7a4ed5e95e355fcebd8be90d1f1af908651149a43",
+          "actor": "验收脚本模拟审批人",
+          "action": "approve",
+          "feedback": "",
+          "scope": "local",
+          "issueIds": [],
+          "id": "int-81c9c8dd",
+          "gateKind": "approval",
+          "targetRevision": 1,
+          "decidedAt": "2026-11-24T06:59:28.346Z"
+        },
+        "confirmation": {
+          "targetId": "prd-4775653e-6ade-43d2-8dfe-7832c2be6cd8",
+          "targetHash": "6cf17bf67d6b550dae9254e6fb96144c80ae58f11bf776da01b19aaaf077f710",
+          "actor": "验收脚本模拟审批人",
+          "action": "confirm",
+          "feedback": "",
+          "scope": "local",
+          "issueIds": [],
+          "id": "int-61d5884b",
+          "gateKind": "confirmation",
+          "targetRevision": 1,
+          "decidedAt": "2026-11-24T06:59:28.396Z"
+        },
+        "prd": {
+          "title": "文本非空行统计工具",
+          "revision": 1,
+          "proposal": {
+            "id": "proposal-fe8cd48d-10b5-471d-a37e-e76da146aa95",
+            "kind": "proposal",
+            "revision": 1,
+            "hash": "a29d764210765431d68dc1e7a4ed5e95e355fcebd8be90d1f1af908651149a43"
+          },
+          "approvalId": "int-81c9c8dd",
+          "sections": {
+            "goals": [
+              "统计本地文本文件的非空行数"
+            ],
+            "summary": "[counter-v1] 文本非空行统计工具",
+            "approach": [
+              "文件按 UTF-8 解码；按换行读取；trim 后非空则计数"
+            ],
+            "scope": [
+              {
+                "key": "count",
+                "kind": "functional",
+                "title": "统计非空行",
+                "decision": "输入文本文件路径，输出非空行数，文件不存在时报告错误",
+                "issueIds": [
+                  "issue-count"
+                ]
+              },
+              {
+                "key": "stream",
+                "kind": "nonfunctional",
+                "title": "流式内存限制",
+                "decision": "流式读取文本，峰值内存不超过 64 MiB",
+                "issueIds": [
+                  "issue-stream"
+                ]
+              }
+            ],
+            "outOfScope": [
+              "未列出的扩展功能"
+            ],
+            "constraints": [
+              "提供命令行接口，不引入 Web 页面或数据库"
+            ],
+            "tradeoffs": [],
+            "risks": [],
+            "unresolved": [],
+            "businessRules": [
+              "文件按 UTF-8 解码；按换行读取；trim 后非空则计数"
+            ],
+            "externalDependencies": []
+          },
+          "background": "[counter-v1] 统计本地文本文件的非空行数",
+          "scenarios": [
+            "统计本地文本文件的非空行数"
+          ],
+          "requirements": [
+            {
+              "id": "FR-75b955fe0e1a99fbbb8f",
+              "scopeKey": "count",
+              "kind": "functional",
+              "title": "统计非空行",
+              "description": "输入文本文件路径，输出非空行数，文件不存在时报告错误",
+              "value": "为脚本提供可复核的统计结果",
+              "priority": "must",
+              "dependencies": [],
+              "constraints": [
+                "UTF-8 编码；trim 后长度为零的行不计数"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-87b89be3d72b4d847e19",
+                  "given": "文件含两行文本、一行空行和一行仅空白字符",
+                  "when": "运行非空行统计",
+                  "then": "输出非空行数 2"
+                },
+                {
+                  "id": "AC-04aeb19bcfcdea2c75f8",
+                  "given": "存在一个空文件",
+                  "when": "运行非空行统计",
+                  "then": "输出非空行数 0"
+                },
+                {
+                  "id": "AC-6f57220981ef5b582ae0",
+                  "given": "文件路径不存在",
+                  "when": "运行非空行统计",
+                  "then": "报告文件不存在"
+                }
+              ]
+            },
+            {
+              "id": "NFR-68a355bd9a1aa462a58d",
+              "scopeKey": "stream",
+              "kind": "nonfunctional",
+              "title": "流式内存限制",
+              "description": "流式读取文本，峰值内存不超过 64 MiB",
+              "value": "避免大文件耗尽内存",
+              "priority": "should",
+              "dependencies": [
+                "FR-75b955fe0e1a99fbbb8f"
+              ],
+              "constraints": [
+                "禁止一次加载整个文件"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-331462af863cf21e8c92",
+                  "given": "一个 1 GiB UTF-8 文本文件",
+                  "when": "统计非空行并采集峰值内存",
+                  "then": "结果正确且峰值内存不超过 64 MiB"
+                }
+              ]
+            }
+          ],
+          "changes": [
+            "初版草案"
+          ],
+          "trace": [
+            {
+              "issueIds": [
+                "issue-count"
+              ],
+              "ideaAndDocumentIds": [
+                "idea-1"
+              ],
+              "proposal": {
+                "id": "proposal-fe8cd48d-10b5-471d-a37e-e76da146aa95",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "a29d764210765431d68dc1e7a4ed5e95e355fcebd8be90d1f1af908651149a43"
+              },
+              "scopeKey": "count",
+              "approvalId": "int-81c9c8dd",
+              "requirementId": "FR-75b955fe0e1a99fbbb8f",
+              "acceptanceIds": [
+                "AC-87b89be3d72b4d847e19",
+                "AC-04aeb19bcfcdea2c75f8",
+                "AC-6f57220981ef5b582ae0"
+              ]
+            },
+            {
+              "issueIds": [
+                "issue-stream"
+              ],
+              "ideaAndDocumentIds": [
+                "idea-1"
+              ],
+              "proposal": {
+                "id": "proposal-fe8cd48d-10b5-471d-a37e-e76da146aa95",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "a29d764210765431d68dc1e7a4ed5e95e355fcebd8be90d1f1af908651149a43"
+              },
+              "scopeKey": "stream",
+              "approvalId": "int-81c9c8dd",
+              "requirementId": "NFR-68a355bd9a1aa462a58d",
+              "acceptanceIds": [
+                "AC-331462af863cf21e8c92"
+              ]
+            }
+          ]
+        },
+        "sha256": "1ac6e5d59f2d18b4cbb997c8b440158e2e5ebf7c6ed8cc5f5cb14e268fc12757"
+      },
+      "workspace": {
+        "workspaceId": "ws-88011696",
+        "name": "文本非空行统计工具",
+        "sourceCommit": "4ee2cce7f1b53fc0004d1dd322c3533ea4bd1fae",
+        "existingPaths": [
+          "README.md"
+        ],
+        "entryPoints": [],
+        "manifests": [],
+        "dependencies": [],
+        "testCommands": [
+          {
+            "directory": ".",
+            "command": "node --test",
+            "source": "workspace.verifyCommand（配置值，尚未执行）"
+          }
+        ],
+        "proposedPaths": [],
+        "notes": [
+          "清单及依赖取自目标提交，未提交或未跟踪文件不计入该版本。",
+          "输入阶段尚未推导拟新增路径；生成后的拟建工件见设计正文 modules.files 中 action=create 的条目。"
+        ]
+      },
+      "reviewEligible": true,
+      "blockers": []
+    },
+    "body": {
+      "schemaVersion": 1,
+      "title": "文本非空行统计工具软件设计",
+      "goal": "统计本地文本文件的非空行数",
+      "inputs": [
+        "UTF-8 文件路径参数"
+      ],
+      "outputs": [
+        "stdout 非空行数或 stderr 错误"
+      ],
+      "modules": [
+        {
+          "id": "entry",
+          "name": "命令行入口",
+          "layer": "integration",
+          "responsibility": "接收文件路径，调用计数函数，成功向 stdout 输出整数和换行；失败向 stderr 输出错误并非零退出",
+          "inputs": [
+            "UTF-8 文件路径参数"
+          ],
+          "outputs": [
+            "stdout 非空行数或 stderr 错误"
+          ],
+          "requirementIds": [
+            "FR-75b955fe0e1a99fbbb8f"
+          ],
+          "dependsOn": [
+            "core"
+          ],
+          "files": [
+            {
+              "path": "src/cli.ts",
+              "action": "create"
+            }
+          ]
+        },
+        {
+          "id": "core",
+          "name": "流式计数逻辑",
+          "layer": "backend",
+          "responsibility": "以流方式按 UTF-8 逐行读取；使用 trim 后长度判断空白行；累计非空行数，不保留完整文件",
+          "inputs": [
+            "文件路径"
+          ],
+          "outputs": [
+            "Promise<number> 非负行数"
+          ],
+          "requirementIds": [
+            "FR-75b955fe0e1a99fbbb8f",
+            "NFR-68a355bd9a1aa462a58d"
+          ],
+          "dependsOn": [],
+          "files": [
+            {
+              "path": "src/count.ts",
+              "action": "create"
+            }
+          ]
+        }
+      ],
+      "interfaces": [
+        {
+          "id": "operation",
+          "provider": "core",
+          "consumers": [
+            "entry"
+          ],
+          "kind": "function",
+          "input": "countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件",
+          "result": "返回非负整数；CLI 将其写入 stdout 并追加换行",
+          "failure": "文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数",
+          "sideEffects": "只读取指定文件，不修改输入文件"
+        }
+      ],
+      "dataRules": [
+        "文件按 UTF-8 解码；按换行读取；trim 后非空则计数",
+        "逐行解码和计数；trim 后为空的行不计数；文件句柄在结束或失败时关闭"
+      ],
+      "constraints": [
+        "提供命令行接口，不引入 Web 页面或数据库",
+        "UTF-8 编码；trim 后长度为零的行不计数",
+        "禁止一次加载整个文件"
+      ],
+      "quality": [
+        {
+          "requirementId": "NFR-68a355bd9a1aa462a58d",
+          "moduleIds": [
+            "core"
+          ],
+          "method": "准备：一个 1 GiB UTF-8 文本文件；执行：统计非空行并采集峰值内存；记录可观察结果",
+          "passCondition": "结果正确且峰值内存不超过 64 MiB"
+        }
+      ],
+      "decisions": [
+        {
+          "id": "module-boundary",
+          "decision": "将 CLI 格式化和流式文件计数分开",
+          "rationale": "明确实现职责、跨模块契约和验证入口",
+          "alternatives": [
+            "把所有职责放在单个入口中"
+          ],
+          "requirementIds": [
+            "FR-75b955fe0e1a99fbbb8f",
+            "NFR-68a355bd9a1aa462a58d"
+          ],
+          "evidence": [
+            "FR-75b955fe0e1a99fbbb8f",
+            "NFR-68a355bd9a1aa462a58d"
+          ]
+        }
+      ],
+      "assumptions": [],
+      "trace": [
+        {
+          "requirementId": "FR-75b955fe0e1a99fbbb8f",
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-87b89be3d72b4d847e19",
+              "method": "准备夹具：文件含两行文本、一行空行和一行仅空白字符；运行非空行统计；断言：输出非空行数 2",
+              "expectedEvidence": "输出非空行数 2"
+            },
+            {
+              "acceptanceId": "AC-04aeb19bcfcdea2c75f8",
+              "method": "准备夹具：存在一个空文件；运行非空行统计；断言：输出非空行数 0",
+              "expectedEvidence": "输出非空行数 0"
+            },
+            {
+              "acceptanceId": "AC-6f57220981ef5b582ae0",
+              "method": "准备夹具：文件路径不存在；运行非空行统计；断言：报告文件不存在",
+              "expectedEvidence": "报告文件不存在"
+            }
+          ]
+        },
+        {
+          "requirementId": "NFR-68a355bd9a1aa462a58d",
+          "moduleIds": [
+            "core"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-331462af863cf21e8c92",
+              "method": "准备夹具：一个 1 GiB UTF-8 文本文件；统计非空行并采集峰值内存；断言：结果正确且峰值内存不超过 64 MiB",
+              "expectedEvidence": "结果正确且峰值内存不超过 64 MiB"
+            }
+          ]
+        }
+      ],
+      "unresolved": [
+        {
+          "id": "other-io-codes",
+          "question": "除文件不存在外的读取错误使用哪个具体非零退出码？该细分值后续确认，当前保证失败为非零退出。",
+          "owner": "接口负责人",
+          "requirementIds": [
+            "FR-75b955fe0e1a99fbbb8f"
+          ],
+          "blocking": false
+        }
+      ],
+      "designChecks": [
+        {
+          "id": "DC-operation-failure",
+          "source": {
+            "kind": "interface",
+            "id": "operation"
+          },
+          "rationale": "核对设计新增的跨模块失败契约",
+          "requirementIds": [
+            "FR-75b955fe0e1a99fbbb8f"
+          ],
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "method": "向入口注入失败并核对调用方可见行为：文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数",
+          "expectedEvidence": "文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数"
+        }
+      ]
+    },
+    "contentSha256": "4505125e3d9b281e8c5259e1521de33fd2475007948ac107dbb41faf4d868074",
+    "createdAt": "2026-11-24T06:59:29.123Z",
+    "metadata": {
+      "actor": "验收脚本模拟设计负责人",
+      "reason": "counter-v1",
+      "generationId": "generation-693d7b96-4710-41ad-a77c-64ceec8e1429",
+      "resolutions": [],
+      "previousDesign": null,
+      "baselineDiff": null
+    },
+    "reviewMarkdown": "# 文本非空行统计工具软件设计\n\n## 目标\n统计本地文本文件的非空行数\n\n## 输入\n- UTF-8 文件路径参数\n\n## 输出\n- stdout 非空行数或 stderr 错误\n\n## 需求\n- FR-01 [FR-75b955fe0e1a99fbbb8f] 输入文本文件路径，输出非空行数，文件不存在时报告错误 优先级 must\n- FR-02 [NFR-68a355bd9a1aa462a58d] 流式读取文本，峰值内存不超过 64 MiB 优先级 should\n\n## 模块\n- 命令行入口: 接收文件路径，调用计数函数，成功向 stdout 输出整数和换行；失败向 stderr 输出错误并非零退出；依赖 core；接口 operation: countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件 → 返回非负整数；CLI 将其写入 stdout 并追加换行；失败 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；覆盖 FR-01 (`src/cli.ts`)\n- 流式计数逻辑: 以流方式按 UTF-8 逐行读取；使用 trim 后长度判断空白行；累计非空行数，不保留完整文件；依赖 无；接口 operation: countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件 → 返回非负整数；CLI 将其写入 stdout 并追加换行；失败 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；覆盖 FR-01, FR-02 (`src/count.ts`)\n\n## 约束\n- 提供命令行接口，不引入 Web 页面或数据库\n- FR-75b955fe0e1a99fbbb8f: UTF-8 编码；trim 后长度为零的行不计数\n- NFR-68a355bd9a1aa462a58d: 禁止一次加载整个文件\n- 提供命令行接口，不引入 Web 页面或数据库\n- UTF-8 编码；trim 后长度为零的行不计数\n- 禁止一次加载整个文件\n\n## 领域规则\n- 文件按 UTF-8 解码；按换行读取；trim 后非空则计数\n- 文件按 UTF-8 解码；按换行读取；trim 后非空则计数\n- 逐行解码和计数；trim 后为空的行不计数；文件句柄在结束或失败时关闭\n\n## 验收\n- AC-01 FR-01 [AC-87b89be3d72b4d847e19] Given 文件含两行文本、一行空行和一行仅空白字符; When 运行非空行统计; Then 输出非空行数 2; 验证 准备夹具：文件含两行文本、一行空行和一行仅空白字符；运行非空行统计；断言：输出非空行数 2; 证据 输出非空行数 2\n- AC-02 FR-01 [AC-04aeb19bcfcdea2c75f8] Given 存在一个空文件; When 运行非空行统计; Then 输出非空行数 0; 验证 准备夹具：存在一个空文件；运行非空行统计；断言：输出非空行数 0; 证据 输出非空行数 0\n- AC-03 FR-01 [AC-6f57220981ef5b582ae0] Given 文件路径不存在; When 运行非空行统计; Then 报告文件不存在; 验证 准备夹具：文件路径不存在；运行非空行统计；断言：报告文件不存在; 证据 报告文件不存在\n- AC-04 FR-02 [AC-331462af863cf21e8c92] Given 一个 1 GiB UTF-8 文本文件; When 统计非空行并采集峰值内存; Then 结果正确且峰值内存不超过 64 MiB; 验证 准备夹具：一个 1 GiB UTF-8 文本文件；统计非空行并采集峰值内存；断言：结果正确且峰值内存不超过 64 MiB; 证据 结果正确且峰值内存不超过 64 MiB\n\n## 假设\n\n\n\n## 来源记录\n- 基线 baseline-run-8d4b1432 / acceptance-counter / v1 / 1ac6e5d59f2d18b4cbb997c8b440158e2e5ebf7c6ed8cc5f5cb14e268fc12757\n- 目标 ws-88011696 / 4ee2cce7f1b53fc0004d1dd322c3533ea4bd1fae\n- 范围外 未列出的扩展功能\n\n## modules\n\n```json\n[\n  {\n    \"id\": \"entry\",\n    \"name\": \"命令行入口\",\n    \"layer\": \"integration\",\n    \"responsibility\": \"接收文件路径，调用计数函数，成功向 stdout 输出整数和换行；失败向 stderr 输出错误并非零退出\",\n    \"inputs\": [\n      \"UTF-8 文件路径参数\"\n    ],\n    \"outputs\": [\n      \"stdout 非空行数或 stderr 错误\"\n    ],\n    \"requirementIds\": [\n      \"FR-75b955fe0e1a99fbbb8f\"\n    ],\n    \"dependsOn\": [\n      \"core\"\n    ],\n    \"files\": [\n      {\n        \"path\": \"src/cli.ts\",\n        \"action\": \"create\"\n      }\n    ]\n  },\n  {\n    \"id\": \"core\",\n    \"name\": \"流式计数逻辑\",\n    \"layer\": \"backend\",\n    \"responsibility\": \"以流方式按 UTF-8 逐行读取；使用 trim 后长度判断空白行；累计非空行数，不保留完整文件\",\n    \"inputs\": [\n      \"文件路径\"\n    ],\n    \"outputs\": [\n      \"Promise<number> 非负行数\"\n    ],\n    \"requirementIds\": [\n      \"FR-75b955fe0e1a99fbbb8f\",\n      \"NFR-68a355bd9a1aa462a58d\"\n    ],\n    \"dependsOn\": [],\n    \"files\": [\n      {\n        \"path\": \"src/count.ts\",\n        \"action\": \"create\"\n      }\n    ]\n  }\n]\n```\n\n## interfaces\n\n```json\n[\n  {\n    \"id\": \"operation\",\n    \"provider\": \"core\",\n    \"consumers\": [\n      \"entry\"\n    ],\n    \"kind\": \"function\",\n    \"input\": \"countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件\",\n    \"result\": \"返回非负整数；CLI 将其写入 stdout 并追加换行\",\n    \"failure\": \"文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数\",\n    \"sideEffects\": \"只读取指定文件，不修改输入文件\"\n  }\n]\n```\n\n## quality\n\n```json\n[\n  {\n    \"requirementId\": \"NFR-68a355bd9a1aa462a58d\",\n    \"moduleIds\": [\n      \"core\"\n    ],\n    \"method\": \"准备：一个 1 GiB UTF-8 文本文件；执行：统计非空行并采集峰值内存；记录可观察结果\",\n    \"passCondition\": \"结果正确且峰值内存不超过 64 MiB\"\n  }\n]\n```\n\n## decisions\n\n```json\n[\n  {\n    \"id\": \"module-boundary\",\n    \"decision\": \"将 CLI 格式化和流式文件计数分开\",\n    \"rationale\": \"明确实现职责、跨模块契约和验证入口\",\n    \"alternatives\": [\n      \"把所有职责放在单个入口中\"\n    ],\n    \"requirementIds\": [\n      \"FR-75b955fe0e1a99fbbb8f\",\n      \"NFR-68a355bd9a1aa462a58d\"\n    ],\n    \"evidence\": [\n      \"FR-75b955fe0e1a99fbbb8f\",\n      \"NFR-68a355bd9a1aa462a58d\"\n    ]\n  }\n]\n```\n\n## assumptions\n\n```json\n[]\n```\n\n## trace\n\n```json\n[\n  {\n    \"requirementId\": \"FR-75b955fe0e1a99fbbb8f\",\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-87b89be3d72b4d847e19\",\n        \"method\": \"准备夹具：文件含两行文本、一行空行和一行仅空白字符；运行非空行统计；断言：输出非空行数 2\",\n        \"expectedEvidence\": \"输出非空行数 2\"\n      },\n      {\n        \"acceptanceId\": \"AC-04aeb19bcfcdea2c75f8\",\n        \"method\": \"准备夹具：存在一个空文件；运行非空行统计；断言：输出非空行数 0\",\n        \"expectedEvidence\": \"输出非空行数 0\"\n      },\n      {\n        \"acceptanceId\": \"AC-6f57220981ef5b582ae0\",\n        \"method\": \"准备夹具：文件路径不存在；运行非空行统计；断言：报告文件不存在\",\n        \"expectedEvidence\": \"报告文件不存在\"\n      }\n    ]\n  },\n  {\n    \"requirementId\": \"NFR-68a355bd9a1aa462a58d\",\n    \"moduleIds\": [\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-331462af863cf21e8c92\",\n        \"method\": \"准备夹具：一个 1 GiB UTF-8 文本文件；统计非空行并采集峰值内存；断言：结果正确且峰值内存不超过 64 MiB\",\n        \"expectedEvidence\": \"结果正确且峰值内存不超过 64 MiB\"\n      }\n    ]\n  }\n]\n```\n\n## unresolved\n\n```json\n[\n  {\n    \"id\": \"other-io-codes\",\n    \"question\": \"除文件不存在外的读取错误使用哪个具体非零退出码？该细分值后续确认，当前保证失败为非零退出。\",\n    \"owner\": \"接口负责人\",\n    \"requirementIds\": [\n      \"FR-75b955fe0e1a99fbbb8f\"\n    ],\n    \"blocking\": false\n  }\n]\n```\n\n## 设计补充检查（独立于 HAMA 原始 AC）\n\n```json\n[\n  {\n    \"id\": \"DC-operation-failure\",\n    \"source\": {\n      \"kind\": \"interface\",\n      \"id\": \"operation\"\n    },\n    \"rationale\": \"核对设计新增的跨模块失败契约\",\n    \"requirementIds\": [\n      \"FR-75b955fe0e1a99fbbb8f\"\n    ],\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"method\": \"向入口注入失败并核对调用方可见行为：文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数\",\n    \"expectedEvidence\": \"文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数\"\n  }\n]\n```",
+    "pmMarkdown": "# 文本非空行统计工具软件设计\n\n## 目标\n统计本地文本文件的非空行数\n\n## 输入\n- UTF-8 文件路径参数\n\n## 输出\n- stdout 非空行数或 stderr 错误\n\n## 需求\n- FR-01 [FR-75b955fe0e1a99fbbb8f] 输入文本文件路径，输出非空行数，文件不存在时报告错误 优先级 must\n- FR-02 [NFR-68a355bd9a1aa462a58d] 流式读取文本，峰值内存不超过 64 MiB 优先级 should\n\n## 模块\n- 命令行入口: 接收文件路径，调用计数函数，成功向 stdout 输出整数和换行；失败向 stderr 输出错误并非零退出；依赖 core；接口 operation: countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件 → 返回非负整数；CLI 将其写入 stdout 并追加换行；失败 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；覆盖 FR-01 (`src/cli.ts`)\n- 流式计数逻辑: 以流方式按 UTF-8 逐行读取；使用 trim 后长度判断空白行；累计非空行数，不保留完整文件；依赖 无；接口 operation: countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件 → 返回非负整数；CLI 将其写入 stdout 并追加换行；失败 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；覆盖 FR-01, FR-02 (`src/count.ts`)\n\n## 约束\n- 提供命令行接口，不引入 Web 页面或数据库\n- FR-75b955fe0e1a99fbbb8f: UTF-8 编码；trim 后长度为零的行不计数\n- NFR-68a355bd9a1aa462a58d: 禁止一次加载整个文件\n- 提供命令行接口，不引入 Web 页面或数据库\n- UTF-8 编码；trim 后长度为零的行不计数\n- 禁止一次加载整个文件\n\n## 领域规则\n- 文件按 UTF-8 解码；按换行读取；trim 后非空则计数\n- 文件按 UTF-8 解码；按换行读取；trim 后非空则计数\n- 逐行解码和计数；trim 后为空的行不计数；文件句柄在结束或失败时关闭\n\n## 验收\n- AC-01 FR-01 [AC-87b89be3d72b4d847e19] Given 文件含两行文本、一行空行和一行仅空白字符; When 运行非空行统计; Then 输出非空行数 2; 验证 准备夹具：文件含两行文本、一行空行和一行仅空白字符；运行非空行统计；断言：输出非空行数 2; 证据 输出非空行数 2\n- AC-02 FR-01 [AC-04aeb19bcfcdea2c75f8] Given 存在一个空文件; When 运行非空行统计; Then 输出非空行数 0; 验证 准备夹具：存在一个空文件；运行非空行统计；断言：输出非空行数 0; 证据 输出非空行数 0\n- AC-03 FR-01 [AC-6f57220981ef5b582ae0] Given 文件路径不存在; When 运行非空行统计; Then 报告文件不存在; 验证 准备夹具：文件路径不存在；运行非空行统计；断言：报告文件不存在; 证据 报告文件不存在\n- AC-04 FR-02 [AC-331462af863cf21e8c92] Given 一个 1 GiB UTF-8 文本文件; When 统计非空行并采集峰值内存; Then 结果正确且峰值内存不超过 64 MiB; 验证 准备夹具：一个 1 GiB UTF-8 文本文件；统计非空行并采集峰值内存；断言：结果正确且峰值内存不超过 64 MiB; 证据 结果正确且峰值内存不超过 64 MiB\n\n## 假设\n\n",
+    "diagnostics": [],
+    "decisions": [],
+    "handoffs": [],
+    "diff": {
+      "changedFields": [
+        "schemaVersion",
+        "title",
+        "goal",
+        "inputs",
+        "outputs",
+        "modules",
+        "interfaces",
+        "dataRules",
+        "constraints",
+        "quality",
+        "decisions",
+        "assumptions",
+        "trace",
+        "unresolved",
+        "designChecks"
+      ],
+      "changes": [
+        {
+          "field": "schemaVersion",
+          "before": null,
+          "after": 1
+        },
+        {
+          "field": "title",
+          "before": null,
+          "after": "文本非空行统计工具软件设计"
+        },
+        {
+          "field": "goal",
+          "before": null,
+          "after": "统计本地文本文件的非空行数"
+        },
+        {
+          "field": "inputs",
+          "before": null,
+          "after": [
+            "UTF-8 文件路径参数"
+          ]
+        },
+        {
+          "field": "outputs",
+          "before": null,
+          "after": [
+            "stdout 非空行数或 stderr 错误"
+          ]
+        },
+        {
+          "field": "modules",
+          "before": null,
+          "after": [
+            {
+              "id": "entry",
+              "name": "命令行入口",
+              "layer": "integration",
+              "responsibility": "接收文件路径，调用计数函数，成功向 stdout 输出整数和换行；失败向 stderr 输出错误并非零退出",
+              "inputs": [
+                "UTF-8 文件路径参数"
+              ],
+              "outputs": [
+                "stdout 非空行数或 stderr 错误"
+              ],
+              "requirementIds": [
+                "FR-75b955fe0e1a99fbbb8f"
+              ],
+              "dependsOn": [
+                "core"
+              ],
+              "files": [
+                {
+                  "path": "src/cli.ts",
+                  "action": "create"
+                }
+              ]
+            },
+            {
+              "id": "core",
+              "name": "流式计数逻辑",
+              "layer": "backend",
+              "responsibility": "以流方式按 UTF-8 逐行读取；使用 trim 后长度判断空白行；累计非空行数，不保留完整文件",
+              "inputs": [
+                "文件路径"
+              ],
+              "outputs": [
+                "Promise<number> 非负行数"
+              ],
+              "requirementIds": [
+                "FR-75b955fe0e1a99fbbb8f",
+                "NFR-68a355bd9a1aa462a58d"
+              ],
+              "dependsOn": [],
+              "files": [
+                {
+                  "path": "src/count.ts",
+                  "action": "create"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "field": "interfaces",
+          "before": null,
+          "after": [
+            {
+              "id": "operation",
+              "provider": "core",
+              "consumers": [
+                "entry"
+              ],
+              "kind": "function",
+              "input": "countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件",
+              "result": "返回非负整数；CLI 将其写入 stdout 并追加换行",
+              "failure": "文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数",
+              "sideEffects": "只读取指定文件，不修改输入文件"
+            }
+          ]
+        },
+        {
+          "field": "dataRules",
+          "before": null,
+          "after": [
+            "文件按 UTF-8 解码；按换行读取；trim 后非空则计数",
+            "逐行解码和计数；trim 后为空的行不计数；文件句柄在结束或失败时关闭"
+          ]
+        },
+        {
+          "field": "constraints",
+          "before": null,
+          "after": [
+            "提供命令行接口，不引入 Web 页面或数据库",
+            "UTF-8 编码；trim 后长度为零的行不计数",
+            "禁止一次加载整个文件"
+          ]
+        },
+        {
+          "field": "quality",
+          "before": null,
+          "after": [
+            {
+              "requirementId": "NFR-68a355bd9a1aa462a58d",
+              "moduleIds": [
+                "core"
+              ],
+              "method": "准备：一个 1 GiB UTF-8 文本文件；执行：统计非空行并采集峰值内存；记录可观察结果",
+              "passCondition": "结果正确且峰值内存不超过 64 MiB"
+            }
+          ]
+        },
+        {
+          "field": "decisions",
+          "before": null,
+          "after": [
+            {
+              "id": "module-boundary",
+              "decision": "将 CLI 格式化和流式文件计数分开",
+              "rationale": "明确实现职责、跨模块契约和验证入口",
+              "alternatives": [
+                "把所有职责放在单个入口中"
+              ],
+              "requirementIds": [
+                "FR-75b955fe0e1a99fbbb8f",
+                "NFR-68a355bd9a1aa462a58d"
+              ],
+              "evidence": [
+                "FR-75b955fe0e1a99fbbb8f",
+                "NFR-68a355bd9a1aa462a58d"
+              ]
+            }
+          ]
+        },
+        {
+          "field": "assumptions",
+          "before": null,
+          "after": []
+        },
+        {
+          "field": "trace",
+          "before": null,
+          "after": [
+            {
+              "requirementId": "FR-75b955fe0e1a99fbbb8f",
+              "moduleIds": [
+                "entry",
+                "core"
+              ],
+              "acceptance": [
+                {
+                  "acceptanceId": "AC-87b89be3d72b4d847e19",
+                  "method": "准备夹具：文件含两行文本、一行空行和一行仅空白字符；运行非空行统计；断言：输出非空行数 2",
+                  "expectedEvidence": "输出非空行数 2"
+                },
+                {
+                  "acceptanceId": "AC-04aeb19bcfcdea2c75f8",
+                  "method": "准备夹具：存在一个空文件；运行非空行统计；断言：输出非空行数 0",
+                  "expectedEvidence": "输出非空行数 0"
+                },
+                {
+                  "acceptanceId": "AC-6f57220981ef5b582ae0",
+                  "method": "准备夹具：文件路径不存在；运行非空行统计；断言：报告文件不存在",
+                  "expectedEvidence": "报告文件不存在"
+                }
+              ]
+            },
+            {
+              "requirementId": "NFR-68a355bd9a1aa462a58d",
+              "moduleIds": [
+                "core"
+              ],
+              "acceptance": [
+                {
+                  "acceptanceId": "AC-331462af863cf21e8c92",
+                  "method": "准备夹具：一个 1 GiB UTF-8 文本文件；统计非空行并采集峰值内存；断言：结果正确且峰值内存不超过 64 MiB",
+                  "expectedEvidence": "结果正确且峰值内存不超过 64 MiB"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "field": "unresolved",
+          "before": null,
+          "after": [
+            {
+              "id": "other-io-codes",
+              "question": "除文件不存在外的读取错误使用哪个具体非零退出码？该细分值后续确认，当前保证失败为非零退出。",
+              "owner": "接口负责人",
+              "requirementIds": [
+                "FR-75b955fe0e1a99fbbb8f"
+              ],
+              "blocking": false
+            }
+          ]
+        },
+        {
+          "field": "designChecks",
+          "before": null,
+          "after": [
+            {
+              "id": "DC-operation-failure",
+              "source": {
+                "kind": "interface",
+                "id": "operation"
+              },
+              "rationale": "核对设计新增的跨模块失败契约",
+              "requirementIds": [
+                "FR-75b955fe0e1a99fbbb8f"
+              ],
+              "moduleIds": [
+                "entry",
+                "core"
+              ],
+              "method": "向入口注入失败并核对调用方可见行为：文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数",
+              "expectedEvidence": "文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数"
+            }
+          ]
+        }
+      ],
+      "addedFiles": [
+        "src/cli.ts",
+        "src/count.ts"
+      ],
+      "removedFiles": [],
+      "targetChanged": false
+    }
+  },
+  "confirmed": {
+    "designId": "design-d18a7274-6419-44ce-ae20-691ad28d35bc",
+    "revision": 1,
+    "parentRevision": null,
+    "state": "confirmed",
+    "schemaVersion": 1,
+    "input": {
+      "designId": "design-d18a7274-6419-44ce-ae20-691ad28d35bc",
+      "revision": 1,
+      "state": "draft",
+      "stage": "input_ready",
+      "createdAt": "2026-11-24T06:59:29.107Z",
+      "contentSha256": "73a9c8c699fa4d11d254c2df1511f5d0f4f7079daad46fccf9f02827afd5b2d8",
+      "baselineRef": {
+        "id": "baseline-run-8d4b1432",
+        "projectId": "acceptance-counter",
+        "revision": 1,
+        "sha256": "1ac6e5d59f2d18b4cbb997c8b440158e2e5ebf7c6ed8cc5f5cb14e268fc12757",
+        "schemaVersion": 1,
+        "mode": "live"
+      },
+      "baseline": {
+        "schemaVersion": 1,
+        "id": "baseline-run-8d4b1432",
+        "projectId": "acceptance-counter",
+        "revision": 1,
+        "parentId": null,
+        "mode": "live",
+        "approvedPrd": {
+          "id": "prd-4775653e-6ade-43d2-8dfe-7832c2be6cd8",
+          "kind": "prd",
+          "revision": 1,
+          "hash": "6cf17bf67d6b550dae9254e6fb96144c80ae58f11bf776da01b19aaaf077f710"
+        },
+        "approval": {
+          "targetId": "proposal-fe8cd48d-10b5-471d-a37e-e76da146aa95",
+          "targetHash": "a29d764210765431d68dc1e7a4ed5e95e355fcebd8be90d1f1af908651149a43",
+          "actor": "验收脚本模拟审批人",
+          "action": "approve",
+          "feedback": "",
+          "scope": "local",
+          "issueIds": [],
+          "id": "int-81c9c8dd",
+          "gateKind": "approval",
+          "targetRevision": 1,
+          "decidedAt": "2026-11-24T06:59:28.346Z"
+        },
+        "confirmation": {
+          "targetId": "prd-4775653e-6ade-43d2-8dfe-7832c2be6cd8",
+          "targetHash": "6cf17bf67d6b550dae9254e6fb96144c80ae58f11bf776da01b19aaaf077f710",
+          "actor": "验收脚本模拟审批人",
+          "action": "confirm",
+          "feedback": "",
+          "scope": "local",
+          "issueIds": [],
+          "id": "int-61d5884b",
+          "gateKind": "confirmation",
+          "targetRevision": 1,
+          "decidedAt": "2026-11-24T06:59:28.396Z"
+        },
+        "prd": {
+          "title": "文本非空行统计工具",
+          "revision": 1,
+          "proposal": {
+            "id": "proposal-fe8cd48d-10b5-471d-a37e-e76da146aa95",
+            "kind": "proposal",
+            "revision": 1,
+            "hash": "a29d764210765431d68dc1e7a4ed5e95e355fcebd8be90d1f1af908651149a43"
+          },
+          "approvalId": "int-81c9c8dd",
+          "sections": {
+            "goals": [
+              "统计本地文本文件的非空行数"
+            ],
+            "summary": "[counter-v1] 文本非空行统计工具",
+            "approach": [
+              "文件按 UTF-8 解码；按换行读取；trim 后非空则计数"
+            ],
+            "scope": [
+              {
+                "key": "count",
+                "kind": "functional",
+                "title": "统计非空行",
+                "decision": "输入文本文件路径，输出非空行数，文件不存在时报告错误",
+                "issueIds": [
+                  "issue-count"
+                ]
+              },
+              {
+                "key": "stream",
+                "kind": "nonfunctional",
+                "title": "流式内存限制",
+                "decision": "流式读取文本，峰值内存不超过 64 MiB",
+                "issueIds": [
+                  "issue-stream"
+                ]
+              }
+            ],
+            "outOfScope": [
+              "未列出的扩展功能"
+            ],
+            "constraints": [
+              "提供命令行接口，不引入 Web 页面或数据库"
+            ],
+            "tradeoffs": [],
+            "risks": [],
+            "unresolved": [],
+            "businessRules": [
+              "文件按 UTF-8 解码；按换行读取；trim 后非空则计数"
+            ],
+            "externalDependencies": []
+          },
+          "background": "[counter-v1] 统计本地文本文件的非空行数",
+          "scenarios": [
+            "统计本地文本文件的非空行数"
+          ],
+          "requirements": [
+            {
+              "id": "FR-75b955fe0e1a99fbbb8f",
+              "scopeKey": "count",
+              "kind": "functional",
+              "title": "统计非空行",
+              "description": "输入文本文件路径，输出非空行数，文件不存在时报告错误",
+              "value": "为脚本提供可复核的统计结果",
+              "priority": "must",
+              "dependencies": [],
+              "constraints": [
+                "UTF-8 编码；trim 后长度为零的行不计数"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-87b89be3d72b4d847e19",
+                  "given": "文件含两行文本、一行空行和一行仅空白字符",
+                  "when": "运行非空行统计",
+                  "then": "输出非空行数 2"
+                },
+                {
+                  "id": "AC-04aeb19bcfcdea2c75f8",
+                  "given": "存在一个空文件",
+                  "when": "运行非空行统计",
+                  "then": "输出非空行数 0"
+                },
+                {
+                  "id": "AC-6f57220981ef5b582ae0",
+                  "given": "文件路径不存在",
+                  "when": "运行非空行统计",
+                  "then": "报告文件不存在"
+                }
+              ]
+            },
+            {
+              "id": "NFR-68a355bd9a1aa462a58d",
+              "scopeKey": "stream",
+              "kind": "nonfunctional",
+              "title": "流式内存限制",
+              "description": "流式读取文本，峰值内存不超过 64 MiB",
+              "value": "避免大文件耗尽内存",
+              "priority": "should",
+              "dependencies": [
+                "FR-75b955fe0e1a99fbbb8f"
+              ],
+              "constraints": [
+                "禁止一次加载整个文件"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-331462af863cf21e8c92",
+                  "given": "一个 1 GiB UTF-8 文本文件",
+                  "when": "统计非空行并采集峰值内存",
+                  "then": "结果正确且峰值内存不超过 64 MiB"
+                }
+              ]
+            }
+          ],
+          "changes": [
+            "初版草案"
+          ],
+          "trace": [
+            {
+              "issueIds": [
+                "issue-count"
+              ],
+              "ideaAndDocumentIds": [
+                "idea-1"
+              ],
+              "proposal": {
+                "id": "proposal-fe8cd48d-10b5-471d-a37e-e76da146aa95",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "a29d764210765431d68dc1e7a4ed5e95e355fcebd8be90d1f1af908651149a43"
+              },
+              "scopeKey": "count",
+              "approvalId": "int-81c9c8dd",
+              "requirementId": "FR-75b955fe0e1a99fbbb8f",
+              "acceptanceIds": [
+                "AC-87b89be3d72b4d847e19",
+                "AC-04aeb19bcfcdea2c75f8",
+                "AC-6f57220981ef5b582ae0"
+              ]
+            },
+            {
+              "issueIds": [
+                "issue-stream"
+              ],
+              "ideaAndDocumentIds": [
+                "idea-1"
+              ],
+              "proposal": {
+                "id": "proposal-fe8cd48d-10b5-471d-a37e-e76da146aa95",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "a29d764210765431d68dc1e7a4ed5e95e355fcebd8be90d1f1af908651149a43"
+              },
+              "scopeKey": "stream",
+              "approvalId": "int-81c9c8dd",
+              "requirementId": "NFR-68a355bd9a1aa462a58d",
+              "acceptanceIds": [
+                "AC-331462af863cf21e8c92"
+              ]
+            }
+          ]
+        },
+        "sha256": "1ac6e5d59f2d18b4cbb997c8b440158e2e5ebf7c6ed8cc5f5cb14e268fc12757"
+      },
+      "workspace": {
+        "workspaceId": "ws-88011696",
+        "name": "文本非空行统计工具",
+        "sourceCommit": "4ee2cce7f1b53fc0004d1dd322c3533ea4bd1fae",
+        "existingPaths": [
+          "README.md"
+        ],
+        "entryPoints": [],
+        "manifests": [],
+        "dependencies": [],
+        "testCommands": [
+          {
+            "directory": ".",
+            "command": "node --test",
+            "source": "workspace.verifyCommand（配置值，尚未执行）"
+          }
+        ],
+        "proposedPaths": [],
+        "notes": [
+          "清单及依赖取自目标提交，未提交或未跟踪文件不计入该版本。",
+          "输入阶段尚未推导拟新增路径；生成后的拟建工件见设计正文 modules.files 中 action=create 的条目。"
+        ]
+      },
+      "reviewEligible": true,
+      "blockers": []
+    },
+    "body": {
+      "schemaVersion": 1,
+      "title": "文本非空行统计工具软件设计",
+      "goal": "统计本地文本文件的非空行数",
+      "inputs": [
+        "UTF-8 文件路径参数"
+      ],
+      "outputs": [
+        "stdout 非空行数或 stderr 错误"
+      ],
+      "modules": [
+        {
+          "id": "entry",
+          "name": "命令行入口",
+          "layer": "integration",
+          "responsibility": "接收文件路径，调用计数函数，成功向 stdout 输出整数和换行；失败向 stderr 输出错误并非零退出",
+          "inputs": [
+            "UTF-8 文件路径参数"
+          ],
+          "outputs": [
+            "stdout 非空行数或 stderr 错误"
+          ],
+          "requirementIds": [
+            "FR-75b955fe0e1a99fbbb8f"
+          ],
+          "dependsOn": [
+            "core"
+          ],
+          "files": [
+            {
+              "path": "src/cli.ts",
+              "action": "create"
+            }
+          ]
+        },
+        {
+          "id": "core",
+          "name": "流式计数逻辑",
+          "layer": "backend",
+          "responsibility": "以流方式按 UTF-8 逐行读取；使用 trim 后长度判断空白行；累计非空行数，不保留完整文件",
+          "inputs": [
+            "文件路径"
+          ],
+          "outputs": [
+            "Promise<number> 非负行数"
+          ],
+          "requirementIds": [
+            "FR-75b955fe0e1a99fbbb8f",
+            "NFR-68a355bd9a1aa462a58d"
+          ],
+          "dependsOn": [],
+          "files": [
+            {
+              "path": "src/count.ts",
+              "action": "create"
+            }
+          ]
+        }
+      ],
+      "interfaces": [
+        {
+          "id": "operation",
+          "provider": "core",
+          "consumers": [
+            "entry"
+          ],
+          "kind": "function",
+          "input": "countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件",
+          "result": "返回非负整数；CLI 将其写入 stdout 并追加换行",
+          "failure": "文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数",
+          "sideEffects": "只读取指定文件，不修改输入文件"
+        }
+      ],
+      "dataRules": [
+        "文件按 UTF-8 解码；按换行读取；trim 后非空则计数",
+        "逐行解码和计数；trim 后为空的行不计数；文件句柄在结束或失败时关闭"
+      ],
+      "constraints": [
+        "提供命令行接口，不引入 Web 页面或数据库",
+        "UTF-8 编码；trim 后长度为零的行不计数",
+        "禁止一次加载整个文件"
+      ],
+      "quality": [
+        {
+          "requirementId": "NFR-68a355bd9a1aa462a58d",
+          "moduleIds": [
+            "core"
+          ],
+          "method": "准备：一个 1 GiB UTF-8 文本文件；执行：统计非空行并采集峰值内存；记录可观察结果",
+          "passCondition": "结果正确且峰值内存不超过 64 MiB"
+        }
+      ],
+      "decisions": [
+        {
+          "id": "module-boundary",
+          "decision": "将 CLI 格式化和流式文件计数分开",
+          "rationale": "明确实现职责、跨模块契约和验证入口",
+          "alternatives": [
+            "把所有职责放在单个入口中"
+          ],
+          "requirementIds": [
+            "FR-75b955fe0e1a99fbbb8f",
+            "NFR-68a355bd9a1aa462a58d"
+          ],
+          "evidence": [
+            "FR-75b955fe0e1a99fbbb8f",
+            "NFR-68a355bd9a1aa462a58d"
+          ]
+        }
+      ],
+      "assumptions": [],
+      "trace": [
+        {
+          "requirementId": "FR-75b955fe0e1a99fbbb8f",
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-87b89be3d72b4d847e19",
+              "method": "准备夹具：文件含两行文本、一行空行和一行仅空白字符；运行非空行统计；断言：输出非空行数 2",
+              "expectedEvidence": "输出非空行数 2"
+            },
+            {
+              "acceptanceId": "AC-04aeb19bcfcdea2c75f8",
+              "method": "准备夹具：存在一个空文件；运行非空行统计；断言：输出非空行数 0",
+              "expectedEvidence": "输出非空行数 0"
+            },
+            {
+              "acceptanceId": "AC-6f57220981ef5b582ae0",
+              "method": "准备夹具：文件路径不存在；运行非空行统计；断言：报告文件不存在",
+              "expectedEvidence": "报告文件不存在"
+            }
+          ]
+        },
+        {
+          "requirementId": "NFR-68a355bd9a1aa462a58d",
+          "moduleIds": [
+            "core"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-331462af863cf21e8c92",
+              "method": "准备夹具：一个 1 GiB UTF-8 文本文件；统计非空行并采集峰值内存；断言：结果正确且峰值内存不超过 64 MiB",
+              "expectedEvidence": "结果正确且峰值内存不超过 64 MiB"
+            }
+          ]
+        }
+      ],
+      "unresolved": [
+        {
+          "id": "other-io-codes",
+          "question": "除文件不存在外的读取错误使用哪个具体非零退出码？该细分值后续确认，当前保证失败为非零退出。",
+          "owner": "接口负责人",
+          "requirementIds": [
+            "FR-75b955fe0e1a99fbbb8f"
+          ],
+          "blocking": false
+        }
+      ],
+      "designChecks": [
+        {
+          "id": "DC-operation-failure",
+          "source": {
+            "kind": "interface",
+            "id": "operation"
+          },
+          "rationale": "核对设计新增的跨模块失败契约",
+          "requirementIds": [
+            "FR-75b955fe0e1a99fbbb8f"
+          ],
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "method": "向入口注入失败并核对调用方可见行为：文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数",
+          "expectedEvidence": "文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数"
+        }
+      ]
+    },
+    "contentSha256": "4505125e3d9b281e8c5259e1521de33fd2475007948ac107dbb41faf4d868074",
+    "createdAt": "2026-11-24T06:59:29.123Z",
+    "metadata": {
+      "actor": "验收脚本模拟设计负责人",
+      "reason": "counter-v1",
+      "generationId": "generation-693d7b96-4710-41ad-a77c-64ceec8e1429",
+      "resolutions": [],
+      "previousDesign": null,
+      "baselineDiff": null
+    },
+    "reviewMarkdown": "# 文本非空行统计工具软件设计\n\n## 目标\n统计本地文本文件的非空行数\n\n## 输入\n- UTF-8 文件路径参数\n\n## 输出\n- stdout 非空行数或 stderr 错误\n\n## 需求\n- FR-01 [FR-75b955fe0e1a99fbbb8f] 输入文本文件路径，输出非空行数，文件不存在时报告错误 优先级 must\n- FR-02 [NFR-68a355bd9a1aa462a58d] 流式读取文本，峰值内存不超过 64 MiB 优先级 should\n\n## 模块\n- 命令行入口: 接收文件路径，调用计数函数，成功向 stdout 输出整数和换行；失败向 stderr 输出错误并非零退出；依赖 core；接口 operation: countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件 → 返回非负整数；CLI 将其写入 stdout 并追加换行；失败 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；覆盖 FR-01 (`src/cli.ts`)\n- 流式计数逻辑: 以流方式按 UTF-8 逐行读取；使用 trim 后长度判断空白行；累计非空行数，不保留完整文件；依赖 无；接口 operation: countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件 → 返回非负整数；CLI 将其写入 stdout 并追加换行；失败 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；覆盖 FR-01, FR-02 (`src/count.ts`)\n\n## 约束\n- 提供命令行接口，不引入 Web 页面或数据库\n- FR-75b955fe0e1a99fbbb8f: UTF-8 编码；trim 后长度为零的行不计数\n- NFR-68a355bd9a1aa462a58d: 禁止一次加载整个文件\n- 提供命令行接口，不引入 Web 页面或数据库\n- UTF-8 编码；trim 后长度为零的行不计数\n- 禁止一次加载整个文件\n\n## 领域规则\n- 文件按 UTF-8 解码；按换行读取；trim 后非空则计数\n- 文件按 UTF-8 解码；按换行读取；trim 后非空则计数\n- 逐行解码和计数；trim 后为空的行不计数；文件句柄在结束或失败时关闭\n\n## 验收\n- AC-01 FR-01 [AC-87b89be3d72b4d847e19] Given 文件含两行文本、一行空行和一行仅空白字符; When 运行非空行统计; Then 输出非空行数 2; 验证 准备夹具：文件含两行文本、一行空行和一行仅空白字符；运行非空行统计；断言：输出非空行数 2; 证据 输出非空行数 2\n- AC-02 FR-01 [AC-04aeb19bcfcdea2c75f8] Given 存在一个空文件; When 运行非空行统计; Then 输出非空行数 0; 验证 准备夹具：存在一个空文件；运行非空行统计；断言：输出非空行数 0; 证据 输出非空行数 0\n- AC-03 FR-01 [AC-6f57220981ef5b582ae0] Given 文件路径不存在; When 运行非空行统计; Then 报告文件不存在; 验证 准备夹具：文件路径不存在；运行非空行统计；断言：报告文件不存在; 证据 报告文件不存在\n- AC-04 FR-02 [AC-331462af863cf21e8c92] Given 一个 1 GiB UTF-8 文本文件; When 统计非空行并采集峰值内存; Then 结果正确且峰值内存不超过 64 MiB; 验证 准备夹具：一个 1 GiB UTF-8 文本文件；统计非空行并采集峰值内存；断言：结果正确且峰值内存不超过 64 MiB; 证据 结果正确且峰值内存不超过 64 MiB\n\n## 假设\n\n\n\n## 来源记录\n- 基线 baseline-run-8d4b1432 / acceptance-counter / v1 / 1ac6e5d59f2d18b4cbb997c8b440158e2e5ebf7c6ed8cc5f5cb14e268fc12757\n- 目标 ws-88011696 / 4ee2cce7f1b53fc0004d1dd322c3533ea4bd1fae\n- 范围外 未列出的扩展功能\n\n## modules\n\n```json\n[\n  {\n    \"id\": \"entry\",\n    \"name\": \"命令行入口\",\n    \"layer\": \"integration\",\n    \"responsibility\": \"接收文件路径，调用计数函数，成功向 stdout 输出整数和换行；失败向 stderr 输出错误并非零退出\",\n    \"inputs\": [\n      \"UTF-8 文件路径参数\"\n    ],\n    \"outputs\": [\n      \"stdout 非空行数或 stderr 错误\"\n    ],\n    \"requirementIds\": [\n      \"FR-75b955fe0e1a99fbbb8f\"\n    ],\n    \"dependsOn\": [\n      \"core\"\n    ],\n    \"files\": [\n      {\n        \"path\": \"src/cli.ts\",\n        \"action\": \"create\"\n      }\n    ]\n  },\n  {\n    \"id\": \"core\",\n    \"name\": \"流式计数逻辑\",\n    \"layer\": \"backend\",\n    \"responsibility\": \"以流方式按 UTF-8 逐行读取；使用 trim 后长度判断空白行；累计非空行数，不保留完整文件\",\n    \"inputs\": [\n      \"文件路径\"\n    ],\n    \"outputs\": [\n      \"Promise<number> 非负行数\"\n    ],\n    \"requirementIds\": [\n      \"FR-75b955fe0e1a99fbbb8f\",\n      \"NFR-68a355bd9a1aa462a58d\"\n    ],\n    \"dependsOn\": [],\n    \"files\": [\n      {\n        \"path\": \"src/count.ts\",\n        \"action\": \"create\"\n      }\n    ]\n  }\n]\n```\n\n## interfaces\n\n```json\n[\n  {\n    \"id\": \"operation\",\n    \"provider\": \"core\",\n    \"consumers\": [\n      \"entry\"\n    ],\n    \"kind\": \"function\",\n    \"input\": \"countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件\",\n    \"result\": \"返回非负整数；CLI 将其写入 stdout 并追加换行\",\n    \"failure\": \"文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数\",\n    \"sideEffects\": \"只读取指定文件，不修改输入文件\"\n  }\n]\n```\n\n## quality\n\n```json\n[\n  {\n    \"requirementId\": \"NFR-68a355bd9a1aa462a58d\",\n    \"moduleIds\": [\n      \"core\"\n    ],\n    \"method\": \"准备：一个 1 GiB UTF-8 文本文件；执行：统计非空行并采集峰值内存；记录可观察结果\",\n    \"passCondition\": \"结果正确且峰值内存不超过 64 MiB\"\n  }\n]\n```\n\n## decisions\n\n```json\n[\n  {\n    \"id\": \"module-boundary\",\n    \"decision\": \"将 CLI 格式化和流式文件计数分开\",\n    \"rationale\": \"明确实现职责、跨模块契约和验证入口\",\n    \"alternatives\": [\n      \"把所有职责放在单个入口中\"\n    ],\n    \"requirementIds\": [\n      \"FR-75b955fe0e1a99fbbb8f\",\n      \"NFR-68a355bd9a1aa462a58d\"\n    ],\n    \"evidence\": [\n      \"FR-75b955fe0e1a99fbbb8f\",\n      \"NFR-68a355bd9a1aa462a58d\"\n    ]\n  }\n]\n```\n\n## assumptions\n\n```json\n[]\n```\n\n## trace\n\n```json\n[\n  {\n    \"requirementId\": \"FR-75b955fe0e1a99fbbb8f\",\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-87b89be3d72b4d847e19\",\n        \"method\": \"准备夹具：文件含两行文本、一行空行和一行仅空白字符；运行非空行统计；断言：输出非空行数 2\",\n        \"expectedEvidence\": \"输出非空行数 2\"\n      },\n      {\n        \"acceptanceId\": \"AC-04aeb19bcfcdea2c75f8\",\n        \"method\": \"准备夹具：存在一个空文件；运行非空行统计；断言：输出非空行数 0\",\n        \"expectedEvidence\": \"输出非空行数 0\"\n      },\n      {\n        \"acceptanceId\": \"AC-6f57220981ef5b582ae0\",\n        \"method\": \"准备夹具：文件路径不存在；运行非空行统计；断言：报告文件不存在\",\n        \"expectedEvidence\": \"报告文件不存在\"\n      }\n    ]\n  },\n  {\n    \"requirementId\": \"NFR-68a355bd9a1aa462a58d\",\n    \"moduleIds\": [\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-331462af863cf21e8c92\",\n        \"method\": \"准备夹具：一个 1 GiB UTF-8 文本文件；统计非空行并采集峰值内存；断言：结果正确且峰值内存不超过 64 MiB\",\n        \"expectedEvidence\": \"结果正确且峰值内存不超过 64 MiB\"\n      }\n    ]\n  }\n]\n```\n\n## unresolved\n\n```json\n[\n  {\n    \"id\": \"other-io-codes\",\n    \"question\": \"除文件不存在外的读取错误使用哪个具体非零退出码？该细分值后续确认，当前保证失败为非零退出。\",\n    \"owner\": \"接口负责人\",\n    \"requirementIds\": [\n      \"FR-75b955fe0e1a99fbbb8f\"\n    ],\n    \"blocking\": false\n  }\n]\n```\n\n## 设计补充检查（独立于 HAMA 原始 AC）\n\n```json\n[\n  {\n    \"id\": \"DC-operation-failure\",\n    \"source\": {\n      \"kind\": \"interface\",\n      \"id\": \"operation\"\n    },\n    \"rationale\": \"核对设计新增的跨模块失败契约\",\n    \"requirementIds\": [\n      \"FR-75b955fe0e1a99fbbb8f\"\n    ],\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"method\": \"向入口注入失败并核对调用方可见行为：文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数\",\n    \"expectedEvidence\": \"文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数\"\n  }\n]\n```",
+    "pmMarkdown": "# 文本非空行统计工具软件设计\n\n## 目标\n统计本地文本文件的非空行数\n\n## 输入\n- UTF-8 文件路径参数\n\n## 输出\n- stdout 非空行数或 stderr 错误\n\n## 需求\n- FR-01 [FR-75b955fe0e1a99fbbb8f] 输入文本文件路径，输出非空行数，文件不存在时报告错误 优先级 must\n- FR-02 [NFR-68a355bd9a1aa462a58d] 流式读取文本，峰值内存不超过 64 MiB 优先级 should\n\n## 模块\n- 命令行入口: 接收文件路径，调用计数函数，成功向 stdout 输出整数和换行；失败向 stderr 输出错误并非零退出；依赖 core；接口 operation: countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件 → 返回非负整数；CLI 将其写入 stdout 并追加换行；失败 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；覆盖 FR-01 (`src/cli.ts`)\n- 流式计数逻辑: 以流方式按 UTF-8 逐行读取；使用 trim 后长度判断空白行；累计非空行数，不保留完整文件；依赖 无；接口 operation: countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件 → 返回非负整数；CLI 将其写入 stdout 并追加换行；失败 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；覆盖 FR-01, FR-02 (`src/count.ts`)\n\n## 约束\n- 提供命令行接口，不引入 Web 页面或数据库\n- FR-75b955fe0e1a99fbbb8f: UTF-8 编码；trim 后长度为零的行不计数\n- NFR-68a355bd9a1aa462a58d: 禁止一次加载整个文件\n- 提供命令行接口，不引入 Web 页面或数据库\n- UTF-8 编码；trim 后长度为零的行不计数\n- 禁止一次加载整个文件\n\n## 领域规则\n- 文件按 UTF-8 解码；按换行读取；trim 后非空则计数\n- 文件按 UTF-8 解码；按换行读取；trim 后非空则计数\n- 逐行解码和计数；trim 后为空的行不计数；文件句柄在结束或失败时关闭\n\n## 验收\n- AC-01 FR-01 [AC-87b89be3d72b4d847e19] Given 文件含两行文本、一行空行和一行仅空白字符; When 运行非空行统计; Then 输出非空行数 2; 验证 准备夹具：文件含两行文本、一行空行和一行仅空白字符；运行非空行统计；断言：输出非空行数 2; 证据 输出非空行数 2\n- AC-02 FR-01 [AC-04aeb19bcfcdea2c75f8] Given 存在一个空文件; When 运行非空行统计; Then 输出非空行数 0; 验证 准备夹具：存在一个空文件；运行非空行统计；断言：输出非空行数 0; 证据 输出非空行数 0\n- AC-03 FR-01 [AC-6f57220981ef5b582ae0] Given 文件路径不存在; When 运行非空行统计; Then 报告文件不存在; 验证 准备夹具：文件路径不存在；运行非空行统计；断言：报告文件不存在; 证据 报告文件不存在\n- AC-04 FR-02 [AC-331462af863cf21e8c92] Given 一个 1 GiB UTF-8 文本文件; When 统计非空行并采集峰值内存; Then 结果正确且峰值内存不超过 64 MiB; 验证 准备夹具：一个 1 GiB UTF-8 文本文件；统计非空行并采集峰值内存；断言：结果正确且峰值内存不超过 64 MiB; 证据 结果正确且峰值内存不超过 64 MiB\n\n## 假设\n\n",
+    "diagnostics": [],
+    "decisions": [
+      {
+        "decisionId": "2a4f40ce-ae1b-473b-bb83-18817d839bd9",
+        "designId": "design-d18a7274-6419-44ce-ae20-691ad28d35bc",
+        "revision": 1,
+        "expectedHash": "4505125e3d9b281e8c5259e1521de33fd2475007948ac107dbb41faf4d868074",
+        "actor": "验收脚本模拟评审人",
+        "action": "submit",
+        "scope": "technical",
+        "findings": [],
+        "decidedAt": "2026-11-24T06:59:29.127Z"
+      },
+      {
+        "decisionId": "1dfa0fe7-39ba-4513-917e-43cc329b7f6e",
+        "designId": "design-d18a7274-6419-44ce-ae20-691ad28d35bc",
+        "revision": 1,
+        "expectedHash": "4505125e3d9b281e8c5259e1521de33fd2475007948ac107dbb41faf4d868074",
+        "actor": "验收脚本模拟评审人",
+        "action": "confirm",
+        "scope": "technical",
+        "findings": [],
+        "decidedAt": "2026-11-24T06:59:29.129Z"
+      }
+    ],
+    "handoffs": [],
+    "diff": {
+      "changedFields": [
+        "schemaVersion",
+        "title",
+        "goal",
+        "inputs",
+        "outputs",
+        "modules",
+        "interfaces",
+        "dataRules",
+        "constraints",
+        "quality",
+        "decisions",
+        "assumptions",
+        "trace",
+        "unresolved",
+        "designChecks"
+      ],
+      "changes": [
+        {
+          "field": "schemaVersion",
+          "before": null,
+          "after": 1
+        },
+        {
+          "field": "title",
+          "before": null,
+          "after": "文本非空行统计工具软件设计"
+        },
+        {
+          "field": "goal",
+          "before": null,
+          "after": "统计本地文本文件的非空行数"
+        },
+        {
+          "field": "inputs",
+          "before": null,
+          "after": [
+            "UTF-8 文件路径参数"
+          ]
+        },
+        {
+          "field": "outputs",
+          "before": null,
+          "after": [
+            "stdout 非空行数或 stderr 错误"
+          ]
+        },
+        {
+          "field": "modules",
+          "before": null,
+          "after": [
+            {
+              "id": "entry",
+              "name": "命令行入口",
+              "layer": "integration",
+              "responsibility": "接收文件路径，调用计数函数，成功向 stdout 输出整数和换行；失败向 stderr 输出错误并非零退出",
+              "inputs": [
+                "UTF-8 文件路径参数"
+              ],
+              "outputs": [
+                "stdout 非空行数或 stderr 错误"
+              ],
+              "requirementIds": [
+                "FR-75b955fe0e1a99fbbb8f"
+              ],
+              "dependsOn": [
+                "core"
+              ],
+              "files": [
+                {
+                  "path": "src/cli.ts",
+                  "action": "create"
+                }
+              ]
+            },
+            {
+              "id": "core",
+              "name": "流式计数逻辑",
+              "layer": "backend",
+              "responsibility": "以流方式按 UTF-8 逐行读取；使用 trim 后长度判断空白行；累计非空行数，不保留完整文件",
+              "inputs": [
+                "文件路径"
+              ],
+              "outputs": [
+                "Promise<number> 非负行数"
+              ],
+              "requirementIds": [
+                "FR-75b955fe0e1a99fbbb8f",
+                "NFR-68a355bd9a1aa462a58d"
+              ],
+              "dependsOn": [],
+              "files": [
+                {
+                  "path": "src/count.ts",
+                  "action": "create"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "field": "interfaces",
+          "before": null,
+          "after": [
+            {
+              "id": "operation",
+              "provider": "core",
+              "consumers": [
+                "entry"
+              ],
+              "kind": "function",
+              "input": "countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件",
+              "result": "返回非负整数；CLI 将其写入 stdout 并追加换行",
+              "failure": "文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数",
+              "sideEffects": "只读取指定文件，不修改输入文件"
+            }
+          ]
+        },
+        {
+          "field": "dataRules",
+          "before": null,
+          "after": [
+            "文件按 UTF-8 解码；按换行读取；trim 后非空则计数",
+            "逐行解码和计数；trim 后为空的行不计数；文件句柄在结束或失败时关闭"
+          ]
+        },
+        {
+          "field": "constraints",
+          "before": null,
+          "after": [
+            "提供命令行接口，不引入 Web 页面或数据库",
+            "UTF-8 编码；trim 后长度为零的行不计数",
+            "禁止一次加载整个文件"
+          ]
+        },
+        {
+          "field": "quality",
+          "before": null,
+          "after": [
+            {
+              "requirementId": "NFR-68a355bd9a1aa462a58d",
+              "moduleIds": [
+                "core"
+              ],
+              "method": "准备：一个 1 GiB UTF-8 文本文件；执行：统计非空行并采集峰值内存；记录可观察结果",
+              "passCondition": "结果正确且峰值内存不超过 64 MiB"
+            }
+          ]
+        },
+        {
+          "field": "decisions",
+          "before": null,
+          "after": [
+            {
+              "id": "module-boundary",
+              "decision": "将 CLI 格式化和流式文件计数分开",
+              "rationale": "明确实现职责、跨模块契约和验证入口",
+              "alternatives": [
+                "把所有职责放在单个入口中"
+              ],
+              "requirementIds": [
+                "FR-75b955fe0e1a99fbbb8f",
+                "NFR-68a355bd9a1aa462a58d"
+              ],
+              "evidence": [
+                "FR-75b955fe0e1a99fbbb8f",
+                "NFR-68a355bd9a1aa462a58d"
+              ]
+            }
+          ]
+        },
+        {
+          "field": "assumptions",
+          "before": null,
+          "after": []
+        },
+        {
+          "field": "trace",
+          "before": null,
+          "after": [
+            {
+              "requirementId": "FR-75b955fe0e1a99fbbb8f",
+              "moduleIds": [
+                "entry",
+                "core"
+              ],
+              "acceptance": [
+                {
+                  "acceptanceId": "AC-87b89be3d72b4d847e19",
+                  "method": "准备夹具：文件含两行文本、一行空行和一行仅空白字符；运行非空行统计；断言：输出非空行数 2",
+                  "expectedEvidence": "输出非空行数 2"
+                },
+                {
+                  "acceptanceId": "AC-04aeb19bcfcdea2c75f8",
+                  "method": "准备夹具：存在一个空文件；运行非空行统计；断言：输出非空行数 0",
+                  "expectedEvidence": "输出非空行数 0"
+                },
+                {
+                  "acceptanceId": "AC-6f57220981ef5b582ae0",
+                  "method": "准备夹具：文件路径不存在；运行非空行统计；断言：报告文件不存在",
+                  "expectedEvidence": "报告文件不存在"
+                }
+              ]
+            },
+            {
+              "requirementId": "NFR-68a355bd9a1aa462a58d",
+              "moduleIds": [
+                "core"
+              ],
+              "acceptance": [
+                {
+                  "acceptanceId": "AC-331462af863cf21e8c92",
+                  "method": "准备夹具：一个 1 GiB UTF-8 文本文件；统计非空行并采集峰值内存；断言：结果正确且峰值内存不超过 64 MiB",
+                  "expectedEvidence": "结果正确且峰值内存不超过 64 MiB"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "field": "unresolved",
+          "before": null,
+          "after": [
+            {
+              "id": "other-io-codes",
+              "question": "除文件不存在外的读取错误使用哪个具体非零退出码？该细分值后续确认，当前保证失败为非零退出。",
+              "owner": "接口负责人",
+              "requirementIds": [
+                "FR-75b955fe0e1a99fbbb8f"
+              ],
+              "blocking": false
+            }
+          ]
+        },
+        {
+          "field": "designChecks",
+          "before": null,
+          "after": [
+            {
+              "id": "DC-operation-failure",
+              "source": {
+                "kind": "interface",
+                "id": "operation"
+              },
+              "rationale": "核对设计新增的跨模块失败契约",
+              "requirementIds": [
+                "FR-75b955fe0e1a99fbbb8f"
+              ],
+              "moduleIds": [
+                "entry",
+                "core"
+              ],
+              "method": "向入口注入失败并核对调用方可见行为：文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数",
+              "expectedEvidence": "文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数"
+            }
+          ]
+        }
+      ],
+      "addedFiles": [
+        "src/cli.ts",
+        "src/count.ts"
+      ],
+      "removedFiles": [],
+      "targetChanged": false
+    }
+  },
+  "receipt": {
+    "designRef": {
+      "designId": "design-d18a7274-6419-44ce-ae20-691ad28d35bc",
+      "revision": 1,
+      "contentSha256": "4505125e3d9b281e8c5259e1521de33fd2475007948ac107dbb41faf4d868074",
+      "workspaceId": "ws-88011696",
+      "sourceCommit": "4ee2cce7f1b53fc0004d1dd322c3533ea4bd1fae"
+    },
+    "workflowId": "wf-ed9c79c7",
+    "pmReportId": "pm-6e9a047b",
+    "status": "received",
+    "createdAt": "2026-11-24T06:59:29.720Z",
+    "diagnostics": [],
+    "workflow": {
+      "workflow": {
+        "id": "wf-ed9c79c7",
+        "workspaceId": "ws-88011696",
+        "code": "WF-002",
+        "title": "文本非空行统计工具软件设计",
+        "description": "统计本地文本文件的非空行数",
+        "status": "validated",
+        "currentVersionNumber": 0,
+        "permissionTier": "supervised",
+        "verifyCommand": "node --test",
+        "maxReworkIterations": 3,
+        "customization": {
+          "templatePreset": "fullstack_se",
+          "includeHumanGate": false,
+          "includeSecurityPass": true,
+          "includeQaAudit": true,
+          "maxParallelWorkers": 3,
+          "dddStrictCheck": true,
+          "pmAgentMode": "hybrid_llm",
+          "budgetUsdLimit": 2.5
+        },
+        "lastHumanReviewedAt": "2026-11-24T06:59:29.425Z",
+        "spacedReviewCount": 0,
+        "createdAt": "2026-11-24T06:59:29.425Z",
+        "updatedAt": "2026-11-24T06:59:29.425Z"
+      },
+      "goalSpec": {
+        "rawMarkdown": "# 文本非空行统计工具软件设计\n\n## 目标\n统计本地文本文件的非空行数\n\n## 输入\n- UTF-8 文件路径参数\n\n## 输出\n- stdout 非空行数或 stderr 错误\n\n## 需求\n- FR-01 [FR-75b955fe0e1a99fbbb8f] 输入文本文件路径，输出非空行数，文件不存在时报告错误 优先级 must\n- FR-02 [NFR-68a355bd9a1aa462a58d] 流式读取文本，峰值内存不超过 64 MiB 优先级 should\n\n## 模块\n- 命令行入口: 接收文件路径，调用计数函数，成功向 stdout 输出整数和换行；失败向 stderr 输出错误并非零退出；依赖 core；接口 operation: countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件 → 返回非负整数；CLI 将其写入 stdout 并追加换行；失败 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；覆盖 FR-01 (`src/cli.ts`)\n- 流式计数逻辑: 以流方式按 UTF-8 逐行读取；使用 trim 后长度判断空白行；累计非空行数，不保留完整文件；依赖 无；接口 operation: countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件 → 返回非负整数；CLI 将其写入 stdout 并追加换行；失败 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；覆盖 FR-01, FR-02 (`src/count.ts`)\n\n## 约束\n- 提供命令行接口，不引入 Web 页面或数据库\n- FR-75b955fe0e1a99fbbb8f: UTF-8 编码；trim 后长度为零的行不计数\n- NFR-68a355bd9a1aa462a58d: 禁止一次加载整个文件\n- 提供命令行接口，不引入 Web 页面或数据库\n- UTF-8 编码；trim 后长度为零的行不计数\n- 禁止一次加载整个文件\n\n## 领域规则\n- 文件按 UTF-8 解码；按换行读取；trim 后非空则计数\n- 文件按 UTF-8 解码；按换行读取；trim 后非空则计数\n- 逐行解码和计数；trim 后为空的行不计数；文件句柄在结束或失败时关闭\n\n## 验收\n- AC-01 FR-01 [AC-87b89be3d72b4d847e19] Given 文件含两行文本、一行空行和一行仅空白字符; When 运行非空行统计; Then 输出非空行数 2; 验证 准备夹具：文件含两行文本、一行空行和一行仅空白字符；运行非空行统计；断言：输出非空行数 2; 证据 输出非空行数 2\n- AC-02 FR-01 [AC-04aeb19bcfcdea2c75f8] Given 存在一个空文件; When 运行非空行统计; Then 输出非空行数 0; 验证 准备夹具：存在一个空文件；运行非空行统计；断言：输出非空行数 0; 证据 输出非空行数 0\n- AC-03 FR-01 [AC-6f57220981ef5b582ae0] Given 文件路径不存在; When 运行非空行统计; Then 报告文件不存在; 验证 准备夹具：文件路径不存在；运行非空行统计；断言：报告文件不存在; 证据 报告文件不存在\n- AC-04 FR-02 [AC-331462af863cf21e8c92] Given 一个 1 GiB UTF-8 文本文件; When 统计非空行并采集峰值内存; Then 结果正确且峰值内存不超过 64 MiB; 验证 准备夹具：一个 1 GiB UTF-8 文本文件；统计非空行并采集峰值内存；断言：结果正确且峰值内存不超过 64 MiB; 证据 结果正确且峰值内存不超过 64 MiB\n\n## 假设\n\n\n\n## 来源记录\n- 基线 baseline-run-8d4b1432 / acceptance-counter / v1 / 1ac6e5d59f2d18b4cbb997c8b440158e2e5ebf7c6ed8cc5f5cb14e268fc12757\n- 目标 ws-88011696 / 4ee2cce7f1b53fc0004d1dd322c3533ea4bd1fae\n- 范围外 未列出的扩展功能\n\n## modules\n\n```json\n[\n  {\n    \"id\": \"entry\",\n    \"name\": \"命令行入口\",\n    \"layer\": \"integration\",\n    \"responsibility\": \"接收文件路径，调用计数函数，成功向 stdout 输出整数和换行；失败向 stderr 输出错误并非零退出\",\n    \"inputs\": [\n      \"UTF-8 文件路径参数\"\n    ],\n    \"outputs\": [\n      \"stdout 非空行数或 stderr 错误\"\n    ],\n    \"requirementIds\": [\n      \"FR-75b955fe0e1a99fbbb8f\"\n    ],\n    \"dependsOn\": [\n      \"core\"\n    ],\n    \"files\": [\n      {\n        \"path\": \"src/cli.ts\",\n        \"action\": \"create\"\n      }\n    ]\n  },\n  {\n    \"id\": \"core\",\n    \"name\": \"流式计数逻辑\",\n    \"layer\": \"backend\",\n    \"responsibility\": \"以流方式按 UTF-8 逐行读取；使用 trim 后长度判断空白行；累计非空行数，不保留完整文件\",\n    \"inputs\": [\n      \"文件路径\"\n    ],\n    \"outputs\": [\n      \"Promise<number> 非负行数\"\n    ],\n    \"requirementIds\": [\n      \"FR-75b955fe0e1a99fbbb8f\",\n      \"NFR-68a355bd9a1aa462a58d\"\n    ],\n    \"dependsOn\": [],\n    \"files\": [\n      {\n        \"path\": \"src/count.ts\",\n        \"action\": \"create\"\n      }\n    ]\n  }\n]\n```\n\n## interfaces\n\n```json\n[\n  {\n    \"id\": \"operation\",\n    \"provider\": \"core\",\n    \"consumers\": [\n      \"entry\"\n    ],\n    \"kind\": \"function\",\n    \"input\": \"countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件\",\n    \"result\": \"返回非负整数；CLI 将其写入 stdout 并追加换行\",\n    \"failure\": \"文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数\",\n    \"sideEffects\": \"只读取指定文件，不修改输入文件\"\n  }\n]\n```\n\n## quality\n\n```json\n[\n  {\n    \"requirementId\": \"NFR-68a355bd9a1aa462a58d\",\n    \"moduleIds\": [\n      \"core\"\n    ],\n    \"method\": \"准备：一个 1 GiB UTF-8 文本文件；执行：统计非空行并采集峰值内存；记录可观察结果\",\n    \"passCondition\": \"结果正确且峰值内存不超过 64 MiB\"\n  }\n]\n```\n\n## decisions\n\n```json\n[\n  {\n    \"id\": \"module-boundary\",\n    \"decision\": \"将 CLI 格式化和流式文件计数分开\",\n    \"rationale\": \"明确实现职责、跨模块契约和验证入口\",\n    \"alternatives\": [\n      \"把所有职责放在单个入口中\"\n    ],\n    \"requirementIds\": [\n      \"FR-75b955fe0e1a99fbbb8f\",\n      \"NFR-68a355bd9a1aa462a58d\"\n    ],\n    \"evidence\": [\n      \"FR-75b955fe0e1a99fbbb8f\",\n      \"NFR-68a355bd9a1aa462a58d\"\n    ]\n  }\n]\n```\n\n## assumptions\n\n```json\n[]\n```\n\n## trace\n\n```json\n[\n  {\n    \"requirementId\": \"FR-75b955fe0e1a99fbbb8f\",\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-87b89be3d72b4d847e19\",\n        \"method\": \"准备夹具：文件含两行文本、一行空行和一行仅空白字符；运行非空行统计；断言：输出非空行数 2\",\n        \"expectedEvidence\": \"输出非空行数 2\"\n      },\n      {\n        \"acceptanceId\": \"AC-04aeb19bcfcdea2c75f8\",\n        \"method\": \"准备夹具：存在一个空文件；运行非空行统计；断言：输出非空行数 0\",\n        \"expectedEvidence\": \"输出非空行数 0\"\n      },\n      {\n        \"acceptanceId\": \"AC-6f57220981ef5b582ae0\",\n        \"method\": \"准备夹具：文件路径不存在；运行非空行统计；断言：报告文件不存在\",\n        \"expectedEvidence\": \"报告文件不存在\"\n      }\n    ]\n  },\n  {\n    \"requirementId\": \"NFR-68a355bd9a1aa462a58d\",\n    \"moduleIds\": [\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-331462af863cf21e8c92\",\n        \"method\": \"准备夹具：一个 1 GiB UTF-8 文本文件；统计非空行并采集峰值内存；断言：结果正确且峰值内存不超过 64 MiB\",\n        \"expectedEvidence\": \"结果正确且峰值内存不超过 64 MiB\"\n      }\n    ]\n  }\n]\n```\n\n## unresolved\n\n```json\n[\n  {\n    \"id\": \"other-io-codes\",\n    \"question\": \"除文件不存在外的读取错误使用哪个具体非零退出码？该细分值后续确认，当前保证失败为非零退出。\",\n    \"owner\": \"接口负责人\",\n    \"requirementIds\": [\n      \"FR-75b955fe0e1a99fbbb8f\"\n    ],\n    \"blocking\": false\n  }\n]\n```\n\n## 设计补充检查（独立于 HAMA 原始 AC）\n\n```json\n[\n  {\n    \"id\": \"DC-operation-failure\",\n    \"source\": {\n      \"kind\": \"interface\",\n      \"id\": \"operation\"\n    },\n    \"rationale\": \"核对设计新增的跨模块失败契约\",\n    \"requirementIds\": [\n      \"FR-75b955fe0e1a99fbbb8f\"\n    ],\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"method\": \"向入口注入失败并核对调用方可见行为：文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数\",\n    \"expectedEvidence\": \"文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数\"\n  }\n]\n```",
+        "title": "文本非空行统计工具软件设计",
+        "goal": "统计本地文本文件的非空行数",
+        "requirementsBaseline": {
+          "id": "baseline-run-8d4b1432",
+          "projectId": "acceptance-counter",
+          "revision": 1,
+          "sha256": "1ac6e5d59f2d18b4cbb997c8b440158e2e5ebf7c6ed8cc5f5cb14e268fc12757"
+        },
+        "inputs": [
+          "UTF-8 文件路径参数"
+        ],
+        "outputs": [
+          "stdout 非空行数或 stderr 错误"
+        ],
+        "constraints": [
+          "提供命令行接口，不引入 Web 页面或数据库",
+          "UTF-8 编码；trim 后长度为零的行不计数",
+          "禁止一次加载整个文件"
+        ],
+        "domainRules": [
+          "文件按 UTF-8 解码；按换行读取；trim 后非空则计数",
+          "逐行解码和计数；trim 后为空的行不计数；文件句柄在结束或失败时关闭"
+        ],
+        "assumptions": [
+          {
+            "id": "design-unresolved-other-io-codes",
+            "text": "除文件不存在外的读取错误使用哪个具体非零退出码？该细分值后续确认，当前保证失败为非零退出。",
+            "source": "suggested",
+            "rationale": "设计未决项；责任人 接口负责人；需求 FR-75b955fe0e1a99fbbb8f"
+          }
+        ],
+        "requirements": [
+          {
+            "id": "FR-75b955fe0e1a99fbbb8f",
+            "code": "FR-75b955fe0e1a99fbbb8f",
+            "title": "统计非空行",
+            "description": "输入文本文件路径，输出非空行数，文件不存在时报告错误",
+            "priority": "must",
+            "verifyHint": "[AC-87b89be3d72b4d847e19] 前提：文件含两行文本、一行空行和一行仅空白字符。操作：运行非空行统计。预期：输出非空行数 2。 验证：准备夹具：文件含两行文本、一行空行和一行仅空白字符；运行非空行统计；断言：输出非空行数 2。证据：输出非空行数 2。\n[AC-04aeb19bcfcdea2c75f8] 前提：存在一个空文件。操作：运行非空行统计。预期：输出非空行数 0。 验证：准备夹具：存在一个空文件；运行非空行统计；断言：输出非空行数 0。证据：输出非空行数 0。\n[AC-6f57220981ef5b582ae0] 前提：文件路径不存在。操作：运行非空行统计。预期：报告文件不存在。 验证：准备夹具：文件路径不存在；运行非空行统计；断言：报告文件不存在。证据：报告文件不存在。\n设计补充检查 [DC-operation-failure]（非原始 AC，来源 interface:operation）：向入口注入失败并核对调用方可见行为：文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；证据 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数"
+          },
+          {
+            "id": "NFR-68a355bd9a1aa462a58d",
+            "code": "NFR-68a355bd9a1aa462a58d",
+            "title": "流式内存限制",
+            "description": "流式读取文本，峰值内存不超过 64 MiB",
+            "priority": "should",
+            "verifyHint": "[AC-331462af863cf21e8c92] 前提：一个 1 GiB UTF-8 文本文件。操作：统计非空行并采集峰值内存。预期：结果正确且峰值内存不超过 64 MiB。 验证：准备夹具：一个 1 GiB UTF-8 文本文件；统计非空行并采集峰值内存；断言：结果正确且峰值内存不超过 64 MiB。证据：结果正确且峰值内存不超过 64 MiB。"
+          }
+        ],
+        "acceptanceCriteria": [
+          {
+            "id": "AC-87b89be3d72b4d847e19",
+            "code": "AC-87b89be3d72b4d847e19",
+            "requirementId": "FR-75b955fe0e1a99fbbb8f",
+            "label": "前提：文件含两行文本、一行空行和一行仅空白字符。操作：运行非空行统计。预期：输出非空行数 2。",
+            "verified": false
+          },
+          {
+            "id": "AC-04aeb19bcfcdea2c75f8",
+            "code": "AC-04aeb19bcfcdea2c75f8",
+            "requirementId": "FR-75b955fe0e1a99fbbb8f",
+            "label": "前提：存在一个空文件。操作：运行非空行统计。预期：输出非空行数 0。",
+            "verified": false
+          },
+          {
+            "id": "AC-6f57220981ef5b582ae0",
+            "code": "AC-6f57220981ef5b582ae0",
+            "requirementId": "FR-75b955fe0e1a99fbbb8f",
+            "label": "前提：文件路径不存在。操作：运行非空行统计。预期：报告文件不存在。",
+            "verified": false
+          },
+          {
+            "id": "AC-331462af863cf21e8c92",
+            "code": "AC-331462af863cf21e8c92",
+            "requirementId": "NFR-68a355bd9a1aa462a58d",
+            "label": "前提：一个 1 GiB UTF-8 文本文件。操作：统计非空行并采集峰值内存。预期：结果正确且峰值内存不超过 64 MiB。",
+            "verified": false
+          }
+        ],
+        "modules": [
+          {
+            "name": "命令行入口",
+            "layer": "integration",
+            "artifacts": [
+              "src/cli.ts"
+            ],
+            "relatedFrCodes": [
+              "FR-75b955fe0e1a99fbbb8f"
+            ],
+            "summary": "模块 entry：接收文件路径，调用计数函数，成功向 stdout 输出整数和换行；失败向 stderr 输出错误并非零退出\n输入：UTF-8 文件路径参数\n输出：stdout 非空行数或 stderr 错误\n依赖：core (流式计数逻辑)\n接口 operation [function]；提供方 core；消费方 entry；输入 countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件；结果 返回非负整数；CLI 将其写入 stdout 并追加换行；失败 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；副作用 只读取指定文件，不修改输入文件\n文件动作：create src/cli.ts\n设计补充检查 DC-operation-failure（非原始 AC，来源 interface:operation，关联需求 FR-75b955fe0e1a99fbbb8f）：向入口注入失败并核对调用方可见行为：文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；证据 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数"
+          },
+          {
+            "name": "流式计数逻辑",
+            "layer": "backend",
+            "artifacts": [
+              "src/count.ts"
+            ],
+            "relatedFrCodes": [
+              "FR-75b955fe0e1a99fbbb8f",
+              "NFR-68a355bd9a1aa462a58d"
+            ],
+            "summary": "模块 core：以流方式按 UTF-8 逐行读取；使用 trim 后长度判断空白行；累计非空行数，不保留完整文件\n输入：文件路径\n输出：Promise<number> 非负行数\n依赖：无\n接口 operation [function]；提供方 core；消费方 entry；输入 countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件；结果 返回非负整数；CLI 将其写入 stdout 并追加换行；失败 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；副作用 只读取指定文件，不修改输入文件\n文件动作：create src/count.ts\n质量要求 NFR-68a355bd9a1aa462a58d：准备：一个 1 GiB UTF-8 文本文件；执行：统计非空行并采集峰值内存；记录可观察结果；通过条件 结果正确且峰值内存不超过 64 MiB\n设计补充检查 DC-operation-failure（非原始 AC，来源 interface:operation，关联需求 FR-75b955fe0e1a99fbbb8f）：向入口注入失败并核对调用方可见行为：文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；证据 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数"
+          }
+        ],
+        "id": "goal-wf-ed9c79c7",
+        "workflowId": "wf-ed9c79c7",
+        "updatedAt": "2026-11-24T06:59:29.416Z"
+      },
+      "nodes": [
+        {
+          "id": "p1-3924d24d",
+          "scopeId": "wf-ed9c79c7",
+          "code": "P1",
+          "parentWbsId": null,
+          "containerNodeId": null,
+          "phaseId": "p1-3924d24d",
+          "phaseTitle": "Phase 1 · Design Spec & Contract Plan",
+          "depth": 0,
+          "kind": "phase_container",
+          "executorKind": "control",
+          "capabilityId": "control:plane",
+          "assignedRole": "lead",
+          "assignedModel": null,
+          "title": "Phase 1 · Design Spec & Contracts",
+          "description": "Synthesize GoalSpec contracts, DDD glossary bindings, and PM decomposition baseline (fullstack_se).",
+          "planningRationale": "Separates architectural planning and schema locking from downstream parallel code generation.",
+          "requirementRefs": [
+            "FR-75b955fe0e1a99fbbb8f",
+            "NFR-68a355bd9a1aa462a58d"
+          ],
+          "inputContract": "UTF-8 文件路径参数",
+          "outputContract": "Verified Shared Contracts & WBS Decomposition",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 1,
+          "collapsed": false,
+          "positionX": 40,
+          "positionY": 20,
+          "width": 840,
+          "height": 174,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:29.423Z"
+        },
+        {
+          "id": "p2-a7ef3028",
+          "scopeId": "wf-ed9c79c7",
+          "code": "P2",
+          "parentWbsId": null,
+          "containerNodeId": null,
+          "phaseId": "p2-a7ef3028",
+          "phaseTitle": "Phase 2 · Parallel PM Task Execution",
+          "depth": 0,
+          "kind": "phase_container",
+          "executorKind": "control",
+          "capabilityId": "control:plane",
+          "assignedRole": "worker",
+          "assignedModel": null,
+          "title": "Phase 2 · Parallel Tasks (2 streams)",
+          "description": "Execute PM-decomposed module slices on disjoint fileScopes, conditional routing, optional security pass, and Join barrier.",
+          "planningRationale": "Maximizes safe throughput with disjoint scopes and fail-closed Join convergence.",
+          "requirementRefs": [
+            "FR-75b955fe0e1a99fbbb8f",
+            "NFR-68a355bd9a1aa462a58d"
+          ],
+          "inputContract": "Phase 1 Git Baseline SHA",
+          "outputContract": "Integrated Feature Diff & Artifacts",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 1,
+          "collapsed": false,
+          "positionX": 40,
+          "positionY": 388,
+          "width": 840,
+          "height": 424,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:29.423Z"
+        },
+        {
+          "id": "p3-f8e12fae",
+          "scopeId": "wf-ed9c79c7",
+          "code": "P3",
+          "parentWbsId": null,
+          "containerNodeId": null,
+          "phaseId": "p3-f8e12fae",
+          "phaseTitle": "Phase 3 · Verification & Recovery",
+          "depth": 0,
+          "kind": "phase_container",
+          "executorKind": "control",
+          "capabilityId": "control:plane",
+          "assignedRole": "evaluator",
+          "assignedModel": null,
+          "title": "Phase 3 · Verification & Recovery",
+          "description": "Deterministic shell gate, DDD/Diff self-check, optional independent QA audit, Git checkpoint, and bounded rewind loop.",
+          "planningRationale": "Separates objective command gates from independent QA review with bounded automatic rollback.",
+          "requirementRefs": [
+            "AC-87b89be3d72b4d847e19",
+            "AC-04aeb19bcfcdea2c75f8",
+            "AC-6f57220981ef5b582ae0",
+            "AC-331462af863cf21e8c92"
+          ],
+          "inputContract": "Phase 2 Integrated Git Commit SHA",
+          "outputContract": "stdout 非空行数或 stderr 错误",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 1,
+          "collapsed": false,
+          "positionX": 40,
+          "positionY": 1002,
+          "width": 840,
+          "height": 320,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:29.423Z"
+        },
+        {
+          "id": "start-60f68e44",
+          "scopeId": "wf-ed9c79c7",
+          "code": "START",
+          "parentWbsId": "p1-3924d24d",
+          "containerNodeId": "p1-3924d24d",
+          "phaseId": "p1-3924d24d",
+          "phaseTitle": "Phase 1 · Design Spec & Contract Plan",
+          "depth": 1,
+          "kind": "start",
+          "executorKind": "control",
+          "capabilityId": "control:plane",
+          "assignedRole": "lead",
+          "assignedModel": null,
+          "title": "Workflow Start",
+          "description": "Anchor base Git SHA and freeze Design Spec baseline for \"文本非空行统计工具软件设计\".",
+          "planningRationale": "Establishes deterministic root state and initial Git rollback anchor.",
+          "requirementRefs": [
+            "FR-75b955fe0e1a99fbbb8f"
+          ],
+          "inputContract": "UTF-8 文件路径参数",
+          "outputContract": "Baseline Commit Anchor",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 1,
+          "collapsed": false,
+          "positionX": 64,
+          "positionY": 76,
+          "width": 196,
+          "height": 72,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:29.423Z"
+        },
+        {
+          "id": "p1t1-5f6a8ff2",
+          "scopeId": "wf-ed9c79c7",
+          "code": "P1.T1",
+          "parentWbsId": "p1-3924d24d",
+          "containerNodeId": "p1-3924d24d",
+          "phaseId": "p1-3924d24d",
+          "phaseTitle": "Phase 1 · Design Spec & Contract Plan",
+          "depth": 1,
+          "kind": "task",
+          "executorKind": "agent",
+          "capabilityId": "native-api",
+          "assignedRole": "lead",
+          "assignedModel": null,
+          "title": "Lock Interfaces & Shared Schemas",
+          "description": "Produce shared contracts and interface boundaries covering FR-75b955fe0e1a99fbbb8f, NFR-68a355bd9a1aa462a58d. Enforce DDD glossary: EnrollmentTicket, JournalEntry, ReworkLoop, TwinGraph.",
+          "planningRationale": "Defining shared contracts upfront prevents merge conflicts across PM-decomposed parallel tasks.",
+          "requirementRefs": [
+            "FR-75b955fe0e1a99fbbb8f",
+            "NFR-68a355bd9a1aa462a58d"
+          ],
+          "inputContract": "Baseline Commit Anchor",
+          "outputContract": "Verified Shared Contracts",
+          "fileScope": [
+            "src/shared/**"
+          ],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 2,
+          "collapsed": false,
+          "positionX": 336,
+          "positionY": 76,
+          "width": 212,
+          "height": 72,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:29.423Z"
+        },
+        {
+          "id": "p1ckpt-2ad64d93",
+          "scopeId": "wf-ed9c79c7",
+          "code": "P1.CKPT",
+          "parentWbsId": null,
+          "containerNodeId": null,
+          "phaseId": null,
+          "phaseTitle": "Phase 1 -> Phase 2 Physical Checkpoint",
+          "depth": 1,
+          "kind": "checkpoint",
+          "executorKind": "control",
+          "capabilityId": "control:plane",
+          "assignedRole": "lead",
+          "assignedModel": null,
+          "title": "Phase 1 基线物理检查点",
+          "description": "Commit Phase 1 design contracts and create a recoverable Git baseline checkpoint before parallel execution.",
+          "planningRationale": "Anchors an immutable Git commit before Phase 2 parallel workers mutate the worktree.",
+          "requirementRefs": [
+            "FR-75b955fe0e1a99fbbb8f"
+          ],
+          "inputContract": "Verified Shared Contracts",
+          "outputContract": "Phase 1 Git Baseline SHA",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 1,
+          "collapsed": false,
+          "positionX": 336,
+          "positionY": 248,
+          "width": 212,
+          "height": 68,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:29.423Z"
+        },
+        {
+          "id": "p2t1-9432045a",
+          "scopeId": "wf-ed9c79c7",
+          "code": "P2.T1",
+          "parentWbsId": "p2-a7ef3028",
+          "containerNodeId": "p2-a7ef3028",
+          "phaseId": "p2-a7ef3028",
+          "phaseTitle": "Phase 2 · Parallel PM Task Execution",
+          "depth": 1,
+          "kind": "task",
+          "executorKind": "agent",
+          "capabilityId": "native-api",
+          "assignedRole": "worker",
+          "assignedModel": null,
+          "title": "命令行入口",
+          "description": "Implement [integration] module slice for FR-75b955fe0e1a99fbbb8f",
+          "planningRationale": "模块 entry：接收文件路径，调用计数函数，成功向 stdout 输出整数和换行；失败向 stderr 输出错误并非零退出\n输入：UTF-8 文件路径参数\n输出：stdout 非空行数或 stderr 错误\n依赖：core (流式计数逻辑)\n接口 operation [function]；提供方 core；消费方 entry；输入 countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件；结果 返回非负整数；CLI 将其写入 stdout 并追加换行；失败 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；副作用 只读取指定文件，不修改输入文件\n文件动作：create src/cli.ts\n设计补充检查 DC-operation-failure（非原始 AC，来源 interface:operation，关联需求 FR-75b955fe0e1a99fbbb8f）：向入口注入失败并核对调用方可见行为：文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；证据 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数 [Layer=integration, Scope=src/cli.ts]. Follow DDD canonical terms (EnrollmentTicket, JournalEntry, ReworkLoop).",
+          "requirementRefs": [
+            "FR-75b955fe0e1a99fbbb8f"
+          ],
+          "inputContract": "Phase 1 Git Baseline SHA",
+          "outputContract": "命令行入口 Diff",
+          "fileScope": [
+            "src/cli.ts"
+          ],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 3,
+          "collapsed": false,
+          "positionX": 64,
+          "positionY": 446,
+          "width": 212,
+          "height": 76,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:29.423Z"
+        },
+        {
+          "id": "p2t2-0b4e79d0",
+          "scopeId": "wf-ed9c79c7",
+          "code": "P2.T2",
+          "parentWbsId": "p2-a7ef3028",
+          "containerNodeId": "p2-a7ef3028",
+          "phaseId": "p2-a7ef3028",
+          "phaseTitle": "Phase 2 · Parallel PM Task Execution",
+          "depth": 1,
+          "kind": "task",
+          "executorKind": "agent",
+          "capabilityId": "native-api",
+          "assignedRole": "worker",
+          "assignedModel": null,
+          "title": "流式计数逻辑",
+          "description": "Implement [backend] module slice for FR-75b955fe0e1a99fbbb8f, NFR-68a355bd9a1aa462a58d",
+          "planningRationale": "模块 core：以流方式按 UTF-8 逐行读取；使用 trim 后长度判断空白行；累计非空行数，不保留完整文件\n输入：文件路径\n输出：Promise<number> 非负行数\n依赖：无\n接口 operation [function]；提供方 core；消费方 entry；输入 countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件；结果 返回非负整数；CLI 将其写入 stdout 并追加换行；失败 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；副作用 只读取指定文件，不修改输入文件\n文件动作：create src/count.ts\n质量要求 NFR-68a355bd9a1aa462a58d：准备：一个 1 GiB UTF-8 文本文件；执行：统计非空行并采集峰值内存；记录可观察结果；通过条件 结果正确且峰值内存不超过 64 MiB\n设计补充检查 DC-operation-failure（非原始 AC，来源 interface:operation，关联需求 FR-75b955fe0e1a99fbbb8f）：向入口注入失败并核对调用方可见行为：文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；证据 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数 [Layer=backend, Scope=src/count.ts]. Follow DDD canonical terms (EnrollmentTicket, JournalEntry, ReworkLoop).",
+          "requirementRefs": [
+            "FR-75b955fe0e1a99fbbb8f",
+            "NFR-68a355bd9a1aa462a58d"
+          ],
+          "inputContract": "Phase 1 Git Baseline SHA",
+          "outputContract": "流式计数逻辑 Diff",
+          "fileScope": [
+            "src/count.ts"
+          ],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 3,
+          "collapsed": false,
+          "positionX": 336,
+          "positionY": 446,
+          "width": 212,
+          "height": 76,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:29.423Z"
+        },
+        {
+          "id": "p2d1-af15e70e",
+          "scopeId": "wf-ed9c79c7",
+          "code": "P2.D1",
+          "parentWbsId": "p2-a7ef3028",
+          "containerNodeId": "p2-a7ef3028",
+          "phaseId": "p2-a7ef3028",
+          "phaseTitle": "Phase 2 · Parallel PM Task Execution",
+          "depth": 1,
+          "kind": "decision",
+          "executorKind": "control",
+          "capabilityId": "control:plane",
+          "assignedRole": "lead",
+          "assignedModel": null,
+          "title": "Execution Profile Router",
+          "description": "Select standard integration path or extended verification path based on change scope.",
+          "planningRationale": "Avoids unnecessary latency for standard changes while routing complex diffs through extended hardening.",
+          "requirementRefs": [
+            "FR-75b955fe0e1a99fbbb8f"
+          ],
+          "inputContract": "Primary Slice Output",
+          "outputContract": "Routing Decision (standard | extended)",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": "standard",
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 1,
+          "collapsed": false,
+          "positionX": 64,
+          "positionY": 578,
+          "width": 212,
+          "height": 76,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:29.423Z"
+        },
+        {
+          "id": "p2std-00bf4106",
+          "scopeId": "wf-ed9c79c7",
+          "code": "P2.STD",
+          "parentWbsId": "p2-a7ef3028",
+          "containerNodeId": "p2-a7ef3028",
+          "phaseId": "p2-a7ef3028",
+          "phaseTitle": "Phase 2 · Parallel PM Task Execution",
+          "depth": 1,
+          "kind": "task",
+          "executorKind": "agent",
+          "capabilityId": "native-api",
+          "assignedRole": "worker",
+          "assignedModel": null,
+          "title": "Standard Integration & Docs",
+          "description": "Wire cross-module interfaces and finalize runtime wiring.",
+          "planningRationale": "Fast integration branch when extended hardening path is not triggered.",
+          "requirementRefs": [
+            "FR-75b955fe0e1a99fbbb8f"
+          ],
+          "inputContract": "Primary Slice Output",
+          "outputContract": "Standard Integration Diff",
+          "fileScope": [
+            "src/index.ts"
+          ],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 2,
+          "collapsed": false,
+          "positionX": 336,
+          "positionY": 578,
+          "width": 212,
+          "height": 76,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:29.423Z"
+        },
+        {
+          "id": "p2ext-6f72aadd",
+          "scopeId": "wf-ed9c79c7",
+          "code": "P2.EXT",
+          "parentWbsId": "p2-a7ef3028",
+          "containerNodeId": "p2-a7ef3028",
+          "phaseId": "p2-a7ef3028",
+          "phaseTitle": "Phase 2 · Parallel PM Task Execution",
+          "depth": 1,
+          "kind": "task",
+          "executorKind": "agent",
+          "capabilityId": "native-api",
+          "assignedRole": "evaluator",
+          "assignedModel": null,
+          "title": "Extended Contract & Stress Pass",
+          "description": "Deep edge-case and resilience checks before Phase 3 certification.",
+          "planningRationale": "Explicit alternate conditional branch selectable during risk-heavy iterations.",
+          "requirementRefs": [
+            "NFR-68a355bd9a1aa462a58d"
+          ],
+          "inputContract": "Primary Slice Output",
+          "outputContract": "Extended Verification Notes",
+          "fileScope": [
+            "docs/**"
+          ],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 2,
+          "collapsed": false,
+          "positionX": 336,
+          "positionY": 710,
+          "width": 212,
+          "height": 76,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:29.423Z"
+        },
+        {
+          "id": "p2sec-18276eb5",
+          "scopeId": "wf-ed9c79c7",
+          "code": "P2.SEC",
+          "parentWbsId": "p2-a7ef3028",
+          "containerNodeId": "p2-a7ef3028",
+          "phaseId": "p2-a7ef3028",
+          "phaseTitle": "Phase 2 · Parallel PM Task Execution",
+          "depth": 1,
+          "kind": "task",
+          "executorKind": "agent",
+          "capabilityId": "native-api",
+          "assignedRole": "evaluator",
+          "assignedModel": null,
+          "title": "Security & Guardrail Scan",
+          "description": "Verify constitution compliance, path confinement, and auth boundaries across all Phase 2 diffs.",
+          "planningRationale": "Enabled by workflow template customization to enforce pre-merge security posture.",
+          "requirementRefs": [
+            "FR-75b955fe0e1a99fbbb8f",
+            "NFR-68a355bd9a1aa462a58d"
+          ],
+          "inputContract": "Integrated Module Diffs",
+          "outputContract": "Security Posture Check",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 2,
+          "collapsed": false,
+          "positionX": 608,
+          "positionY": 578,
+          "width": 212,
+          "height": 76,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:29.423Z"
+        },
+        {
+          "id": "p2join-0ee85cd7",
+          "scopeId": "wf-ed9c79c7",
+          "code": "P2.JOIN",
+          "parentWbsId": "p2-a7ef3028",
+          "containerNodeId": "p2-a7ef3028",
+          "phaseId": "p2-a7ef3028",
+          "phaseTitle": "Phase 2 · Parallel PM Task Execution",
+          "depth": 1,
+          "kind": "join",
+          "executorKind": "control",
+          "capabilityId": "control:plane",
+          "assignedRole": "lead",
+          "assignedModel": null,
+          "title": "Phase 2 Join Barrier",
+          "description": "Synchronize parallel PM slices and routed branches into unified verification snapshot.",
+          "planningRationale": "Guarantees no verification gate executes against partially completed slices.",
+          "requirementRefs": [
+            "FR-75b955fe0e1a99fbbb8f",
+            "NFR-68a355bd9a1aa462a58d"
+          ],
+          "inputContract": "All Phase 2 Active Branch Artifacts",
+          "outputContract": "Unified Ready-to-Verify Snapshot",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 1,
+          "collapsed": false,
+          "positionX": 608,
+          "positionY": 710,
+          "width": 212,
+          "height": 76,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:29.423Z"
+        },
+        {
+          "id": "p2ckpt-e54df30a",
+          "scopeId": "wf-ed9c79c7",
+          "code": "P2.CKPT",
+          "parentWbsId": null,
+          "containerNodeId": null,
+          "phaseId": null,
+          "phaseTitle": "Phase 2 -> Phase 3 Physical Checkpoint",
+          "depth": 1,
+          "kind": "checkpoint",
+          "executorKind": "control",
+          "capabilityId": "control:plane",
+          "assignedRole": "evaluator",
+          "assignedModel": null,
+          "title": "Phase 2 集成物理检查点",
+          "description": "Commit integrated Phase 2 parallel worker diffs into a clean Git checkpoint prior to Phase 3 verification.",
+          "planningRationale": "Separates worker implementation state from Phase 3 shell gates and rewind boundaries.",
+          "requirementRefs": [
+            "FR-75b955fe0e1a99fbbb8f",
+            "NFR-68a355bd9a1aa462a58d"
+          ],
+          "inputContract": "Unified Ready-to-Verify Snapshot",
+          "outputContract": "Phase 2 Integrated Git Commit SHA",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 1,
+          "collapsed": false,
+          "positionX": 336,
+          "positionY": 862,
+          "width": 212,
+          "height": 68,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:29.423Z"
+        },
+        {
+          "id": "p3gate-cee1d8f1",
+          "scopeId": "wf-ed9c79c7",
+          "code": "P3.GATE",
+          "parentWbsId": "p3-f8e12fae",
+          "containerNodeId": "p3-f8e12fae",
+          "phaseId": "p3-f8e12fae",
+          "phaseTitle": "Phase 3 · Verification & Recovery",
+          "depth": 1,
+          "kind": "gate_shell",
+          "executorKind": "tool",
+          "capabilityId": "tool:shell",
+          "assignedRole": "evaluator",
+          "assignedModel": null,
+          "title": "Deterministic Shell Gate",
+          "description": "Run verification command: node --test",
+          "planningRationale": "Objective exit-code gate prevents self-grading before QA review.",
+          "requirementRefs": [
+            "AC-87b89be3d72b4d847e19",
+            "AC-04aeb19bcfcdea2c75f8",
+            "AC-6f57220981ef5b582ae0",
+            "AC-331462af863cf21e8c92"
+          ],
+          "inputContract": "Phase 2 Integrated Git Commit SHA",
+          "outputContract": "Gate Exit Code & Logs",
+          "fileScope": [],
+          "gateCommand": "node --test",
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 2,
+          "collapsed": false,
+          "positionX": 64,
+          "positionY": 1060,
+          "width": 212,
+          "height": 74,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:29.423Z"
+        },
+        {
+          "id": "p3sc-4467cad9",
+          "scopeId": "wf-ed9c79c7",
+          "code": "P3.SC",
+          "parentWbsId": "p3-f8e12fae",
+          "containerNodeId": "p3-f8e12fae",
+          "phaseId": "p3-f8e12fae",
+          "phaseTitle": "Phase 3 · Verification & Recovery",
+          "depth": 1,
+          "kind": "selfcheck",
+          "executorKind": "tool",
+          "capabilityId": "tool:shell",
+          "assignedRole": "evaluator",
+          "assignedModel": null,
+          "title": "Diff, AC & DDD Drift Check",
+          "description": "Inspect git diff, verify AC coverage, and check DDD ubiquitous terminology alignment.",
+          "planningRationale": "Catches terminology drift and incomplete acceptance evidence early.",
+          "requirementRefs": [
+            "AC-87b89be3d72b4d847e19",
+            "AC-04aeb19bcfcdea2c75f8",
+            "AC-6f57220981ef5b582ae0",
+            "AC-331462af863cf21e8c92"
+          ],
+          "inputContract": "Gate Exit Code & Logs",
+          "outputContract": "Diff & DDD Evidence Manifest",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 2,
+          "collapsed": false,
+          "positionX": 336,
+          "positionY": 1060,
+          "width": 212,
+          "height": 74,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:29.423Z"
+        },
+        {
+          "id": "p3qa-bd4e8423",
+          "scopeId": "wf-ed9c79c7",
+          "code": "P3.QA",
+          "parentWbsId": "p3-f8e12fae",
+          "containerNodeId": "p3-f8e12fae",
+          "phaseId": "p3-f8e12fae",
+          "phaseTitle": "Phase 3 · Verification & Recovery",
+          "depth": 1,
+          "kind": "qa_audit",
+          "executorKind": "agent",
+          "capabilityId": "native-api",
+          "assignedRole": "evaluator",
+          "assignedModel": null,
+          "title": "Independent QA Audit",
+          "description": "Evaluate deliverable strictly against GoalSpec constraints and acceptance criteria.",
+          "planningRationale": "Independent evaluator verdict separates pass commit checkpoint from bounded fail-rewind.",
+          "requirementRefs": [
+            "AC-87b89be3d72b4d847e19",
+            "AC-04aeb19bcfcdea2c75f8",
+            "AC-6f57220981ef5b582ae0",
+            "AC-331462af863cf21e8c92"
+          ],
+          "inputContract": "Diff & DDD Evidence Manifest",
+          "outputContract": "Fail-Closed JSON Audit Verdict",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 3,
+          "collapsed": false,
+          "positionX": 608,
+          "positionY": 1060,
+          "width": 212,
+          "height": 74,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:29.423Z"
+        },
+        {
+          "id": "p3ckpt-e7197012",
+          "scopeId": "wf-ed9c79c7",
+          "code": "P3.CKPT",
+          "parentWbsId": "p3-f8e12fae",
+          "containerNodeId": "p3-f8e12fae",
+          "phaseId": "p3-f8e12fae",
+          "phaseTitle": "Phase 3 · Verification & Recovery",
+          "depth": 1,
+          "kind": "checkpoint",
+          "executorKind": "control",
+          "capabilityId": "control:plane",
+          "assignedRole": "evaluator",
+          "assignedModel": null,
+          "title": "Physical Git Checkpoint",
+          "description": "Commit certified worktree state and tag durable snapshot.",
+          "planningRationale": "Persists recoverable milestone snapshot on verified pass.",
+          "requirementRefs": [
+            "AC-87b89be3d72b4d847e19"
+          ],
+          "inputContract": "Pass Audit Verdict",
+          "outputContract": "Git Commit SHA & Tag",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 1,
+          "collapsed": false,
+          "positionX": 336,
+          "positionY": 1196,
+          "width": 212,
+          "height": 74,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:29.423Z"
+        },
+        {
+          "id": "p3rst-b2c1a65a",
+          "scopeId": "wf-ed9c79c7",
+          "code": "P3.RST",
+          "parentWbsId": "p3-f8e12fae",
+          "containerNodeId": "p3-f8e12fae",
+          "phaseId": "p3-f8e12fae",
+          "phaseTitle": "Phase 3 · Verification & Recovery",
+          "depth": 1,
+          "kind": "restore",
+          "executorKind": "control",
+          "capabilityId": "control:plane",
+          "assignedRole": "evaluator",
+          "assignedModel": null,
+          "title": "Bounded Rescue Rewind",
+          "description": "Create non-destructive git rescue ref and rewind execution frontier on failure.",
+          "planningRationale": "Preserves debug artifacts in rescue branch while deterministically retrying up to maxReworkIterations.",
+          "requirementRefs": [
+            "AC-87b89be3d72b4d847e19"
+          ],
+          "inputContract": "Fail Audit / Gate Error",
+          "outputContract": "Rescue Branch Ref & Re-armed Frontier",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 3,
+          "collapsed": false,
+          "positionX": 64,
+          "positionY": 1196,
+          "width": 212,
+          "height": 74,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:29.423Z"
+        },
+        {
+          "id": "p3done-e28dd7a2",
+          "scopeId": "wf-ed9c79c7",
+          "code": "DONE",
+          "parentWbsId": "p3-f8e12fae",
+          "containerNodeId": "p3-f8e12fae",
+          "phaseId": "p3-f8e12fae",
+          "phaseTitle": "Phase 3 · Verification & Recovery",
+          "depth": 1,
+          "kind": "done",
+          "executorKind": "control",
+          "capabilityId": "control:plane",
+          "assignedRole": "lead",
+          "assignedModel": null,
+          "title": "Certified Release Complete",
+          "description": "All gates, constraints, and acceptance criteria satisfied.",
+          "planningRationale": "Terminal sink asserting full specification closure.",
+          "requirementRefs": [
+            "AC-87b89be3d72b4d847e19",
+            "AC-04aeb19bcfcdea2c75f8",
+            "AC-6f57220981ef5b582ae0",
+            "AC-331462af863cf21e8c92"
+          ],
+          "inputContract": "Git Commit SHA & Tag",
+          "outputContract": "stdout 非空行数或 stderr 错误",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 1,
+          "collapsed": false,
+          "positionX": 608,
+          "positionY": 1196,
+          "width": 212,
+          "height": 74,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:29.423Z"
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge-b8723a9e",
+          "scopeId": "wf-ed9c79c7",
+          "sourceNodeId": "start-60f68e44",
+          "targetNodeId": "p1t1-5f6a8ff2",
+          "kind": "dep",
+          "label": "init",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-052d96e8",
+          "scopeId": "wf-ed9c79c7",
+          "sourceNodeId": "p1t1-5f6a8ff2",
+          "targetNodeId": "p1ckpt-2ad64d93",
+          "kind": "dep",
+          "label": "anchor",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-13707937",
+          "scopeId": "wf-ed9c79c7",
+          "sourceNodeId": "p1ckpt-2ad64d93",
+          "targetNodeId": "p2t1-9432045a",
+          "kind": "dep",
+          "label": "fork-1",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-2e347b5d",
+          "scopeId": "wf-ed9c79c7",
+          "sourceNodeId": "p1ckpt-2ad64d93",
+          "targetNodeId": "p2t2-0b4e79d0",
+          "kind": "dep",
+          "label": "fork-2",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-df55ab2d",
+          "scopeId": "wf-ed9c79c7",
+          "sourceNodeId": "p2t1-9432045a",
+          "targetNodeId": "p2d1-af15e70e",
+          "kind": "dep",
+          "label": "route",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-25e85eb1",
+          "scopeId": "wf-ed9c79c7",
+          "sourceNodeId": "p2d1-af15e70e",
+          "targetNodeId": "p2std-00bf4106",
+          "kind": "pass",
+          "label": "standard",
+          "conditionExpr": "standard"
+        },
+        {
+          "id": "edge-5ea811e6",
+          "scopeId": "wf-ed9c79c7",
+          "sourceNodeId": "p2d1-af15e70e",
+          "targetNodeId": "p2ext-6f72aadd",
+          "kind": "pass",
+          "label": "extended",
+          "conditionExpr": "extended"
+        },
+        {
+          "id": "edge-cac2654f",
+          "scopeId": "wf-ed9c79c7",
+          "sourceNodeId": "p2t2-0b4e79d0",
+          "targetNodeId": "p2sec-18276eb5",
+          "kind": "dep",
+          "label": "sync",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-4754b99f",
+          "scopeId": "wf-ed9c79c7",
+          "sourceNodeId": "p2std-00bf4106",
+          "targetNodeId": "p2sec-18276eb5",
+          "kind": "dep",
+          "label": "sync",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-227d89b8",
+          "scopeId": "wf-ed9c79c7",
+          "sourceNodeId": "p2ext-6f72aadd",
+          "targetNodeId": "p2sec-18276eb5",
+          "kind": "dep",
+          "label": "sync",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-815c0df0",
+          "scopeId": "wf-ed9c79c7",
+          "sourceNodeId": "p2sec-18276eb5",
+          "targetNodeId": "p2join-0ee85cd7",
+          "kind": "dep",
+          "label": "cleared",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-e4dc2b3d",
+          "scopeId": "wf-ed9c79c7",
+          "sourceNodeId": "p2join-0ee85cd7",
+          "targetNodeId": "p2ckpt-e54df30a",
+          "kind": "dep",
+          "label": "checkpoint",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-d0937b1c",
+          "scopeId": "wf-ed9c79c7",
+          "sourceNodeId": "p2ckpt-e54df30a",
+          "targetNodeId": "p3gate-cee1d8f1",
+          "kind": "dep",
+          "label": "verify",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-777420f7",
+          "scopeId": "wf-ed9c79c7",
+          "sourceNodeId": "p3gate-cee1d8f1",
+          "targetNodeId": "p3sc-4467cad9",
+          "kind": "pass",
+          "label": "exit 0",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-f9f4fe71",
+          "scopeId": "wf-ed9c79c7",
+          "sourceNodeId": "p3gate-cee1d8f1",
+          "targetNodeId": "p3rst-b2c1a65a",
+          "kind": "fail",
+          "label": "gate fail",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-6f4cc01b",
+          "scopeId": "wf-ed9c79c7",
+          "sourceNodeId": "p3sc-4467cad9",
+          "targetNodeId": "p3qa-bd4e8423",
+          "kind": "dep",
+          "label": "audit",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-99da96be",
+          "scopeId": "wf-ed9c79c7",
+          "sourceNodeId": "p3qa-bd4e8423",
+          "targetNodeId": "p3ckpt-e7197012",
+          "kind": "pass",
+          "label": "pass",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-a4c13306",
+          "scopeId": "wf-ed9c79c7",
+          "sourceNodeId": "p3qa-bd4e8423",
+          "targetNodeId": "p3rst-b2c1a65a",
+          "kind": "fail",
+          "label": "qa fail",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-41ec93f5",
+          "scopeId": "wf-ed9c79c7",
+          "sourceNodeId": "p3rst-b2c1a65a",
+          "targetNodeId": "p3gate-cee1d8f1",
+          "kind": "loop",
+          "label": "rework",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-5a3c4b2b",
+          "scopeId": "wf-ed9c79c7",
+          "sourceNodeId": "p3ckpt-e7197012",
+          "targetNodeId": "p3done-e28dd7a2",
+          "kind": "dep",
+          "label": "certify",
+          "conditionExpr": null
+        }
+      ],
+      "validation": {
+        "workflowId": "wf-ed9c79c7",
+        "valid": true,
+        "errorCount": 0,
+        "warningCount": 0,
+        "infoCount": 1,
+        "issues": [
+          {
+            "id": "val-b186383a",
+            "level": "info",
+            "category": "spec_coverage",
+            "nodeCode": null,
+            "requirementCode": null,
+            "message": "Unconfirmed suggested assumption: \"除文件不存在外的读取错误使用哪个具体非零退出码？该细分值后续确认，当前保证失败为非零退出。\"",
+            "suggestion": "Review and confirm or replace auto-suggested assumptions in GoalSpec."
+          }
+        ],
+        "checkedAt": "2026-11-24T06:59:29.425Z"
+      },
+      "latestTrial": null,
+      "lastImpact": null,
+      "versions": [],
+      "pmReport": {
+        "id": "pm-6e9a047b",
+        "workflowId": "wf-ed9c79c7",
+        "mode": "structural_pm",
+        "templatePreset": "fullstack_se",
+        "detectedModules": [
+          {
+            "name": "命令行入口",
+            "layer": "integration",
+            "artifacts": [
+              "src/cli.ts"
+            ],
+            "relatedFrCodes": [
+              "FR-75b955fe0e1a99fbbb8f"
+            ],
+            "summary": "模块 entry：接收文件路径，调用计数函数，成功向 stdout 输出整数和换行；失败向 stderr 输出错误并非零退出\n输入：UTF-8 文件路径参数\n输出：stdout 非空行数或 stderr 错误\n依赖：core (流式计数逻辑)\n接口 operation [function]；提供方 core；消费方 entry；输入 countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件；结果 返回非负整数；CLI 将其写入 stdout 并追加换行；失败 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；副作用 只读取指定文件，不修改输入文件\n文件动作：create src/cli.ts\n设计补充检查 DC-operation-failure（非原始 AC，来源 interface:operation，关联需求 FR-75b955fe0e1a99fbbb8f）：向入口注入失败并核对调用方可见行为：文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；证据 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数"
+          },
+          {
+            "name": "流式计数逻辑",
+            "layer": "backend",
+            "artifacts": [
+              "src/count.ts"
+            ],
+            "relatedFrCodes": [
+              "FR-75b955fe0e1a99fbbb8f",
+              "NFR-68a355bd9a1aa462a58d"
+            ],
+            "summary": "模块 core：以流方式按 UTF-8 逐行读取；使用 trim 后长度判断空白行；累计非空行数，不保留完整文件\n输入：文件路径\n输出：Promise<number> 非负行数\n依赖：无\n接口 operation [function]；提供方 core；消费方 entry；输入 countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件；结果 返回非负整数；CLI 将其写入 stdout 并追加换行；失败 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；副作用 只读取指定文件，不修改输入文件\n文件动作：create src/count.ts\n质量要求 NFR-68a355bd9a1aa462a58d：准备：一个 1 GiB UTF-8 文本文件；执行：统计非空行并采集峰值内存；记录可观察结果；通过条件 结果正确且峰值内存不超过 64 MiB\n设计补充检查 DC-operation-failure（非原始 AC，来源 interface:operation，关联需求 FR-75b955fe0e1a99fbbb8f）：向入口注入失败并核对调用方可见行为：文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；证据 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数"
+          }
+        ],
+        "slices": [
+          {
+            "code": "P2.T1",
+            "title": "命令行入口",
+            "phase": "P2",
+            "layer": "integration",
+            "requirementRefs": [
+              "FR-75b955fe0e1a99fbbb8f"
+            ],
+            "dependsOnCodes": [
+              "P1.T1"
+            ],
+            "assignedRole": "worker",
+            "executorKind": "agent",
+            "fileScope": [
+              "src/cli.ts"
+            ],
+            "rationale": "模块 entry：接收文件路径，调用计数函数，成功向 stdout 输出整数和换行；失败向 stderr 输出错误并非零退出\n输入：UTF-8 文件路径参数\n输出：stdout 非空行数或 stderr 错误\n依赖：core (流式计数逻辑)\n接口 operation [function]；提供方 core；消费方 entry；输入 countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件；结果 返回非负整数；CLI 将其写入 stdout 并追加换行；失败 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；副作用 只读取指定文件，不修改输入文件\n文件动作：create src/cli.ts\n设计补充检查 DC-operation-failure（非原始 AC，来源 interface:operation，关联需求 FR-75b955fe0e1a99fbbb8f）：向入口注入失败并核对调用方可见行为：文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；证据 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数 [Layer=integration, Scope=src/cli.ts]. Follow DDD canonical terms (EnrollmentTicket, JournalEntry, ReworkLoop)."
+          },
+          {
+            "code": "P2.T2",
+            "title": "流式计数逻辑",
+            "phase": "P2",
+            "layer": "backend",
+            "requirementRefs": [
+              "FR-75b955fe0e1a99fbbb8f",
+              "NFR-68a355bd9a1aa462a58d"
+            ],
+            "dependsOnCodes": [
+              "P1.T1"
+            ],
+            "assignedRole": "worker",
+            "executorKind": "agent",
+            "fileScope": [
+              "src/count.ts"
+            ],
+            "rationale": "模块 core：以流方式按 UTF-8 逐行读取；使用 trim 后长度判断空白行；累计非空行数，不保留完整文件\n输入：文件路径\n输出：Promise<number> 非负行数\n依赖：无\n接口 operation [function]；提供方 core；消费方 entry；输入 countFile(path: string): Promise<number>，路径必须指向 UTF-8 文件；结果 返回非负整数；CLI 将其写入 stdout 并追加换行；失败 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；副作用 只读取指定文件，不修改输入文件\n文件动作：create src/count.ts\n质量要求 NFR-68a355bd9a1aa462a58d：准备：一个 1 GiB UTF-8 文本文件；执行：统计非空行并采集峰值内存；记录可观察结果；通过条件 结果正确且峰值内存不超过 64 MiB\n设计补充检查 DC-operation-failure（非原始 AC，来源 interface:operation，关联需求 FR-75b955fe0e1a99fbbb8f）：向入口注入失败并核对调用方可见行为：文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数；证据 文件不存在时向 stderr 报告错误，退出码非零；失败不输出部分计数 [Layer=backend, Scope=src/count.ts]. Follow DDD canonical terms (EnrollmentTicket, JournalEntry, ReworkLoop)."
+          }
+        ],
+        "pmNarrative": "PM Agent analyzed \"文本非空行统计工具软件设计\" using template \"fullstack_se\" (2 explicit Design Spec modules -> 2 parallel P2 task slices, maxWorkers=3). Autonomous Phase 1 -> Phase 2 handoff enabled. Pre-merge Security & Guardrail scan armed.",
+        "skillsApplied": [
+          "worktree-isolation-safety",
+          "fail-closed-gates",
+          "pm-modular-decomposition"
+        ],
+        "createdAt": "2026-11-24T06:59:29.416Z"
+      }
+    }
+  },
+  "coverage": [
+    {
+      "requirementId": "FR-75b955fe0e1a99fbbb8f",
+      "scopeKey": "count",
+      "kind": "functional",
+      "priority": "must",
+      "dependencies": [],
+      "constraints": [
+        "UTF-8 编码；trim 后长度为零的行不计数"
+      ],
+      "moduleIds": [
+        "entry",
+        "core"
+      ],
+      "acceptance": [
+        {
+          "id": "AC-87b89be3d72b4d847e19",
+          "given": "文件含两行文本、一行空行和一行仅空白字符",
+          "when": "运行非空行统计",
+          "then": "输出非空行数 2",
+          "acceptanceId": "AC-87b89be3d72b4d847e19",
+          "method": "准备夹具：文件含两行文本、一行空行和一行仅空白字符；运行非空行统计；断言：输出非空行数 2",
+          "expectedEvidence": "输出非空行数 2"
+        },
+        {
+          "id": "AC-04aeb19bcfcdea2c75f8",
+          "given": "存在一个空文件",
+          "when": "运行非空行统计",
+          "then": "输出非空行数 0",
+          "acceptanceId": "AC-04aeb19bcfcdea2c75f8",
+          "method": "准备夹具：存在一个空文件；运行非空行统计；断言：输出非空行数 0",
+          "expectedEvidence": "输出非空行数 0"
+        },
+        {
+          "id": "AC-6f57220981ef5b582ae0",
+          "given": "文件路径不存在",
+          "when": "运行非空行统计",
+          "then": "报告文件不存在",
+          "acceptanceId": "AC-6f57220981ef5b582ae0",
+          "method": "准备夹具：文件路径不存在；运行非空行统计；断言：报告文件不存在",
+          "expectedEvidence": "报告文件不存在"
+        }
+      ],
+      "issueIds": [
+        "issue-count"
+      ],
+      "proposalId": "proposal-fe8cd48d-10b5-471d-a37e-e76da146aa95"
+    },
+    {
+      "requirementId": "NFR-68a355bd9a1aa462a58d",
+      "scopeKey": "stream",
+      "kind": "nonfunctional",
+      "priority": "should",
+      "dependencies": [
+        "FR-75b955fe0e1a99fbbb8f"
+      ],
+      "constraints": [
+        "禁止一次加载整个文件"
+      ],
+      "moduleIds": [
+        "core"
+      ],
+      "acceptance": [
+        {
+          "id": "AC-331462af863cf21e8c92",
+          "given": "一个 1 GiB UTF-8 文本文件",
+          "when": "统计非空行并采集峰值内存",
+          "then": "结果正确且峰值内存不超过 64 MiB",
+          "acceptanceId": "AC-331462af863cf21e8c92",
+          "method": "准备夹具：一个 1 GiB UTF-8 文本文件；统计非空行并采集峰值内存；断言：结果正确且峰值内存不超过 64 MiB",
+          "expectedEvidence": "结果正确且峰值内存不超过 64 MiB"
+        }
+      ],
+      "issueIds": [
+        "issue-stream"
+      ],
+      "proposalId": "proposal-fe8cd48d-10b5-471d-a37e-e76da146aa95"
+    }
+  ]
+}

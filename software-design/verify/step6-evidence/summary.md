@@ -1,0 +1,10 @@
+# 第 6 部分交接验收总表
+
+真实 HAMA / 设计 / Planner / SQLite / HTTP，本地模型协议夹具与脚本化审批；非在线质量评测
+
+| 项目 / PRD 基线版本与摘要 | 工作区 / 目标提交 | Design Spec 修订与摘要 | workflow.id / pmReport.id | 抽查的原始需求与 AC / PM 模块 / 结果 |
+| --- | --- | --- | --- | --- |
+| counter-v1 · acceptance-counter<br>baseline-run-8d4b1432 / v1<br>1ac6e5d59f2d18b4cbb997c8b440158e2e5ebf7c6ed8cc5f5cb14e268fc12757 | ws-88011696<br>4ee2cce7f1b53fc0004d1dd322c3533ea4bd1fae | design-d18a7274-6419-44ce-ae20-691ad28d35bc / v1<br>4505125e3d9b281e8c5259e1521de33fd2475007948ac107dbb41faf4d868074 | wf-ed9c79c7<br>pm-6e9a047b | FR-75b955fe0e1a99fbbb8f<br>AC-87b89be3d72b4d847e19<br>entry / src/cli.ts / P2.T1<br>received；[完整证据](counter-v1.json) |
+| ledger · acceptance-ledger<br>baseline-run-5c1edfe7 / v1<br>7bfa76e7872ad64cc4cb3e95ab7d5bf427a3d47a8e875d53001407fdee62ad71 | ws-6fd6d856<br>cad45dde810aefd49627451c5854b12ca1d6a016 | design-a5f1d7f0-7572-4d38-b5c5-6c5ad43d4530 / v1<br>6dee9a207cee968687b8d2cb5081956197b3e1575f9e74631e1e3785957503d0 | wf-f7631008<br>pm-91641362 | FR-4da5a603dfd62de7ae18<br>AC-d69b70f80aa98064a5df<br>entry / src/journal-api.ts / P2.T1<br>received；[完整证据](ledger.json) |
+| campus-demo · acceptance-campus<br>baseline-run-8becd703 / v1<br>1d9ed1bbf4b5cab718f21ca9dc86b164609967a6ec6f3c6e5f4fe6bd88fa0173 | ws-080d15a7<br>62852e9f6f71de8a3e948a7466c9be694bedf35c | design-c0d7ddde-3751-4354-8f10-c8fa0ce396a7 / v1<br>5f85ad1e5d0a8e3a67191d14a53836a1277d18e6da782032aabde3b1974d60d6 | 演练，不创建工作流<br>无 PM 回执 | FR-e9c0c1e97f4001b50b8d<br>AC-751562f2dc980d63c9e2<br>entry / src/registration-view.tsx / 演练草案<br>demo_draft_only；[完整证据](campus-demo.json) |
+| counter-v2 · acceptance-counter<br>baseline-run-bacc14cc / v2<br>3a738516324ef9961e9bf34dee9950d1ffd9ca07887748a2d53c0dd2f7d3ac00 | ws-88011696<br>4ee2cce7f1b53fc0004d1dd322c3533ea4bd1fae | design-c11544b2-6c6e-405c-ac5b-28b3ff75731f / v1<br>412e31a09f1fe5a52489c3eae10b169fc2162e258c7ad5e31ff98a868455eeb0 | wf-9e5d5b2a<br>pm-87c81588 | FR-75b955fe0e1a99fbbb8f<br>AC-87b89be3d72b4d847e19<br>entry / src/cli.ts / P2.T1<br>received；[完整证据](counter-v2.json) |

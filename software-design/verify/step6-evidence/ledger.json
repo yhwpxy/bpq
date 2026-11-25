@@ -1,0 +1,4043 @@
+{
+  "caseId": "ledger",
+  "baseline": {
+    "schemaVersion": 1,
+    "id": "baseline-run-5c1edfe7",
+    "projectId": "acceptance-ledger",
+    "revision": 1,
+    "parentId": null,
+    "mode": "live",
+    "approvedPrd": {
+      "id": "prd-7deddf57-3ccd-4cdd-bdff-4944b711058b",
+      "kind": "prd",
+      "revision": 1,
+      "hash": "e9f1fe62b03419c07f21329d8f64544221123b7f0ce0ec3a7f83ece5c56b637c"
+    },
+    "approval": {
+      "targetId": "proposal-2a818145-0404-4113-9280-3902a690d9c7",
+      "targetHash": "2ec27fd26bd15e23db452689d202f1932e23da5e05934499a70177c14b7dc73a",
+      "actor": "验收脚本模拟审批人",
+      "action": "approve",
+      "feedback": "",
+      "scope": "local",
+      "issueIds": [],
+      "id": "int-61b534a5",
+      "gateKind": "approval",
+      "targetRevision": 1,
+      "decidedAt": "2026-11-24T06:59:29.787Z"
+    },
+    "confirmation": {
+      "targetId": "prd-7deddf57-3ccd-4cdd-bdff-4944b711058b",
+      "targetHash": "e9f1fe62b03419c07f21329d8f64544221123b7f0ce0ec3a7f83ece5c56b637c",
+      "actor": "验收脚本模拟审批人",
+      "action": "confirm",
+      "feedback": "",
+      "scope": "local",
+      "issueIds": [],
+      "id": "int-3db7347c",
+      "gateKind": "confirmation",
+      "targetRevision": 1,
+      "decidedAt": "2026-11-24T06:59:29.837Z"
+    },
+    "prd": {
+      "title": "多币种记账服务",
+      "revision": 1,
+      "proposal": {
+        "id": "proposal-2a818145-0404-4113-9280-3902a690d9c7",
+        "kind": "proposal",
+        "revision": 1,
+        "hash": "2ec27fd26bd15e23db452689d202f1932e23da5e05934499a70177c14b7dc73a"
+      },
+      "approvalId": "int-61b534a5",
+      "sections": {
+        "goals": [
+          "保存平衡分录及可回查的汇率快照"
+        ],
+        "summary": "[ledger] 多币种记账服务",
+        "approach": [
+          "借方合计等于贷方合计才能过账",
+          "换算使用记账日期的汇率快照，四舍五入保留两位小数"
+        ],
+        "scope": [
+          {
+            "key": "journal",
+            "kind": "functional",
+            "title": "分录过账",
+            "decision": "验证借贷平衡后保存分录，失败时不保存部分分录",
+            "issueIds": [
+              "issue-journal"
+            ]
+          },
+          {
+            "key": "fx",
+            "kind": "functional",
+            "title": "汇率快照",
+            "decision": "用记账日期汇率换算金额并保存快照",
+            "issueIds": [
+              "issue-fx"
+            ]
+          },
+          {
+            "key": "atomic",
+            "kind": "nonfunctional",
+            "title": "事务幂等",
+            "decision": "相同业务请求编号并发提交只产生一次过账",
+            "issueIds": [
+              "issue-atomic"
+            ]
+          }
+        ],
+        "outOfScope": [
+          "未列出的扩展功能"
+        ],
+        "constraints": [
+          "金额使用十进制定点数，禁止二进制浮点金额计算",
+          "一次过账的所有写入在单个事务内完成"
+        ],
+        "tradeoffs": [],
+        "risks": [],
+        "unresolved": [],
+        "businessRules": [
+          "借方合计等于贷方合计才能过账",
+          "换算使用记账日期的汇率快照，四舍五入保留两位小数"
+        ],
+        "externalDependencies": []
+      },
+      "background": "[ledger] 保存平衡分录及可回查的汇率快照",
+      "scenarios": [
+        "保存平衡分录及可回查的汇率快照"
+      ],
+      "requirements": [
+        {
+          "id": "FR-4da5a603dfd62de7ae18",
+          "scopeKey": "journal",
+          "kind": "functional",
+          "title": "分录过账",
+          "description": "验证借贷平衡后保存分录，失败时不保存部分分录",
+          "value": "保证账本一致性",
+          "priority": "must",
+          "dependencies": [],
+          "constraints": [
+            "必须保存唯一业务请求编号"
+          ],
+          "state": "baselined",
+          "acceptance": [
+            {
+              "id": "AC-d69b70f80aa98064a5df",
+              "given": "借方与贷方各 100.00 元",
+              "when": "提交过账",
+              "then": "返回分录编号并保存两笔平衡分录"
+            },
+            {
+              "id": "AC-77dff747145eda7a7e33",
+              "given": "借方 100.00 元且贷方 90.00 元",
+              "when": "提交过账",
+              "then": "拒绝请求且账本无新增记录"
+            }
+          ]
+        },
+        {
+          "id": "FR-ceb605312220e6b15ae3",
+          "scopeKey": "fx",
+          "kind": "functional",
+          "title": "汇率快照",
+          "description": "用记账日期汇率换算金额并保存快照",
+          "value": "支持对账追溯",
+          "priority": "should",
+          "dependencies": [
+            "FR-4da5a603dfd62de7ae18"
+          ],
+          "constraints": [
+            "缺少当日汇率时拒绝过账"
+          ],
+          "state": "baselined",
+          "acceptance": [
+            {
+              "id": "AC-d0c79a7b04c68d895bf0",
+              "given": "USD 100.00、当日 USD/CNY 汇率 7.2000",
+              "when": "换算并过账",
+              "then": "保存 CNY 720.00 和汇率 7.2000 的快照"
+            },
+            {
+              "id": "AC-8b295d01a3038d0b293c",
+              "given": "缺少记账日期的汇率",
+              "when": "请求换算过账",
+              "then": "返回缺失汇率错误且无部分分录"
+            }
+          ]
+        },
+        {
+          "id": "NFR-d176c258c08e3e27eb86",
+          "scopeKey": "atomic",
+          "kind": "nonfunctional",
+          "title": "事务幂等",
+          "description": "相同业务请求编号并发提交只产生一次过账",
+          "value": "避免重复入账",
+          "priority": "must",
+          "dependencies": [
+            "FR-4da5a603dfd62de7ae18"
+          ],
+          "constraints": [
+            "业务请求编号唯一，检查和写入必须原子完成"
+          ],
+          "state": "baselined",
+          "acceptance": [
+            {
+              "id": "AC-7248d591eb9e5d859400",
+              "given": "两笔带相同业务请求编号的平衡分录请求",
+              "when": "并发提交",
+              "then": "只有一个分录编号和一组过账记录"
+            }
+          ]
+        }
+      ],
+      "changes": [
+        "初版草案"
+      ],
+      "trace": [
+        {
+          "issueIds": [
+            "issue-journal"
+          ],
+          "ideaAndDocumentIds": [
+            "idea-1"
+          ],
+          "proposal": {
+            "id": "proposal-2a818145-0404-4113-9280-3902a690d9c7",
+            "kind": "proposal",
+            "revision": 1,
+            "hash": "2ec27fd26bd15e23db452689d202f1932e23da5e05934499a70177c14b7dc73a"
+          },
+          "scopeKey": "journal",
+          "approvalId": "int-61b534a5",
+          "requirementId": "FR-4da5a603dfd62de7ae18",
+          "acceptanceIds": [
+            "AC-d69b70f80aa98064a5df",
+            "AC-77dff747145eda7a7e33"
+          ]
+        },
+        {
+          "issueIds": [
+            "issue-fx"
+          ],
+          "ideaAndDocumentIds": [
+            "idea-1"
+          ],
+          "proposal": {
+            "id": "proposal-2a818145-0404-4113-9280-3902a690d9c7",
+            "kind": "proposal",
+            "revision": 1,
+            "hash": "2ec27fd26bd15e23db452689d202f1932e23da5e05934499a70177c14b7dc73a"
+          },
+          "scopeKey": "fx",
+          "approvalId": "int-61b534a5",
+          "requirementId": "FR-ceb605312220e6b15ae3",
+          "acceptanceIds": [
+            "AC-d0c79a7b04c68d895bf0",
+            "AC-8b295d01a3038d0b293c"
+          ]
+        },
+        {
+          "issueIds": [
+            "issue-atomic"
+          ],
+          "ideaAndDocumentIds": [
+            "idea-1"
+          ],
+          "proposal": {
+            "id": "proposal-2a818145-0404-4113-9280-3902a690d9c7",
+            "kind": "proposal",
+            "revision": 1,
+            "hash": "2ec27fd26bd15e23db452689d202f1932e23da5e05934499a70177c14b7dc73a"
+          },
+          "scopeKey": "atomic",
+          "approvalId": "int-61b534a5",
+          "requirementId": "NFR-d176c258c08e3e27eb86",
+          "acceptanceIds": [
+            "AC-7248d591eb9e5d859400"
+          ]
+        }
+      ]
+    },
+    "sha256": "7bfa76e7872ad64cc4cb3e95ab7d5bf427a3d47a8e875d53001407fdee62ad71"
+  },
+  "input": {
+    "designId": "design-a5f1d7f0-7572-4d38-b5c5-6c5ad43d4530",
+    "revision": 1,
+    "state": "draft",
+    "stage": "input_ready",
+    "createdAt": "2026-11-24T06:59:30.543Z",
+    "contentSha256": "cd9f0a9e223854b29950a3da5c6073899ea8db37559dc1d75933f9af9c365941",
+    "baselineRef": {
+      "id": "baseline-run-5c1edfe7",
+      "projectId": "acceptance-ledger",
+      "revision": 1,
+      "sha256": "7bfa76e7872ad64cc4cb3e95ab7d5bf427a3d47a8e875d53001407fdee62ad71",
+      "schemaVersion": 1,
+      "mode": "live"
+    },
+    "baseline": {
+      "schemaVersion": 1,
+      "id": "baseline-run-5c1edfe7",
+      "projectId": "acceptance-ledger",
+      "revision": 1,
+      "parentId": null,
+      "mode": "live",
+      "approvedPrd": {
+        "id": "prd-7deddf57-3ccd-4cdd-bdff-4944b711058b",
+        "kind": "prd",
+        "revision": 1,
+        "hash": "e9f1fe62b03419c07f21329d8f64544221123b7f0ce0ec3a7f83ece5c56b637c"
+      },
+      "approval": {
+        "targetId": "proposal-2a818145-0404-4113-9280-3902a690d9c7",
+        "targetHash": "2ec27fd26bd15e23db452689d202f1932e23da5e05934499a70177c14b7dc73a",
+        "actor": "验收脚本模拟审批人",
+        "action": "approve",
+        "feedback": "",
+        "scope": "local",
+        "issueIds": [],
+        "id": "int-61b534a5",
+        "gateKind": "approval",
+        "targetRevision": 1,
+        "decidedAt": "2026-11-24T06:59:29.787Z"
+      },
+      "confirmation": {
+        "targetId": "prd-7deddf57-3ccd-4cdd-bdff-4944b711058b",
+        "targetHash": "e9f1fe62b03419c07f21329d8f64544221123b7f0ce0ec3a7f83ece5c56b637c",
+        "actor": "验收脚本模拟审批人",
+        "action": "confirm",
+        "feedback": "",
+        "scope": "local",
+        "issueIds": [],
+        "id": "int-3db7347c",
+        "gateKind": "confirmation",
+        "targetRevision": 1,
+        "decidedAt": "2026-11-24T06:59:29.837Z"
+      },
+      "prd": {
+        "title": "多币种记账服务",
+        "revision": 1,
+        "proposal": {
+          "id": "proposal-2a818145-0404-4113-9280-3902a690d9c7",
+          "kind": "proposal",
+          "revision": 1,
+          "hash": "2ec27fd26bd15e23db452689d202f1932e23da5e05934499a70177c14b7dc73a"
+        },
+        "approvalId": "int-61b534a5",
+        "sections": {
+          "goals": [
+            "保存平衡分录及可回查的汇率快照"
+          ],
+          "summary": "[ledger] 多币种记账服务",
+          "approach": [
+            "借方合计等于贷方合计才能过账",
+            "换算使用记账日期的汇率快照，四舍五入保留两位小数"
+          ],
+          "scope": [
+            {
+              "key": "journal",
+              "kind": "functional",
+              "title": "分录过账",
+              "decision": "验证借贷平衡后保存分录，失败时不保存部分分录",
+              "issueIds": [
+                "issue-journal"
+              ]
+            },
+            {
+              "key": "fx",
+              "kind": "functional",
+              "title": "汇率快照",
+              "decision": "用记账日期汇率换算金额并保存快照",
+              "issueIds": [
+                "issue-fx"
+              ]
+            },
+            {
+              "key": "atomic",
+              "kind": "nonfunctional",
+              "title": "事务幂等",
+              "decision": "相同业务请求编号并发提交只产生一次过账",
+              "issueIds": [
+                "issue-atomic"
+              ]
+            }
+          ],
+          "outOfScope": [
+            "未列出的扩展功能"
+          ],
+          "constraints": [
+            "金额使用十进制定点数，禁止二进制浮点金额计算",
+            "一次过账的所有写入在单个事务内完成"
+          ],
+          "tradeoffs": [],
+          "risks": [],
+          "unresolved": [],
+          "businessRules": [
+            "借方合计等于贷方合计才能过账",
+            "换算使用记账日期的汇率快照，四舍五入保留两位小数"
+          ],
+          "externalDependencies": []
+        },
+        "background": "[ledger] 保存平衡分录及可回查的汇率快照",
+        "scenarios": [
+          "保存平衡分录及可回查的汇率快照"
+        ],
+        "requirements": [
+          {
+            "id": "FR-4da5a603dfd62de7ae18",
+            "scopeKey": "journal",
+            "kind": "functional",
+            "title": "分录过账",
+            "description": "验证借贷平衡后保存分录，失败时不保存部分分录",
+            "value": "保证账本一致性",
+            "priority": "must",
+            "dependencies": [],
+            "constraints": [
+              "必须保存唯一业务请求编号"
+            ],
+            "state": "baselined",
+            "acceptance": [
+              {
+                "id": "AC-d69b70f80aa98064a5df",
+                "given": "借方与贷方各 100.00 元",
+                "when": "提交过账",
+                "then": "返回分录编号并保存两笔平衡分录"
+              },
+              {
+                "id": "AC-77dff747145eda7a7e33",
+                "given": "借方 100.00 元且贷方 90.00 元",
+                "when": "提交过账",
+                "then": "拒绝请求且账本无新增记录"
+              }
+            ]
+          },
+          {
+            "id": "FR-ceb605312220e6b15ae3",
+            "scopeKey": "fx",
+            "kind": "functional",
+            "title": "汇率快照",
+            "description": "用记账日期汇率换算金额并保存快照",
+            "value": "支持对账追溯",
+            "priority": "should",
+            "dependencies": [
+              "FR-4da5a603dfd62de7ae18"
+            ],
+            "constraints": [
+              "缺少当日汇率时拒绝过账"
+            ],
+            "state": "baselined",
+            "acceptance": [
+              {
+                "id": "AC-d0c79a7b04c68d895bf0",
+                "given": "USD 100.00、当日 USD/CNY 汇率 7.2000",
+                "when": "换算并过账",
+                "then": "保存 CNY 720.00 和汇率 7.2000 的快照"
+              },
+              {
+                "id": "AC-8b295d01a3038d0b293c",
+                "given": "缺少记账日期的汇率",
+                "when": "请求换算过账",
+                "then": "返回缺失汇率错误且无部分分录"
+              }
+            ]
+          },
+          {
+            "id": "NFR-d176c258c08e3e27eb86",
+            "scopeKey": "atomic",
+            "kind": "nonfunctional",
+            "title": "事务幂等",
+            "description": "相同业务请求编号并发提交只产生一次过账",
+            "value": "避免重复入账",
+            "priority": "must",
+            "dependencies": [
+              "FR-4da5a603dfd62de7ae18"
+            ],
+            "constraints": [
+              "业务请求编号唯一，检查和写入必须原子完成"
+            ],
+            "state": "baselined",
+            "acceptance": [
+              {
+                "id": "AC-7248d591eb9e5d859400",
+                "given": "两笔带相同业务请求编号的平衡分录请求",
+                "when": "并发提交",
+                "then": "只有一个分录编号和一组过账记录"
+              }
+            ]
+          }
+        ],
+        "changes": [
+          "初版草案"
+        ],
+        "trace": [
+          {
+            "issueIds": [
+              "issue-journal"
+            ],
+            "ideaAndDocumentIds": [
+              "idea-1"
+            ],
+            "proposal": {
+              "id": "proposal-2a818145-0404-4113-9280-3902a690d9c7",
+              "kind": "proposal",
+              "revision": 1,
+              "hash": "2ec27fd26bd15e23db452689d202f1932e23da5e05934499a70177c14b7dc73a"
+            },
+            "scopeKey": "journal",
+            "approvalId": "int-61b534a5",
+            "requirementId": "FR-4da5a603dfd62de7ae18",
+            "acceptanceIds": [
+              "AC-d69b70f80aa98064a5df",
+              "AC-77dff747145eda7a7e33"
+            ]
+          },
+          {
+            "issueIds": [
+              "issue-fx"
+            ],
+            "ideaAndDocumentIds": [
+              "idea-1"
+            ],
+            "proposal": {
+              "id": "proposal-2a818145-0404-4113-9280-3902a690d9c7",
+              "kind": "proposal",
+              "revision": 1,
+              "hash": "2ec27fd26bd15e23db452689d202f1932e23da5e05934499a70177c14b7dc73a"
+            },
+            "scopeKey": "fx",
+            "approvalId": "int-61b534a5",
+            "requirementId": "FR-ceb605312220e6b15ae3",
+            "acceptanceIds": [
+              "AC-d0c79a7b04c68d895bf0",
+              "AC-8b295d01a3038d0b293c"
+            ]
+          },
+          {
+            "issueIds": [
+              "issue-atomic"
+            ],
+            "ideaAndDocumentIds": [
+              "idea-1"
+            ],
+            "proposal": {
+              "id": "proposal-2a818145-0404-4113-9280-3902a690d9c7",
+              "kind": "proposal",
+              "revision": 1,
+              "hash": "2ec27fd26bd15e23db452689d202f1932e23da5e05934499a70177c14b7dc73a"
+            },
+            "scopeKey": "atomic",
+            "approvalId": "int-61b534a5",
+            "requirementId": "NFR-d176c258c08e3e27eb86",
+            "acceptanceIds": [
+              "AC-7248d591eb9e5d859400"
+            ]
+          }
+        ]
+      },
+      "sha256": "7bfa76e7872ad64cc4cb3e95ab7d5bf427a3d47a8e875d53001407fdee62ad71"
+    },
+    "workspace": {
+      "workspaceId": "ws-6fd6d856",
+      "name": "多币种记账服务",
+      "sourceCommit": "cad45dde810aefd49627451c5854b12ca1d6a016",
+      "existingPaths": [
+        "README.md"
+      ],
+      "entryPoints": [],
+      "manifests": [],
+      "dependencies": [],
+      "testCommands": [
+        {
+          "directory": ".",
+          "command": "node --test",
+          "source": "workspace.verifyCommand（配置值，尚未执行）"
+        }
+      ],
+      "proposedPaths": [],
+      "notes": [
+        "清单及依赖取自目标提交，未提交或未跟踪文件不计入该版本。",
+        "输入阶段尚未推导拟新增路径；生成后的拟建工件见设计正文 modules.files 中 action=create 的条目。"
+      ]
+    },
+    "reviewEligible": true,
+    "blockers": []
+  },
+  "generation": {
+    "generationId": "generation-fabfca2c-c569-42dd-806b-4cbd0e899b00",
+    "designId": "design-a5f1d7f0-7572-4d38-b5c5-6c5ad43d4530",
+    "revision": 1,
+    "createdAt": "2026-11-24T06:59:30.547Z",
+    "input": {
+      "designId": "design-a5f1d7f0-7572-4d38-b5c5-6c5ad43d4530",
+      "revision": 1,
+      "state": "draft",
+      "stage": "input_ready",
+      "createdAt": "2026-11-24T06:59:30.543Z",
+      "contentSha256": "cd9f0a9e223854b29950a3da5c6073899ea8db37559dc1d75933f9af9c365941",
+      "baselineRef": {
+        "id": "baseline-run-5c1edfe7",
+        "projectId": "acceptance-ledger",
+        "revision": 1,
+        "sha256": "7bfa76e7872ad64cc4cb3e95ab7d5bf427a3d47a8e875d53001407fdee62ad71",
+        "schemaVersion": 1,
+        "mode": "live"
+      },
+      "baseline": {
+        "schemaVersion": 1,
+        "id": "baseline-run-5c1edfe7",
+        "projectId": "acceptance-ledger",
+        "revision": 1,
+        "parentId": null,
+        "mode": "live",
+        "approvedPrd": {
+          "id": "prd-7deddf57-3ccd-4cdd-bdff-4944b711058b",
+          "kind": "prd",
+          "revision": 1,
+          "hash": "e9f1fe62b03419c07f21329d8f64544221123b7f0ce0ec3a7f83ece5c56b637c"
+        },
+        "approval": {
+          "targetId": "proposal-2a818145-0404-4113-9280-3902a690d9c7",
+          "targetHash": "2ec27fd26bd15e23db452689d202f1932e23da5e05934499a70177c14b7dc73a",
+          "actor": "验收脚本模拟审批人",
+          "action": "approve",
+          "feedback": "",
+          "scope": "local",
+          "issueIds": [],
+          "id": "int-61b534a5",
+          "gateKind": "approval",
+          "targetRevision": 1,
+          "decidedAt": "2026-11-24T06:59:29.787Z"
+        },
+        "confirmation": {
+          "targetId": "prd-7deddf57-3ccd-4cdd-bdff-4944b711058b",
+          "targetHash": "e9f1fe62b03419c07f21329d8f64544221123b7f0ce0ec3a7f83ece5c56b637c",
+          "actor": "验收脚本模拟审批人",
+          "action": "confirm",
+          "feedback": "",
+          "scope": "local",
+          "issueIds": [],
+          "id": "int-3db7347c",
+          "gateKind": "confirmation",
+          "targetRevision": 1,
+          "decidedAt": "2026-11-24T06:59:29.837Z"
+        },
+        "prd": {
+          "title": "多币种记账服务",
+          "revision": 1,
+          "proposal": {
+            "id": "proposal-2a818145-0404-4113-9280-3902a690d9c7",
+            "kind": "proposal",
+            "revision": 1,
+            "hash": "2ec27fd26bd15e23db452689d202f1932e23da5e05934499a70177c14b7dc73a"
+          },
+          "approvalId": "int-61b534a5",
+          "sections": {
+            "goals": [
+              "保存平衡分录及可回查的汇率快照"
+            ],
+            "summary": "[ledger] 多币种记账服务",
+            "approach": [
+              "借方合计等于贷方合计才能过账",
+              "换算使用记账日期的汇率快照，四舍五入保留两位小数"
+            ],
+            "scope": [
+              {
+                "key": "journal",
+                "kind": "functional",
+                "title": "分录过账",
+                "decision": "验证借贷平衡后保存分录，失败时不保存部分分录",
+                "issueIds": [
+                  "issue-journal"
+                ]
+              },
+              {
+                "key": "fx",
+                "kind": "functional",
+                "title": "汇率快照",
+                "decision": "用记账日期汇率换算金额并保存快照",
+                "issueIds": [
+                  "issue-fx"
+                ]
+              },
+              {
+                "key": "atomic",
+                "kind": "nonfunctional",
+                "title": "事务幂等",
+                "decision": "相同业务请求编号并发提交只产生一次过账",
+                "issueIds": [
+                  "issue-atomic"
+                ]
+              }
+            ],
+            "outOfScope": [
+              "未列出的扩展功能"
+            ],
+            "constraints": [
+              "金额使用十进制定点数，禁止二进制浮点金额计算",
+              "一次过账的所有写入在单个事务内完成"
+            ],
+            "tradeoffs": [],
+            "risks": [],
+            "unresolved": [],
+            "businessRules": [
+              "借方合计等于贷方合计才能过账",
+              "换算使用记账日期的汇率快照，四舍五入保留两位小数"
+            ],
+            "externalDependencies": []
+          },
+          "background": "[ledger] 保存平衡分录及可回查的汇率快照",
+          "scenarios": [
+            "保存平衡分录及可回查的汇率快照"
+          ],
+          "requirements": [
+            {
+              "id": "FR-4da5a603dfd62de7ae18",
+              "scopeKey": "journal",
+              "kind": "functional",
+              "title": "分录过账",
+              "description": "验证借贷平衡后保存分录，失败时不保存部分分录",
+              "value": "保证账本一致性",
+              "priority": "must",
+              "dependencies": [],
+              "constraints": [
+                "必须保存唯一业务请求编号"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-d69b70f80aa98064a5df",
+                  "given": "借方与贷方各 100.00 元",
+                  "when": "提交过账",
+                  "then": "返回分录编号并保存两笔平衡分录"
+                },
+                {
+                  "id": "AC-77dff747145eda7a7e33",
+                  "given": "借方 100.00 元且贷方 90.00 元",
+                  "when": "提交过账",
+                  "then": "拒绝请求且账本无新增记录"
+                }
+              ]
+            },
+            {
+              "id": "FR-ceb605312220e6b15ae3",
+              "scopeKey": "fx",
+              "kind": "functional",
+              "title": "汇率快照",
+              "description": "用记账日期汇率换算金额并保存快照",
+              "value": "支持对账追溯",
+              "priority": "should",
+              "dependencies": [
+                "FR-4da5a603dfd62de7ae18"
+              ],
+              "constraints": [
+                "缺少当日汇率时拒绝过账"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-d0c79a7b04c68d895bf0",
+                  "given": "USD 100.00、当日 USD/CNY 汇率 7.2000",
+                  "when": "换算并过账",
+                  "then": "保存 CNY 720.00 和汇率 7.2000 的快照"
+                },
+                {
+                  "id": "AC-8b295d01a3038d0b293c",
+                  "given": "缺少记账日期的汇率",
+                  "when": "请求换算过账",
+                  "then": "返回缺失汇率错误且无部分分录"
+                }
+              ]
+            },
+            {
+              "id": "NFR-d176c258c08e3e27eb86",
+              "scopeKey": "atomic",
+              "kind": "nonfunctional",
+              "title": "事务幂等",
+              "description": "相同业务请求编号并发提交只产生一次过账",
+              "value": "避免重复入账",
+              "priority": "must",
+              "dependencies": [
+                "FR-4da5a603dfd62de7ae18"
+              ],
+              "constraints": [
+                "业务请求编号唯一，检查和写入必须原子完成"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-7248d591eb9e5d859400",
+                  "given": "两笔带相同业务请求编号的平衡分录请求",
+                  "when": "并发提交",
+                  "then": "只有一个分录编号和一组过账记录"
+                }
+              ]
+            }
+          ],
+          "changes": [
+            "初版草案"
+          ],
+          "trace": [
+            {
+              "issueIds": [
+                "issue-journal"
+              ],
+              "ideaAndDocumentIds": [
+                "idea-1"
+              ],
+              "proposal": {
+                "id": "proposal-2a818145-0404-4113-9280-3902a690d9c7",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "2ec27fd26bd15e23db452689d202f1932e23da5e05934499a70177c14b7dc73a"
+              },
+              "scopeKey": "journal",
+              "approvalId": "int-61b534a5",
+              "requirementId": "FR-4da5a603dfd62de7ae18",
+              "acceptanceIds": [
+                "AC-d69b70f80aa98064a5df",
+                "AC-77dff747145eda7a7e33"
+              ]
+            },
+            {
+              "issueIds": [
+                "issue-fx"
+              ],
+              "ideaAndDocumentIds": [
+                "idea-1"
+              ],
+              "proposal": {
+                "id": "proposal-2a818145-0404-4113-9280-3902a690d9c7",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "2ec27fd26bd15e23db452689d202f1932e23da5e05934499a70177c14b7dc73a"
+              },
+              "scopeKey": "fx",
+              "approvalId": "int-61b534a5",
+              "requirementId": "FR-ceb605312220e6b15ae3",
+              "acceptanceIds": [
+                "AC-d0c79a7b04c68d895bf0",
+                "AC-8b295d01a3038d0b293c"
+              ]
+            },
+            {
+              "issueIds": [
+                "issue-atomic"
+              ],
+              "ideaAndDocumentIds": [
+                "idea-1"
+              ],
+              "proposal": {
+                "id": "proposal-2a818145-0404-4113-9280-3902a690d9c7",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "2ec27fd26bd15e23db452689d202f1932e23da5e05934499a70177c14b7dc73a"
+              },
+              "scopeKey": "atomic",
+              "approvalId": "int-61b534a5",
+              "requirementId": "NFR-d176c258c08e3e27eb86",
+              "acceptanceIds": [
+                "AC-7248d591eb9e5d859400"
+              ]
+            }
+          ]
+        },
+        "sha256": "7bfa76e7872ad64cc4cb3e95ab7d5bf427a3d47a8e875d53001407fdee62ad71"
+      },
+      "workspace": {
+        "workspaceId": "ws-6fd6d856",
+        "name": "多币种记账服务",
+        "sourceCommit": "cad45dde810aefd49627451c5854b12ca1d6a016",
+        "existingPaths": [
+          "README.md"
+        ],
+        "entryPoints": [],
+        "manifests": [],
+        "dependencies": [],
+        "testCommands": [
+          {
+            "directory": ".",
+            "command": "node --test",
+            "source": "workspace.verifyCommand（配置值，尚未执行）"
+          }
+        ],
+        "proposedPaths": [],
+        "notes": [
+          "清单及依赖取自目标提交，未提交或未跟踪文件不计入该版本。",
+          "输入阶段尚未推导拟新增路径；生成后的拟建工件见设计正文 modules.files 中 action=create 的条目。"
+        ]
+      },
+      "reviewEligible": true,
+      "blockers": []
+    },
+    "request": {
+      "expectedHash": "cd9f0a9e223854b29950a3da5c6073899ea8db37559dc1d75933f9af9c365941",
+      "providerId": "openai",
+      "model": "acceptance-fixture",
+      "feedback": "按本项目原始需求推导具体契约，保留未知项和来源"
+    },
+    "status": "ready",
+    "body": {
+      "schemaVersion": 1,
+      "title": "多币种记账服务软件设计",
+      "goal": "保存平衡分录及可回查的汇率快照",
+      "inputs": [
+        "业务请求编号、日期、币种及借贷分录"
+      ],
+      "outputs": [
+        "分录编号或过账错误"
+      ],
+      "modules": [
+        {
+          "id": "entry",
+          "name": "记账接口",
+          "layer": "integration",
+          "responsibility": "校验业务请求、币种和记账日期，返回分录编号或明确错误",
+          "inputs": [
+            "业务请求编号、日期、币种及借贷分录"
+          ],
+          "outputs": [
+            "分录编号或过账错误"
+          ],
+          "requirementIds": [
+            "FR-4da5a603dfd62de7ae18",
+            "FR-ceb605312220e6b15ae3",
+            "NFR-d176c258c08e3e27eb86"
+          ],
+          "dependsOn": [
+            "core"
+          ],
+          "files": [
+            {
+              "path": "src/journal-api.ts",
+              "action": "create"
+            }
+          ]
+        },
+        {
+          "id": "core",
+          "name": "分录与汇率引擎",
+          "layer": "data",
+          "responsibility": "以十进制定点数检查借贷平衡，按日期汇率快照换算并四舍五入到分；按业务编号幂等地在单个事务过账",
+          "inputs": [
+            "业务请求编号、十进制金额、记账日期及汇率快照"
+          ],
+          "outputs": [
+            "平衡分录编号和换算金额"
+          ],
+          "requirementIds": [
+            "FR-4da5a603dfd62de7ae18",
+            "FR-ceb605312220e6b15ae3",
+            "NFR-d176c258c08e3e27eb86"
+          ],
+          "dependsOn": [],
+          "files": [
+            {
+              "path": "src/ledger.ts",
+              "action": "create"
+            }
+          ]
+        }
+      ],
+      "interfaces": [
+        {
+          "id": "operation",
+          "provider": "core",
+          "consumers": [
+            "entry"
+          ],
+          "kind": "function",
+          "input": "postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串",
+          "result": "返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00",
+          "failure": "借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号",
+          "sideEffects": "仅成功事务保存整组分录和汇率快照"
+        }
+      ],
+      "dataRules": [
+        "借方合计等于贷方合计才能过账",
+        "换算使用记账日期的汇率快照，四舍五入保留两位小数",
+        "十进制定点金额，借贷合计相等；记录日期、币种及汇率快照；业务请求编号唯一"
+      ],
+      "constraints": [
+        "金额使用十进制定点数，禁止二进制浮点金额计算",
+        "一次过账的所有写入在单个事务内完成",
+        "必须保存唯一业务请求编号",
+        "缺少当日汇率时拒绝过账",
+        "业务请求编号唯一，检查和写入必须原子完成"
+      ],
+      "quality": [
+        {
+          "requirementId": "NFR-d176c258c08e3e27eb86",
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "method": "准备：两笔带相同业务请求编号的平衡分录请求；执行：并发提交；记录可观察结果",
+          "passCondition": "只有一个分录编号和一组过账记录"
+        }
+      ],
+      "decisions": [
+        {
+          "id": "module-boundary",
+          "decision": "将请求接入和事务记账引擎分开",
+          "rationale": "明确实现职责、跨模块契约和验证入口",
+          "alternatives": [
+            "把所有职责放在单个入口中"
+          ],
+          "requirementIds": [
+            "FR-4da5a603dfd62de7ae18",
+            "FR-ceb605312220e6b15ae3",
+            "NFR-d176c258c08e3e27eb86"
+          ],
+          "evidence": [
+            "FR-4da5a603dfd62de7ae18",
+            "FR-ceb605312220e6b15ae3",
+            "NFR-d176c258c08e3e27eb86"
+          ]
+        }
+      ],
+      "assumptions": [],
+      "trace": [
+        {
+          "requirementId": "FR-4da5a603dfd62de7ae18",
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-d69b70f80aa98064a5df",
+              "method": "准备夹具：借方与贷方各 100.00 元；提交过账；断言：返回分录编号并保存两笔平衡分录",
+              "expectedEvidence": "返回分录编号并保存两笔平衡分录"
+            },
+            {
+              "acceptanceId": "AC-77dff747145eda7a7e33",
+              "method": "准备夹具：借方 100.00 元且贷方 90.00 元；提交过账；断言：拒绝请求且账本无新增记录",
+              "expectedEvidence": "拒绝请求且账本无新增记录"
+            }
+          ]
+        },
+        {
+          "requirementId": "FR-ceb605312220e6b15ae3",
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-d0c79a7b04c68d895bf0",
+              "method": "准备夹具：USD 100.00、当日 USD/CNY 汇率 7.2000；换算并过账；断言：保存 CNY 720.00 和汇率 7.2000 的快照",
+              "expectedEvidence": "保存 CNY 720.00 和汇率 7.2000 的快照"
+            },
+            {
+              "acceptanceId": "AC-8b295d01a3038d0b293c",
+              "method": "准备夹具：缺少记账日期的汇率；请求换算过账；断言：返回缺失汇率错误且无部分分录",
+              "expectedEvidence": "返回缺失汇率错误且无部分分录"
+            }
+          ]
+        },
+        {
+          "requirementId": "NFR-d176c258c08e3e27eb86",
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-7248d591eb9e5d859400",
+              "method": "准备夹具：两笔带相同业务请求编号的平衡分录请求；并发提交；断言：只有一个分录编号和一组过账记录",
+              "expectedEvidence": "只有一个分录编号和一组过账记录"
+            }
+          ]
+        }
+      ],
+      "unresolved": [],
+      "designChecks": [
+        {
+          "id": "DC-operation-failure",
+          "source": {
+            "kind": "interface",
+            "id": "operation"
+          },
+          "rationale": "核对设计新增的跨模块失败契约",
+          "requirementIds": [
+            "FR-4da5a603dfd62de7ae18"
+          ],
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "method": "向入口注入失败并核对调用方可见行为：借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号",
+          "expectedEvidence": "借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号"
+        }
+      ]
+    },
+    "contentSha256": "205c494e8be075f2ceae612a9ee6a1fc9c097a42aff1e526bf445bd4444142a6",
+    "reviewMarkdown": "# 多币种记账服务软件设计\n\n## 目标\n保存平衡分录及可回查的汇率快照\n\n## 输入\n- 业务请求编号、日期、币种及借贷分录\n\n## 输出\n- 分录编号或过账错误\n\n## 需求\n- FR-01 [FR-4da5a603dfd62de7ae18] 验证借贷平衡后保存分录，失败时不保存部分分录 优先级 must\n- FR-02 [FR-ceb605312220e6b15ae3] 用记账日期汇率换算金额并保存快照 优先级 should\n- FR-03 [NFR-d176c258c08e3e27eb86] 相同业务请求编号并发提交只产生一次过账 优先级 must\n\n## 模块\n- 记账接口: 校验业务请求、币种和记账日期，返回分录编号或明确错误；依赖 core；接口 operation: postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串 → 返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00；失败 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；覆盖 FR-01, FR-02, FR-03 (`src/journal-api.ts`)\n- 分录与汇率引擎: 以十进制定点数检查借贷平衡，按日期汇率快照换算并四舍五入到分；按业务编号幂等地在单个事务过账；依赖 无；接口 operation: postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串 → 返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00；失败 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；覆盖 FR-01, FR-02, FR-03 (`src/ledger.ts`)\n\n## 约束\n- 金额使用十进制定点数，禁止二进制浮点金额计算\n- 一次过账的所有写入在单个事务内完成\n- FR-4da5a603dfd62de7ae18: 必须保存唯一业务请求编号\n- FR-ceb605312220e6b15ae3: 缺少当日汇率时拒绝过账\n- NFR-d176c258c08e3e27eb86: 业务请求编号唯一，检查和写入必须原子完成\n- 金额使用十进制定点数，禁止二进制浮点金额计算\n- 一次过账的所有写入在单个事务内完成\n- 必须保存唯一业务请求编号\n- 缺少当日汇率时拒绝过账\n- 业务请求编号唯一，检查和写入必须原子完成\n\n## 领域规则\n- 借方合计等于贷方合计才能过账\n- 换算使用记账日期的汇率快照，四舍五入保留两位小数\n- 借方合计等于贷方合计才能过账\n- 换算使用记账日期的汇率快照，四舍五入保留两位小数\n- 十进制定点金额，借贷合计相等；记录日期、币种及汇率快照；业务请求编号唯一\n\n## 验收\n- AC-01 FR-01 [AC-d69b70f80aa98064a5df] Given 借方与贷方各 100.00 元; When 提交过账; Then 返回分录编号并保存两笔平衡分录; 验证 准备夹具：借方与贷方各 100.00 元；提交过账；断言：返回分录编号并保存两笔平衡分录; 证据 返回分录编号并保存两笔平衡分录\n- AC-02 FR-01 [AC-77dff747145eda7a7e33] Given 借方 100.00 元且贷方 90.00 元; When 提交过账; Then 拒绝请求且账本无新增记录; 验证 准备夹具：借方 100.00 元且贷方 90.00 元；提交过账；断言：拒绝请求且账本无新增记录; 证据 拒绝请求且账本无新增记录\n- AC-03 FR-02 [AC-d0c79a7b04c68d895bf0] Given USD 100.00、当日 USD/CNY 汇率 7.2000; When 换算并过账; Then 保存 CNY 720.00 和汇率 7.2000 的快照; 验证 准备夹具：USD 100.00、当日 USD/CNY 汇率 7.2000；换算并过账；断言：保存 CNY 720.00 和汇率 7.2000 的快照; 证据 保存 CNY 720.00 和汇率 7.2000 的快照\n- AC-04 FR-02 [AC-8b295d01a3038d0b293c] Given 缺少记账日期的汇率; When 请求换算过账; Then 返回缺失汇率错误且无部分分录; 验证 准备夹具：缺少记账日期的汇率；请求换算过账；断言：返回缺失汇率错误且无部分分录; 证据 返回缺失汇率错误且无部分分录\n- AC-05 FR-03 [AC-7248d591eb9e5d859400] Given 两笔带相同业务请求编号的平衡分录请求; When 并发提交; Then 只有一个分录编号和一组过账记录; 验证 准备夹具：两笔带相同业务请求编号的平衡分录请求；并发提交；断言：只有一个分录编号和一组过账记录; 证据 只有一个分录编号和一组过账记录\n\n## 假设\n\n\n\n## 来源记录\n- 基线 baseline-run-5c1edfe7 / acceptance-ledger / v1 / 7bfa76e7872ad64cc4cb3e95ab7d5bf427a3d47a8e875d53001407fdee62ad71\n- 目标 ws-6fd6d856 / cad45dde810aefd49627451c5854b12ca1d6a016\n- 范围外 未列出的扩展功能\n\n## modules\n\n```json\n[\n  {\n    \"id\": \"entry\",\n    \"name\": \"记账接口\",\n    \"layer\": \"integration\",\n    \"responsibility\": \"校验业务请求、币种和记账日期，返回分录编号或明确错误\",\n    \"inputs\": [\n      \"业务请求编号、日期、币种及借贷分录\"\n    ],\n    \"outputs\": [\n      \"分录编号或过账错误\"\n    ],\n    \"requirementIds\": [\n      \"FR-4da5a603dfd62de7ae18\",\n      \"FR-ceb605312220e6b15ae3\",\n      \"NFR-d176c258c08e3e27eb86\"\n    ],\n    \"dependsOn\": [\n      \"core\"\n    ],\n    \"files\": [\n      {\n        \"path\": \"src/journal-api.ts\",\n        \"action\": \"create\"\n      }\n    ]\n  },\n  {\n    \"id\": \"core\",\n    \"name\": \"分录与汇率引擎\",\n    \"layer\": \"data\",\n    \"responsibility\": \"以十进制定点数检查借贷平衡，按日期汇率快照换算并四舍五入到分；按业务编号幂等地在单个事务过账\",\n    \"inputs\": [\n      \"业务请求编号、十进制金额、记账日期及汇率快照\"\n    ],\n    \"outputs\": [\n      \"平衡分录编号和换算金额\"\n    ],\n    \"requirementIds\": [\n      \"FR-4da5a603dfd62de7ae18\",\n      \"FR-ceb605312220e6b15ae3\",\n      \"NFR-d176c258c08e3e27eb86\"\n    ],\n    \"dependsOn\": [],\n    \"files\": [\n      {\n        \"path\": \"src/ledger.ts\",\n        \"action\": \"create\"\n      }\n    ]\n  }\n]\n```\n\n## interfaces\n\n```json\n[\n  {\n    \"id\": \"operation\",\n    \"provider\": \"core\",\n    \"consumers\": [\n      \"entry\"\n    ],\n    \"kind\": \"function\",\n    \"input\": \"postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串\",\n    \"result\": \"返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00\",\n    \"failure\": \"借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号\",\n    \"sideEffects\": \"仅成功事务保存整组分录和汇率快照\"\n  }\n]\n```\n\n## quality\n\n```json\n[\n  {\n    \"requirementId\": \"NFR-d176c258c08e3e27eb86\",\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"method\": \"准备：两笔带相同业务请求编号的平衡分录请求；执行：并发提交；记录可观察结果\",\n    \"passCondition\": \"只有一个分录编号和一组过账记录\"\n  }\n]\n```\n\n## decisions\n\n```json\n[\n  {\n    \"id\": \"module-boundary\",\n    \"decision\": \"将请求接入和事务记账引擎分开\",\n    \"rationale\": \"明确实现职责、跨模块契约和验证入口\",\n    \"alternatives\": [\n      \"把所有职责放在单个入口中\"\n    ],\n    \"requirementIds\": [\n      \"FR-4da5a603dfd62de7ae18\",\n      \"FR-ceb605312220e6b15ae3\",\n      \"NFR-d176c258c08e3e27eb86\"\n    ],\n    \"evidence\": [\n      \"FR-4da5a603dfd62de7ae18\",\n      \"FR-ceb605312220e6b15ae3\",\n      \"NFR-d176c258c08e3e27eb86\"\n    ]\n  }\n]\n```\n\n## assumptions\n\n```json\n[]\n```\n\n## trace\n\n```json\n[\n  {\n    \"requirementId\": \"FR-4da5a603dfd62de7ae18\",\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-d69b70f80aa98064a5df\",\n        \"method\": \"准备夹具：借方与贷方各 100.00 元；提交过账；断言：返回分录编号并保存两笔平衡分录\",\n        \"expectedEvidence\": \"返回分录编号并保存两笔平衡分录\"\n      },\n      {\n        \"acceptanceId\": \"AC-77dff747145eda7a7e33\",\n        \"method\": \"准备夹具：借方 100.00 元且贷方 90.00 元；提交过账；断言：拒绝请求且账本无新增记录\",\n        \"expectedEvidence\": \"拒绝请求且账本无新增记录\"\n      }\n    ]\n  },\n  {\n    \"requirementId\": \"FR-ceb605312220e6b15ae3\",\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-d0c79a7b04c68d895bf0\",\n        \"method\": \"准备夹具：USD 100.00、当日 USD/CNY 汇率 7.2000；换算并过账；断言：保存 CNY 720.00 和汇率 7.2000 的快照\",\n        \"expectedEvidence\": \"保存 CNY 720.00 和汇率 7.2000 的快照\"\n      },\n      {\n        \"acceptanceId\": \"AC-8b295d01a3038d0b293c\",\n        \"method\": \"准备夹具：缺少记账日期的汇率；请求换算过账；断言：返回缺失汇率错误且无部分分录\",\n        \"expectedEvidence\": \"返回缺失汇率错误且无部分分录\"\n      }\n    ]\n  },\n  {\n    \"requirementId\": \"NFR-d176c258c08e3e27eb86\",\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-7248d591eb9e5d859400\",\n        \"method\": \"准备夹具：两笔带相同业务请求编号的平衡分录请求；并发提交；断言：只有一个分录编号和一组过账记录\",\n        \"expectedEvidence\": \"只有一个分录编号和一组过账记录\"\n      }\n    ]\n  }\n]\n```\n\n## unresolved\n\n```json\n[]\n```\n\n## 设计补充检查（独立于 HAMA 原始 AC）\n\n```json\n[\n  {\n    \"id\": \"DC-operation-failure\",\n    \"source\": {\n      \"kind\": \"interface\",\n      \"id\": \"operation\"\n    },\n    \"rationale\": \"核对设计新增的跨模块失败契约\",\n    \"requirementIds\": [\n      \"FR-4da5a603dfd62de7ae18\"\n    ],\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"method\": \"向入口注入失败并核对调用方可见行为：借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号\",\n    \"expectedEvidence\": \"借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号\"\n  }\n]\n```",
+    "pmMarkdown": "# 多币种记账服务软件设计\n\n## 目标\n保存平衡分录及可回查的汇率快照\n\n## 输入\n- 业务请求编号、日期、币种及借贷分录\n\n## 输出\n- 分录编号或过账错误\n\n## 需求\n- FR-01 [FR-4da5a603dfd62de7ae18] 验证借贷平衡后保存分录，失败时不保存部分分录 优先级 must\n- FR-02 [FR-ceb605312220e6b15ae3] 用记账日期汇率换算金额并保存快照 优先级 should\n- FR-03 [NFR-d176c258c08e3e27eb86] 相同业务请求编号并发提交只产生一次过账 优先级 must\n\n## 模块\n- 记账接口: 校验业务请求、币种和记账日期，返回分录编号或明确错误；依赖 core；接口 operation: postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串 → 返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00；失败 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；覆盖 FR-01, FR-02, FR-03 (`src/journal-api.ts`)\n- 分录与汇率引擎: 以十进制定点数检查借贷平衡，按日期汇率快照换算并四舍五入到分；按业务编号幂等地在单个事务过账；依赖 无；接口 operation: postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串 → 返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00；失败 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；覆盖 FR-01, FR-02, FR-03 (`src/ledger.ts`)\n\n## 约束\n- 金额使用十进制定点数，禁止二进制浮点金额计算\n- 一次过账的所有写入在单个事务内完成\n- FR-4da5a603dfd62de7ae18: 必须保存唯一业务请求编号\n- FR-ceb605312220e6b15ae3: 缺少当日汇率时拒绝过账\n- NFR-d176c258c08e3e27eb86: 业务请求编号唯一，检查和写入必须原子完成\n- 金额使用十进制定点数，禁止二进制浮点金额计算\n- 一次过账的所有写入在单个事务内完成\n- 必须保存唯一业务请求编号\n- 缺少当日汇率时拒绝过账\n- 业务请求编号唯一，检查和写入必须原子完成\n\n## 领域规则\n- 借方合计等于贷方合计才能过账\n- 换算使用记账日期的汇率快照，四舍五入保留两位小数\n- 借方合计等于贷方合计才能过账\n- 换算使用记账日期的汇率快照，四舍五入保留两位小数\n- 十进制定点金额，借贷合计相等；记录日期、币种及汇率快照；业务请求编号唯一\n\n## 验收\n- AC-01 FR-01 [AC-d69b70f80aa98064a5df] Given 借方与贷方各 100.00 元; When 提交过账; Then 返回分录编号并保存两笔平衡分录; 验证 准备夹具：借方与贷方各 100.00 元；提交过账；断言：返回分录编号并保存两笔平衡分录; 证据 返回分录编号并保存两笔平衡分录\n- AC-02 FR-01 [AC-77dff747145eda7a7e33] Given 借方 100.00 元且贷方 90.00 元; When 提交过账; Then 拒绝请求且账本无新增记录; 验证 准备夹具：借方 100.00 元且贷方 90.00 元；提交过账；断言：拒绝请求且账本无新增记录; 证据 拒绝请求且账本无新增记录\n- AC-03 FR-02 [AC-d0c79a7b04c68d895bf0] Given USD 100.00、当日 USD/CNY 汇率 7.2000; When 换算并过账; Then 保存 CNY 720.00 和汇率 7.2000 的快照; 验证 准备夹具：USD 100.00、当日 USD/CNY 汇率 7.2000；换算并过账；断言：保存 CNY 720.00 和汇率 7.2000 的快照; 证据 保存 CNY 720.00 和汇率 7.2000 的快照\n- AC-04 FR-02 [AC-8b295d01a3038d0b293c] Given 缺少记账日期的汇率; When 请求换算过账; Then 返回缺失汇率错误且无部分分录; 验证 准备夹具：缺少记账日期的汇率；请求换算过账；断言：返回缺失汇率错误且无部分分录; 证据 返回缺失汇率错误且无部分分录\n- AC-05 FR-03 [AC-7248d591eb9e5d859400] Given 两笔带相同业务请求编号的平衡分录请求; When 并发提交; Then 只有一个分录编号和一组过账记录; 验证 准备夹具：两笔带相同业务请求编号的平衡分录请求；并发提交；断言：只有一个分录编号和一组过账记录; 证据 只有一个分录编号和一组过账记录\n\n## 假设\n\n",
+    "diagnostics": [],
+    "reviewEligible": true
+  },
+  "draft": {
+    "designId": "design-a5f1d7f0-7572-4d38-b5c5-6c5ad43d4530",
+    "revision": 1,
+    "parentRevision": null,
+    "state": "draft",
+    "schemaVersion": 1,
+    "input": {
+      "designId": "design-a5f1d7f0-7572-4d38-b5c5-6c5ad43d4530",
+      "revision": 1,
+      "state": "draft",
+      "stage": "input_ready",
+      "createdAt": "2026-11-24T06:59:30.543Z",
+      "contentSha256": "cd9f0a9e223854b29950a3da5c6073899ea8db37559dc1d75933f9af9c365941",
+      "baselineRef": {
+        "id": "baseline-run-5c1edfe7",
+        "projectId": "acceptance-ledger",
+        "revision": 1,
+        "sha256": "7bfa76e7872ad64cc4cb3e95ab7d5bf427a3d47a8e875d53001407fdee62ad71",
+        "schemaVersion": 1,
+        "mode": "live"
+      },
+      "baseline": {
+        "schemaVersion": 1,
+        "id": "baseline-run-5c1edfe7",
+        "projectId": "acceptance-ledger",
+        "revision": 1,
+        "parentId": null,
+        "mode": "live",
+        "approvedPrd": {
+          "id": "prd-7deddf57-3ccd-4cdd-bdff-4944b711058b",
+          "kind": "prd",
+          "revision": 1,
+          "hash": "e9f1fe62b03419c07f21329d8f64544221123b7f0ce0ec3a7f83ece5c56b637c"
+        },
+        "approval": {
+          "targetId": "proposal-2a818145-0404-4113-9280-3902a690d9c7",
+          "targetHash": "2ec27fd26bd15e23db452689d202f1932e23da5e05934499a70177c14b7dc73a",
+          "actor": "验收脚本模拟审批人",
+          "action": "approve",
+          "feedback": "",
+          "scope": "local",
+          "issueIds": [],
+          "id": "int-61b534a5",
+          "gateKind": "approval",
+          "targetRevision": 1,
+          "decidedAt": "2026-11-24T06:59:29.787Z"
+        },
+        "confirmation": {
+          "targetId": "prd-7deddf57-3ccd-4cdd-bdff-4944b711058b",
+          "targetHash": "e9f1fe62b03419c07f21329d8f64544221123b7f0ce0ec3a7f83ece5c56b637c",
+          "actor": "验收脚本模拟审批人",
+          "action": "confirm",
+          "feedback": "",
+          "scope": "local",
+          "issueIds": [],
+          "id": "int-3db7347c",
+          "gateKind": "confirmation",
+          "targetRevision": 1,
+          "decidedAt": "2026-11-24T06:59:29.837Z"
+        },
+        "prd": {
+          "title": "多币种记账服务",
+          "revision": 1,
+          "proposal": {
+            "id": "proposal-2a818145-0404-4113-9280-3902a690d9c7",
+            "kind": "proposal",
+            "revision": 1,
+            "hash": "2ec27fd26bd15e23db452689d202f1932e23da5e05934499a70177c14b7dc73a"
+          },
+          "approvalId": "int-61b534a5",
+          "sections": {
+            "goals": [
+              "保存平衡分录及可回查的汇率快照"
+            ],
+            "summary": "[ledger] 多币种记账服务",
+            "approach": [
+              "借方合计等于贷方合计才能过账",
+              "换算使用记账日期的汇率快照，四舍五入保留两位小数"
+            ],
+            "scope": [
+              {
+                "key": "journal",
+                "kind": "functional",
+                "title": "分录过账",
+                "decision": "验证借贷平衡后保存分录，失败时不保存部分分录",
+                "issueIds": [
+                  "issue-journal"
+                ]
+              },
+              {
+                "key": "fx",
+                "kind": "functional",
+                "title": "汇率快照",
+                "decision": "用记账日期汇率换算金额并保存快照",
+                "issueIds": [
+                  "issue-fx"
+                ]
+              },
+              {
+                "key": "atomic",
+                "kind": "nonfunctional",
+                "title": "事务幂等",
+                "decision": "相同业务请求编号并发提交只产生一次过账",
+                "issueIds": [
+                  "issue-atomic"
+                ]
+              }
+            ],
+            "outOfScope": [
+              "未列出的扩展功能"
+            ],
+            "constraints": [
+              "金额使用十进制定点数，禁止二进制浮点金额计算",
+              "一次过账的所有写入在单个事务内完成"
+            ],
+            "tradeoffs": [],
+            "risks": [],
+            "unresolved": [],
+            "businessRules": [
+              "借方合计等于贷方合计才能过账",
+              "换算使用记账日期的汇率快照，四舍五入保留两位小数"
+            ],
+            "externalDependencies": []
+          },
+          "background": "[ledger] 保存平衡分录及可回查的汇率快照",
+          "scenarios": [
+            "保存平衡分录及可回查的汇率快照"
+          ],
+          "requirements": [
+            {
+              "id": "FR-4da5a603dfd62de7ae18",
+              "scopeKey": "journal",
+              "kind": "functional",
+              "title": "分录过账",
+              "description": "验证借贷平衡后保存分录，失败时不保存部分分录",
+              "value": "保证账本一致性",
+              "priority": "must",
+              "dependencies": [],
+              "constraints": [
+                "必须保存唯一业务请求编号"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-d69b70f80aa98064a5df",
+                  "given": "借方与贷方各 100.00 元",
+                  "when": "提交过账",
+                  "then": "返回分录编号并保存两笔平衡分录"
+                },
+                {
+                  "id": "AC-77dff747145eda7a7e33",
+                  "given": "借方 100.00 元且贷方 90.00 元",
+                  "when": "提交过账",
+                  "then": "拒绝请求且账本无新增记录"
+                }
+              ]
+            },
+            {
+              "id": "FR-ceb605312220e6b15ae3",
+              "scopeKey": "fx",
+              "kind": "functional",
+              "title": "汇率快照",
+              "description": "用记账日期汇率换算金额并保存快照",
+              "value": "支持对账追溯",
+              "priority": "should",
+              "dependencies": [
+                "FR-4da5a603dfd62de7ae18"
+              ],
+              "constraints": [
+                "缺少当日汇率时拒绝过账"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-d0c79a7b04c68d895bf0",
+                  "given": "USD 100.00、当日 USD/CNY 汇率 7.2000",
+                  "when": "换算并过账",
+                  "then": "保存 CNY 720.00 和汇率 7.2000 的快照"
+                },
+                {
+                  "id": "AC-8b295d01a3038d0b293c",
+                  "given": "缺少记账日期的汇率",
+                  "when": "请求换算过账",
+                  "then": "返回缺失汇率错误且无部分分录"
+                }
+              ]
+            },
+            {
+              "id": "NFR-d176c258c08e3e27eb86",
+              "scopeKey": "atomic",
+              "kind": "nonfunctional",
+              "title": "事务幂等",
+              "description": "相同业务请求编号并发提交只产生一次过账",
+              "value": "避免重复入账",
+              "priority": "must",
+              "dependencies": [
+                "FR-4da5a603dfd62de7ae18"
+              ],
+              "constraints": [
+                "业务请求编号唯一，检查和写入必须原子完成"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-7248d591eb9e5d859400",
+                  "given": "两笔带相同业务请求编号的平衡分录请求",
+                  "when": "并发提交",
+                  "then": "只有一个分录编号和一组过账记录"
+                }
+              ]
+            }
+          ],
+          "changes": [
+            "初版草案"
+          ],
+          "trace": [
+            {
+              "issueIds": [
+                "issue-journal"
+              ],
+              "ideaAndDocumentIds": [
+                "idea-1"
+              ],
+              "proposal": {
+                "id": "proposal-2a818145-0404-4113-9280-3902a690d9c7",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "2ec27fd26bd15e23db452689d202f1932e23da5e05934499a70177c14b7dc73a"
+              },
+              "scopeKey": "journal",
+              "approvalId": "int-61b534a5",
+              "requirementId": "FR-4da5a603dfd62de7ae18",
+              "acceptanceIds": [
+                "AC-d69b70f80aa98064a5df",
+                "AC-77dff747145eda7a7e33"
+              ]
+            },
+            {
+              "issueIds": [
+                "issue-fx"
+              ],
+              "ideaAndDocumentIds": [
+                "idea-1"
+              ],
+              "proposal": {
+                "id": "proposal-2a818145-0404-4113-9280-3902a690d9c7",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "2ec27fd26bd15e23db452689d202f1932e23da5e05934499a70177c14b7dc73a"
+              },
+              "scopeKey": "fx",
+              "approvalId": "int-61b534a5",
+              "requirementId": "FR-ceb605312220e6b15ae3",
+              "acceptanceIds": [
+                "AC-d0c79a7b04c68d895bf0",
+                "AC-8b295d01a3038d0b293c"
+              ]
+            },
+            {
+              "issueIds": [
+                "issue-atomic"
+              ],
+              "ideaAndDocumentIds": [
+                "idea-1"
+              ],
+              "proposal": {
+                "id": "proposal-2a818145-0404-4113-9280-3902a690d9c7",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "2ec27fd26bd15e23db452689d202f1932e23da5e05934499a70177c14b7dc73a"
+              },
+              "scopeKey": "atomic",
+              "approvalId": "int-61b534a5",
+              "requirementId": "NFR-d176c258c08e3e27eb86",
+              "acceptanceIds": [
+                "AC-7248d591eb9e5d859400"
+              ]
+            }
+          ]
+        },
+        "sha256": "7bfa76e7872ad64cc4cb3e95ab7d5bf427a3d47a8e875d53001407fdee62ad71"
+      },
+      "workspace": {
+        "workspaceId": "ws-6fd6d856",
+        "name": "多币种记账服务",
+        "sourceCommit": "cad45dde810aefd49627451c5854b12ca1d6a016",
+        "existingPaths": [
+          "README.md"
+        ],
+        "entryPoints": [],
+        "manifests": [],
+        "dependencies": [],
+        "testCommands": [
+          {
+            "directory": ".",
+            "command": "node --test",
+            "source": "workspace.verifyCommand（配置值，尚未执行）"
+          }
+        ],
+        "proposedPaths": [],
+        "notes": [
+          "清单及依赖取自目标提交，未提交或未跟踪文件不计入该版本。",
+          "输入阶段尚未推导拟新增路径；生成后的拟建工件见设计正文 modules.files 中 action=create 的条目。"
+        ]
+      },
+      "reviewEligible": true,
+      "blockers": []
+    },
+    "body": {
+      "schemaVersion": 1,
+      "title": "多币种记账服务软件设计",
+      "goal": "保存平衡分录及可回查的汇率快照",
+      "inputs": [
+        "业务请求编号、日期、币种及借贷分录"
+      ],
+      "outputs": [
+        "分录编号或过账错误"
+      ],
+      "modules": [
+        {
+          "id": "entry",
+          "name": "记账接口",
+          "layer": "integration",
+          "responsibility": "校验业务请求、币种和记账日期，返回分录编号或明确错误",
+          "inputs": [
+            "业务请求编号、日期、币种及借贷分录"
+          ],
+          "outputs": [
+            "分录编号或过账错误"
+          ],
+          "requirementIds": [
+            "FR-4da5a603dfd62de7ae18",
+            "FR-ceb605312220e6b15ae3",
+            "NFR-d176c258c08e3e27eb86"
+          ],
+          "dependsOn": [
+            "core"
+          ],
+          "files": [
+            {
+              "path": "src/journal-api.ts",
+              "action": "create"
+            }
+          ]
+        },
+        {
+          "id": "core",
+          "name": "分录与汇率引擎",
+          "layer": "data",
+          "responsibility": "以十进制定点数检查借贷平衡，按日期汇率快照换算并四舍五入到分；按业务编号幂等地在单个事务过账",
+          "inputs": [
+            "业务请求编号、十进制金额、记账日期及汇率快照"
+          ],
+          "outputs": [
+            "平衡分录编号和换算金额"
+          ],
+          "requirementIds": [
+            "FR-4da5a603dfd62de7ae18",
+            "FR-ceb605312220e6b15ae3",
+            "NFR-d176c258c08e3e27eb86"
+          ],
+          "dependsOn": [],
+          "files": [
+            {
+              "path": "src/ledger.ts",
+              "action": "create"
+            }
+          ]
+        }
+      ],
+      "interfaces": [
+        {
+          "id": "operation",
+          "provider": "core",
+          "consumers": [
+            "entry"
+          ],
+          "kind": "function",
+          "input": "postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串",
+          "result": "返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00",
+          "failure": "借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号",
+          "sideEffects": "仅成功事务保存整组分录和汇率快照"
+        }
+      ],
+      "dataRules": [
+        "借方合计等于贷方合计才能过账",
+        "换算使用记账日期的汇率快照，四舍五入保留两位小数",
+        "十进制定点金额，借贷合计相等；记录日期、币种及汇率快照；业务请求编号唯一"
+      ],
+      "constraints": [
+        "金额使用十进制定点数，禁止二进制浮点金额计算",
+        "一次过账的所有写入在单个事务内完成",
+        "必须保存唯一业务请求编号",
+        "缺少当日汇率时拒绝过账",
+        "业务请求编号唯一，检查和写入必须原子完成"
+      ],
+      "quality": [
+        {
+          "requirementId": "NFR-d176c258c08e3e27eb86",
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "method": "准备：两笔带相同业务请求编号的平衡分录请求；执行：并发提交；记录可观察结果",
+          "passCondition": "只有一个分录编号和一组过账记录"
+        }
+      ],
+      "decisions": [
+        {
+          "id": "module-boundary",
+          "decision": "将请求接入和事务记账引擎分开",
+          "rationale": "明确实现职责、跨模块契约和验证入口",
+          "alternatives": [
+            "把所有职责放在单个入口中"
+          ],
+          "requirementIds": [
+            "FR-4da5a603dfd62de7ae18",
+            "FR-ceb605312220e6b15ae3",
+            "NFR-d176c258c08e3e27eb86"
+          ],
+          "evidence": [
+            "FR-4da5a603dfd62de7ae18",
+            "FR-ceb605312220e6b15ae3",
+            "NFR-d176c258c08e3e27eb86"
+          ]
+        }
+      ],
+      "assumptions": [],
+      "trace": [
+        {
+          "requirementId": "FR-4da5a603dfd62de7ae18",
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-d69b70f80aa98064a5df",
+              "method": "准备夹具：借方与贷方各 100.00 元；提交过账；断言：返回分录编号并保存两笔平衡分录",
+              "expectedEvidence": "返回分录编号并保存两笔平衡分录"
+            },
+            {
+              "acceptanceId": "AC-77dff747145eda7a7e33",
+              "method": "准备夹具：借方 100.00 元且贷方 90.00 元；提交过账；断言：拒绝请求且账本无新增记录",
+              "expectedEvidence": "拒绝请求且账本无新增记录"
+            }
+          ]
+        },
+        {
+          "requirementId": "FR-ceb605312220e6b15ae3",
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-d0c79a7b04c68d895bf0",
+              "method": "准备夹具：USD 100.00、当日 USD/CNY 汇率 7.2000；换算并过账；断言：保存 CNY 720.00 和汇率 7.2000 的快照",
+              "expectedEvidence": "保存 CNY 720.00 和汇率 7.2000 的快照"
+            },
+            {
+              "acceptanceId": "AC-8b295d01a3038d0b293c",
+              "method": "准备夹具：缺少记账日期的汇率；请求换算过账；断言：返回缺失汇率错误且无部分分录",
+              "expectedEvidence": "返回缺失汇率错误且无部分分录"
+            }
+          ]
+        },
+        {
+          "requirementId": "NFR-d176c258c08e3e27eb86",
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-7248d591eb9e5d859400",
+              "method": "准备夹具：两笔带相同业务请求编号的平衡分录请求；并发提交；断言：只有一个分录编号和一组过账记录",
+              "expectedEvidence": "只有一个分录编号和一组过账记录"
+            }
+          ]
+        }
+      ],
+      "unresolved": [],
+      "designChecks": [
+        {
+          "id": "DC-operation-failure",
+          "source": {
+            "kind": "interface",
+            "id": "operation"
+          },
+          "rationale": "核对设计新增的跨模块失败契约",
+          "requirementIds": [
+            "FR-4da5a603dfd62de7ae18"
+          ],
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "method": "向入口注入失败并核对调用方可见行为：借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号",
+          "expectedEvidence": "借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号"
+        }
+      ]
+    },
+    "contentSha256": "6dee9a207cee968687b8d2cb5081956197b3e1575f9e74631e1e3785957503d0",
+    "createdAt": "2026-11-24T06:59:30.556Z",
+    "metadata": {
+      "actor": "验收脚本模拟设计负责人",
+      "reason": "ledger",
+      "generationId": "generation-fabfca2c-c569-42dd-806b-4cbd0e899b00",
+      "resolutions": [],
+      "previousDesign": null,
+      "baselineDiff": null
+    },
+    "reviewMarkdown": "# 多币种记账服务软件设计\n\n## 目标\n保存平衡分录及可回查的汇率快照\n\n## 输入\n- 业务请求编号、日期、币种及借贷分录\n\n## 输出\n- 分录编号或过账错误\n\n## 需求\n- FR-01 [FR-4da5a603dfd62de7ae18] 验证借贷平衡后保存分录，失败时不保存部分分录 优先级 must\n- FR-02 [FR-ceb605312220e6b15ae3] 用记账日期汇率换算金额并保存快照 优先级 should\n- FR-03 [NFR-d176c258c08e3e27eb86] 相同业务请求编号并发提交只产生一次过账 优先级 must\n\n## 模块\n- 记账接口: 校验业务请求、币种和记账日期，返回分录编号或明确错误；依赖 core；接口 operation: postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串 → 返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00；失败 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；覆盖 FR-01, FR-02, FR-03 (`src/journal-api.ts`)\n- 分录与汇率引擎: 以十进制定点数检查借贷平衡，按日期汇率快照换算并四舍五入到分；按业务编号幂等地在单个事务过账；依赖 无；接口 operation: postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串 → 返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00；失败 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；覆盖 FR-01, FR-02, FR-03 (`src/ledger.ts`)\n\n## 约束\n- 金额使用十进制定点数，禁止二进制浮点金额计算\n- 一次过账的所有写入在单个事务内完成\n- FR-4da5a603dfd62de7ae18: 必须保存唯一业务请求编号\n- FR-ceb605312220e6b15ae3: 缺少当日汇率时拒绝过账\n- NFR-d176c258c08e3e27eb86: 业务请求编号唯一，检查和写入必须原子完成\n- 金额使用十进制定点数，禁止二进制浮点金额计算\n- 一次过账的所有写入在单个事务内完成\n- 必须保存唯一业务请求编号\n- 缺少当日汇率时拒绝过账\n- 业务请求编号唯一，检查和写入必须原子完成\n\n## 领域规则\n- 借方合计等于贷方合计才能过账\n- 换算使用记账日期的汇率快照，四舍五入保留两位小数\n- 借方合计等于贷方合计才能过账\n- 换算使用记账日期的汇率快照，四舍五入保留两位小数\n- 十进制定点金额，借贷合计相等；记录日期、币种及汇率快照；业务请求编号唯一\n\n## 验收\n- AC-01 FR-01 [AC-d69b70f80aa98064a5df] Given 借方与贷方各 100.00 元; When 提交过账; Then 返回分录编号并保存两笔平衡分录; 验证 准备夹具：借方与贷方各 100.00 元；提交过账；断言：返回分录编号并保存两笔平衡分录; 证据 返回分录编号并保存两笔平衡分录\n- AC-02 FR-01 [AC-77dff747145eda7a7e33] Given 借方 100.00 元且贷方 90.00 元; When 提交过账; Then 拒绝请求且账本无新增记录; 验证 准备夹具：借方 100.00 元且贷方 90.00 元；提交过账；断言：拒绝请求且账本无新增记录; 证据 拒绝请求且账本无新增记录\n- AC-03 FR-02 [AC-d0c79a7b04c68d895bf0] Given USD 100.00、当日 USD/CNY 汇率 7.2000; When 换算并过账; Then 保存 CNY 720.00 和汇率 7.2000 的快照; 验证 准备夹具：USD 100.00、当日 USD/CNY 汇率 7.2000；换算并过账；断言：保存 CNY 720.00 和汇率 7.2000 的快照; 证据 保存 CNY 720.00 和汇率 7.2000 的快照\n- AC-04 FR-02 [AC-8b295d01a3038d0b293c] Given 缺少记账日期的汇率; When 请求换算过账; Then 返回缺失汇率错误且无部分分录; 验证 准备夹具：缺少记账日期的汇率；请求换算过账；断言：返回缺失汇率错误且无部分分录; 证据 返回缺失汇率错误且无部分分录\n- AC-05 FR-03 [AC-7248d591eb9e5d859400] Given 两笔带相同业务请求编号的平衡分录请求; When 并发提交; Then 只有一个分录编号和一组过账记录; 验证 准备夹具：两笔带相同业务请求编号的平衡分录请求；并发提交；断言：只有一个分录编号和一组过账记录; 证据 只有一个分录编号和一组过账记录\n\n## 假设\n\n\n\n## 来源记录\n- 基线 baseline-run-5c1edfe7 / acceptance-ledger / v1 / 7bfa76e7872ad64cc4cb3e95ab7d5bf427a3d47a8e875d53001407fdee62ad71\n- 目标 ws-6fd6d856 / cad45dde810aefd49627451c5854b12ca1d6a016\n- 范围外 未列出的扩展功能\n\n## modules\n\n```json\n[\n  {\n    \"id\": \"entry\",\n    \"name\": \"记账接口\",\n    \"layer\": \"integration\",\n    \"responsibility\": \"校验业务请求、币种和记账日期，返回分录编号或明确错误\",\n    \"inputs\": [\n      \"业务请求编号、日期、币种及借贷分录\"\n    ],\n    \"outputs\": [\n      \"分录编号或过账错误\"\n    ],\n    \"requirementIds\": [\n      \"FR-4da5a603dfd62de7ae18\",\n      \"FR-ceb605312220e6b15ae3\",\n      \"NFR-d176c258c08e3e27eb86\"\n    ],\n    \"dependsOn\": [\n      \"core\"\n    ],\n    \"files\": [\n      {\n        \"path\": \"src/journal-api.ts\",\n        \"action\": \"create\"\n      }\n    ]\n  },\n  {\n    \"id\": \"core\",\n    \"name\": \"分录与汇率引擎\",\n    \"layer\": \"data\",\n    \"responsibility\": \"以十进制定点数检查借贷平衡，按日期汇率快照换算并四舍五入到分；按业务编号幂等地在单个事务过账\",\n    \"inputs\": [\n      \"业务请求编号、十进制金额、记账日期及汇率快照\"\n    ],\n    \"outputs\": [\n      \"平衡分录编号和换算金额\"\n    ],\n    \"requirementIds\": [\n      \"FR-4da5a603dfd62de7ae18\",\n      \"FR-ceb605312220e6b15ae3\",\n      \"NFR-d176c258c08e3e27eb86\"\n    ],\n    \"dependsOn\": [],\n    \"files\": [\n      {\n        \"path\": \"src/ledger.ts\",\n        \"action\": \"create\"\n      }\n    ]\n  }\n]\n```\n\n## interfaces\n\n```json\n[\n  {\n    \"id\": \"operation\",\n    \"provider\": \"core\",\n    \"consumers\": [\n      \"entry\"\n    ],\n    \"kind\": \"function\",\n    \"input\": \"postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串\",\n    \"result\": \"返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00\",\n    \"failure\": \"借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号\",\n    \"sideEffects\": \"仅成功事务保存整组分录和汇率快照\"\n  }\n]\n```\n\n## quality\n\n```json\n[\n  {\n    \"requirementId\": \"NFR-d176c258c08e3e27eb86\",\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"method\": \"准备：两笔带相同业务请求编号的平衡分录请求；执行：并发提交；记录可观察结果\",\n    \"passCondition\": \"只有一个分录编号和一组过账记录\"\n  }\n]\n```\n\n## decisions\n\n```json\n[\n  {\n    \"id\": \"module-boundary\",\n    \"decision\": \"将请求接入和事务记账引擎分开\",\n    \"rationale\": \"明确实现职责、跨模块契约和验证入口\",\n    \"alternatives\": [\n      \"把所有职责放在单个入口中\"\n    ],\n    \"requirementIds\": [\n      \"FR-4da5a603dfd62de7ae18\",\n      \"FR-ceb605312220e6b15ae3\",\n      \"NFR-d176c258c08e3e27eb86\"\n    ],\n    \"evidence\": [\n      \"FR-4da5a603dfd62de7ae18\",\n      \"FR-ceb605312220e6b15ae3\",\n      \"NFR-d176c258c08e3e27eb86\"\n    ]\n  }\n]\n```\n\n## assumptions\n\n```json\n[]\n```\n\n## trace\n\n```json\n[\n  {\n    \"requirementId\": \"FR-4da5a603dfd62de7ae18\",\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-d69b70f80aa98064a5df\",\n        \"method\": \"准备夹具：借方与贷方各 100.00 元；提交过账；断言：返回分录编号并保存两笔平衡分录\",\n        \"expectedEvidence\": \"返回分录编号并保存两笔平衡分录\"\n      },\n      {\n        \"acceptanceId\": \"AC-77dff747145eda7a7e33\",\n        \"method\": \"准备夹具：借方 100.00 元且贷方 90.00 元；提交过账；断言：拒绝请求且账本无新增记录\",\n        \"expectedEvidence\": \"拒绝请求且账本无新增记录\"\n      }\n    ]\n  },\n  {\n    \"requirementId\": \"FR-ceb605312220e6b15ae3\",\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-d0c79a7b04c68d895bf0\",\n        \"method\": \"准备夹具：USD 100.00、当日 USD/CNY 汇率 7.2000；换算并过账；断言：保存 CNY 720.00 和汇率 7.2000 的快照\",\n        \"expectedEvidence\": \"保存 CNY 720.00 和汇率 7.2000 的快照\"\n      },\n      {\n        \"acceptanceId\": \"AC-8b295d01a3038d0b293c\",\n        \"method\": \"准备夹具：缺少记账日期的汇率；请求换算过账；断言：返回缺失汇率错误且无部分分录\",\n        \"expectedEvidence\": \"返回缺失汇率错误且无部分分录\"\n      }\n    ]\n  },\n  {\n    \"requirementId\": \"NFR-d176c258c08e3e27eb86\",\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-7248d591eb9e5d859400\",\n        \"method\": \"准备夹具：两笔带相同业务请求编号的平衡分录请求；并发提交；断言：只有一个分录编号和一组过账记录\",\n        \"expectedEvidence\": \"只有一个分录编号和一组过账记录\"\n      }\n    ]\n  }\n]\n```\n\n## unresolved\n\n```json\n[]\n```\n\n## 设计补充检查（独立于 HAMA 原始 AC）\n\n```json\n[\n  {\n    \"id\": \"DC-operation-failure\",\n    \"source\": {\n      \"kind\": \"interface\",\n      \"id\": \"operation\"\n    },\n    \"rationale\": \"核对设计新增的跨模块失败契约\",\n    \"requirementIds\": [\n      \"FR-4da5a603dfd62de7ae18\"\n    ],\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"method\": \"向入口注入失败并核对调用方可见行为：借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号\",\n    \"expectedEvidence\": \"借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号\"\n  }\n]\n```",
+    "pmMarkdown": "# 多币种记账服务软件设计\n\n## 目标\n保存平衡分录及可回查的汇率快照\n\n## 输入\n- 业务请求编号、日期、币种及借贷分录\n\n## 输出\n- 分录编号或过账错误\n\n## 需求\n- FR-01 [FR-4da5a603dfd62de7ae18] 验证借贷平衡后保存分录，失败时不保存部分分录 优先级 must\n- FR-02 [FR-ceb605312220e6b15ae3] 用记账日期汇率换算金额并保存快照 优先级 should\n- FR-03 [NFR-d176c258c08e3e27eb86] 相同业务请求编号并发提交只产生一次过账 优先级 must\n\n## 模块\n- 记账接口: 校验业务请求、币种和记账日期，返回分录编号或明确错误；依赖 core；接口 operation: postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串 → 返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00；失败 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；覆盖 FR-01, FR-02, FR-03 (`src/journal-api.ts`)\n- 分录与汇率引擎: 以十进制定点数检查借贷平衡，按日期汇率快照换算并四舍五入到分；按业务编号幂等地在单个事务过账；依赖 无；接口 operation: postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串 → 返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00；失败 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；覆盖 FR-01, FR-02, FR-03 (`src/ledger.ts`)\n\n## 约束\n- 金额使用十进制定点数，禁止二进制浮点金额计算\n- 一次过账的所有写入在单个事务内完成\n- FR-4da5a603dfd62de7ae18: 必须保存唯一业务请求编号\n- FR-ceb605312220e6b15ae3: 缺少当日汇率时拒绝过账\n- NFR-d176c258c08e3e27eb86: 业务请求编号唯一，检查和写入必须原子完成\n- 金额使用十进制定点数，禁止二进制浮点金额计算\n- 一次过账的所有写入在单个事务内完成\n- 必须保存唯一业务请求编号\n- 缺少当日汇率时拒绝过账\n- 业务请求编号唯一，检查和写入必须原子完成\n\n## 领域规则\n- 借方合计等于贷方合计才能过账\n- 换算使用记账日期的汇率快照，四舍五入保留两位小数\n- 借方合计等于贷方合计才能过账\n- 换算使用记账日期的汇率快照，四舍五入保留两位小数\n- 十进制定点金额，借贷合计相等；记录日期、币种及汇率快照；业务请求编号唯一\n\n## 验收\n- AC-01 FR-01 [AC-d69b70f80aa98064a5df] Given 借方与贷方各 100.00 元; When 提交过账; Then 返回分录编号并保存两笔平衡分录; 验证 准备夹具：借方与贷方各 100.00 元；提交过账；断言：返回分录编号并保存两笔平衡分录; 证据 返回分录编号并保存两笔平衡分录\n- AC-02 FR-01 [AC-77dff747145eda7a7e33] Given 借方 100.00 元且贷方 90.00 元; When 提交过账; Then 拒绝请求且账本无新增记录; 验证 准备夹具：借方 100.00 元且贷方 90.00 元；提交过账；断言：拒绝请求且账本无新增记录; 证据 拒绝请求且账本无新增记录\n- AC-03 FR-02 [AC-d0c79a7b04c68d895bf0] Given USD 100.00、当日 USD/CNY 汇率 7.2000; When 换算并过账; Then 保存 CNY 720.00 和汇率 7.2000 的快照; 验证 准备夹具：USD 100.00、当日 USD/CNY 汇率 7.2000；换算并过账；断言：保存 CNY 720.00 和汇率 7.2000 的快照; 证据 保存 CNY 720.00 和汇率 7.2000 的快照\n- AC-04 FR-02 [AC-8b295d01a3038d0b293c] Given 缺少记账日期的汇率; When 请求换算过账; Then 返回缺失汇率错误且无部分分录; 验证 准备夹具：缺少记账日期的汇率；请求换算过账；断言：返回缺失汇率错误且无部分分录; 证据 返回缺失汇率错误且无部分分录\n- AC-05 FR-03 [AC-7248d591eb9e5d859400] Given 两笔带相同业务请求编号的平衡分录请求; When 并发提交; Then 只有一个分录编号和一组过账记录; 验证 准备夹具：两笔带相同业务请求编号的平衡分录请求；并发提交；断言：只有一个分录编号和一组过账记录; 证据 只有一个分录编号和一组过账记录\n\n## 假设\n\n",
+    "diagnostics": [],
+    "decisions": [],
+    "handoffs": [],
+    "diff": {
+      "changedFields": [
+        "schemaVersion",
+        "title",
+        "goal",
+        "inputs",
+        "outputs",
+        "modules",
+        "interfaces",
+        "dataRules",
+        "constraints",
+        "quality",
+        "decisions",
+        "assumptions",
+        "trace",
+        "unresolved",
+        "designChecks"
+      ],
+      "changes": [
+        {
+          "field": "schemaVersion",
+          "before": null,
+          "after": 1
+        },
+        {
+          "field": "title",
+          "before": null,
+          "after": "多币种记账服务软件设计"
+        },
+        {
+          "field": "goal",
+          "before": null,
+          "after": "保存平衡分录及可回查的汇率快照"
+        },
+        {
+          "field": "inputs",
+          "before": null,
+          "after": [
+            "业务请求编号、日期、币种及借贷分录"
+          ]
+        },
+        {
+          "field": "outputs",
+          "before": null,
+          "after": [
+            "分录编号或过账错误"
+          ]
+        },
+        {
+          "field": "modules",
+          "before": null,
+          "after": [
+            {
+              "id": "entry",
+              "name": "记账接口",
+              "layer": "integration",
+              "responsibility": "校验业务请求、币种和记账日期，返回分录编号或明确错误",
+              "inputs": [
+                "业务请求编号、日期、币种及借贷分录"
+              ],
+              "outputs": [
+                "分录编号或过账错误"
+              ],
+              "requirementIds": [
+                "FR-4da5a603dfd62de7ae18",
+                "FR-ceb605312220e6b15ae3",
+                "NFR-d176c258c08e3e27eb86"
+              ],
+              "dependsOn": [
+                "core"
+              ],
+              "files": [
+                {
+                  "path": "src/journal-api.ts",
+                  "action": "create"
+                }
+              ]
+            },
+            {
+              "id": "core",
+              "name": "分录与汇率引擎",
+              "layer": "data",
+              "responsibility": "以十进制定点数检查借贷平衡，按日期汇率快照换算并四舍五入到分；按业务编号幂等地在单个事务过账",
+              "inputs": [
+                "业务请求编号、十进制金额、记账日期及汇率快照"
+              ],
+              "outputs": [
+                "平衡分录编号和换算金额"
+              ],
+              "requirementIds": [
+                "FR-4da5a603dfd62de7ae18",
+                "FR-ceb605312220e6b15ae3",
+                "NFR-d176c258c08e3e27eb86"
+              ],
+              "dependsOn": [],
+              "files": [
+                {
+                  "path": "src/ledger.ts",
+                  "action": "create"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "field": "interfaces",
+          "before": null,
+          "after": [
+            {
+              "id": "operation",
+              "provider": "core",
+              "consumers": [
+                "entry"
+              ],
+              "kind": "function",
+              "input": "postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串",
+              "result": "返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00",
+              "failure": "借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号",
+              "sideEffects": "仅成功事务保存整组分录和汇率快照"
+            }
+          ]
+        },
+        {
+          "field": "dataRules",
+          "before": null,
+          "after": [
+            "借方合计等于贷方合计才能过账",
+            "换算使用记账日期的汇率快照，四舍五入保留两位小数",
+            "十进制定点金额，借贷合计相等；记录日期、币种及汇率快照；业务请求编号唯一"
+          ]
+        },
+        {
+          "field": "constraints",
+          "before": null,
+          "after": [
+            "金额使用十进制定点数，禁止二进制浮点金额计算",
+            "一次过账的所有写入在单个事务内完成",
+            "必须保存唯一业务请求编号",
+            "缺少当日汇率时拒绝过账",
+            "业务请求编号唯一，检查和写入必须原子完成"
+          ]
+        },
+        {
+          "field": "quality",
+          "before": null,
+          "after": [
+            {
+              "requirementId": "NFR-d176c258c08e3e27eb86",
+              "moduleIds": [
+                "entry",
+                "core"
+              ],
+              "method": "准备：两笔带相同业务请求编号的平衡分录请求；执行：并发提交；记录可观察结果",
+              "passCondition": "只有一个分录编号和一组过账记录"
+            }
+          ]
+        },
+        {
+          "field": "decisions",
+          "before": null,
+          "after": [
+            {
+              "id": "module-boundary",
+              "decision": "将请求接入和事务记账引擎分开",
+              "rationale": "明确实现职责、跨模块契约和验证入口",
+              "alternatives": [
+                "把所有职责放在单个入口中"
+              ],
+              "requirementIds": [
+                "FR-4da5a603dfd62de7ae18",
+                "FR-ceb605312220e6b15ae3",
+                "NFR-d176c258c08e3e27eb86"
+              ],
+              "evidence": [
+                "FR-4da5a603dfd62de7ae18",
+                "FR-ceb605312220e6b15ae3",
+                "NFR-d176c258c08e3e27eb86"
+              ]
+            }
+          ]
+        },
+        {
+          "field": "assumptions",
+          "before": null,
+          "after": []
+        },
+        {
+          "field": "trace",
+          "before": null,
+          "after": [
+            {
+              "requirementId": "FR-4da5a603dfd62de7ae18",
+              "moduleIds": [
+                "entry",
+                "core"
+              ],
+              "acceptance": [
+                {
+                  "acceptanceId": "AC-d69b70f80aa98064a5df",
+                  "method": "准备夹具：借方与贷方各 100.00 元；提交过账；断言：返回分录编号并保存两笔平衡分录",
+                  "expectedEvidence": "返回分录编号并保存两笔平衡分录"
+                },
+                {
+                  "acceptanceId": "AC-77dff747145eda7a7e33",
+                  "method": "准备夹具：借方 100.00 元且贷方 90.00 元；提交过账；断言：拒绝请求且账本无新增记录",
+                  "expectedEvidence": "拒绝请求且账本无新增记录"
+                }
+              ]
+            },
+            {
+              "requirementId": "FR-ceb605312220e6b15ae3",
+              "moduleIds": [
+                "entry",
+                "core"
+              ],
+              "acceptance": [
+                {
+                  "acceptanceId": "AC-d0c79a7b04c68d895bf0",
+                  "method": "准备夹具：USD 100.00、当日 USD/CNY 汇率 7.2000；换算并过账；断言：保存 CNY 720.00 和汇率 7.2000 的快照",
+                  "expectedEvidence": "保存 CNY 720.00 和汇率 7.2000 的快照"
+                },
+                {
+                  "acceptanceId": "AC-8b295d01a3038d0b293c",
+                  "method": "准备夹具：缺少记账日期的汇率；请求换算过账；断言：返回缺失汇率错误且无部分分录",
+                  "expectedEvidence": "返回缺失汇率错误且无部分分录"
+                }
+              ]
+            },
+            {
+              "requirementId": "NFR-d176c258c08e3e27eb86",
+              "moduleIds": [
+                "entry",
+                "core"
+              ],
+              "acceptance": [
+                {
+                  "acceptanceId": "AC-7248d591eb9e5d859400",
+                  "method": "准备夹具：两笔带相同业务请求编号的平衡分录请求；并发提交；断言：只有一个分录编号和一组过账记录",
+                  "expectedEvidence": "只有一个分录编号和一组过账记录"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "field": "unresolved",
+          "before": null,
+          "after": []
+        },
+        {
+          "field": "designChecks",
+          "before": null,
+          "after": [
+            {
+              "id": "DC-operation-failure",
+              "source": {
+                "kind": "interface",
+                "id": "operation"
+              },
+              "rationale": "核对设计新增的跨模块失败契约",
+              "requirementIds": [
+                "FR-4da5a603dfd62de7ae18"
+              ],
+              "moduleIds": [
+                "entry",
+                "core"
+              ],
+              "method": "向入口注入失败并核对调用方可见行为：借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号",
+              "expectedEvidence": "借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号"
+            }
+          ]
+        }
+      ],
+      "addedFiles": [
+        "src/journal-api.ts",
+        "src/ledger.ts"
+      ],
+      "removedFiles": [],
+      "targetChanged": false
+    }
+  },
+  "confirmed": {
+    "designId": "design-a5f1d7f0-7572-4d38-b5c5-6c5ad43d4530",
+    "revision": 1,
+    "parentRevision": null,
+    "state": "confirmed",
+    "schemaVersion": 1,
+    "input": {
+      "designId": "design-a5f1d7f0-7572-4d38-b5c5-6c5ad43d4530",
+      "revision": 1,
+      "state": "draft",
+      "stage": "input_ready",
+      "createdAt": "2026-11-24T06:59:30.543Z",
+      "contentSha256": "cd9f0a9e223854b29950a3da5c6073899ea8db37559dc1d75933f9af9c365941",
+      "baselineRef": {
+        "id": "baseline-run-5c1edfe7",
+        "projectId": "acceptance-ledger",
+        "revision": 1,
+        "sha256": "7bfa76e7872ad64cc4cb3e95ab7d5bf427a3d47a8e875d53001407fdee62ad71",
+        "schemaVersion": 1,
+        "mode": "live"
+      },
+      "baseline": {
+        "schemaVersion": 1,
+        "id": "baseline-run-5c1edfe7",
+        "projectId": "acceptance-ledger",
+        "revision": 1,
+        "parentId": null,
+        "mode": "live",
+        "approvedPrd": {
+          "id": "prd-7deddf57-3ccd-4cdd-bdff-4944b711058b",
+          "kind": "prd",
+          "revision": 1,
+          "hash": "e9f1fe62b03419c07f21329d8f64544221123b7f0ce0ec3a7f83ece5c56b637c"
+        },
+        "approval": {
+          "targetId": "proposal-2a818145-0404-4113-9280-3902a690d9c7",
+          "targetHash": "2ec27fd26bd15e23db452689d202f1932e23da5e05934499a70177c14b7dc73a",
+          "actor": "验收脚本模拟审批人",
+          "action": "approve",
+          "feedback": "",
+          "scope": "local",
+          "issueIds": [],
+          "id": "int-61b534a5",
+          "gateKind": "approval",
+          "targetRevision": 1,
+          "decidedAt": "2026-11-24T06:59:29.787Z"
+        },
+        "confirmation": {
+          "targetId": "prd-7deddf57-3ccd-4cdd-bdff-4944b711058b",
+          "targetHash": "e9f1fe62b03419c07f21329d8f64544221123b7f0ce0ec3a7f83ece5c56b637c",
+          "actor": "验收脚本模拟审批人",
+          "action": "confirm",
+          "feedback": "",
+          "scope": "local",
+          "issueIds": [],
+          "id": "int-3db7347c",
+          "gateKind": "confirmation",
+          "targetRevision": 1,
+          "decidedAt": "2026-11-24T06:59:29.837Z"
+        },
+        "prd": {
+          "title": "多币种记账服务",
+          "revision": 1,
+          "proposal": {
+            "id": "proposal-2a818145-0404-4113-9280-3902a690d9c7",
+            "kind": "proposal",
+            "revision": 1,
+            "hash": "2ec27fd26bd15e23db452689d202f1932e23da5e05934499a70177c14b7dc73a"
+          },
+          "approvalId": "int-61b534a5",
+          "sections": {
+            "goals": [
+              "保存平衡分录及可回查的汇率快照"
+            ],
+            "summary": "[ledger] 多币种记账服务",
+            "approach": [
+              "借方合计等于贷方合计才能过账",
+              "换算使用记账日期的汇率快照，四舍五入保留两位小数"
+            ],
+            "scope": [
+              {
+                "key": "journal",
+                "kind": "functional",
+                "title": "分录过账",
+                "decision": "验证借贷平衡后保存分录，失败时不保存部分分录",
+                "issueIds": [
+                  "issue-journal"
+                ]
+              },
+              {
+                "key": "fx",
+                "kind": "functional",
+                "title": "汇率快照",
+                "decision": "用记账日期汇率换算金额并保存快照",
+                "issueIds": [
+                  "issue-fx"
+                ]
+              },
+              {
+                "key": "atomic",
+                "kind": "nonfunctional",
+                "title": "事务幂等",
+                "decision": "相同业务请求编号并发提交只产生一次过账",
+                "issueIds": [
+                  "issue-atomic"
+                ]
+              }
+            ],
+            "outOfScope": [
+              "未列出的扩展功能"
+            ],
+            "constraints": [
+              "金额使用十进制定点数，禁止二进制浮点金额计算",
+              "一次过账的所有写入在单个事务内完成"
+            ],
+            "tradeoffs": [],
+            "risks": [],
+            "unresolved": [],
+            "businessRules": [
+              "借方合计等于贷方合计才能过账",
+              "换算使用记账日期的汇率快照，四舍五入保留两位小数"
+            ],
+            "externalDependencies": []
+          },
+          "background": "[ledger] 保存平衡分录及可回查的汇率快照",
+          "scenarios": [
+            "保存平衡分录及可回查的汇率快照"
+          ],
+          "requirements": [
+            {
+              "id": "FR-4da5a603dfd62de7ae18",
+              "scopeKey": "journal",
+              "kind": "functional",
+              "title": "分录过账",
+              "description": "验证借贷平衡后保存分录，失败时不保存部分分录",
+              "value": "保证账本一致性",
+              "priority": "must",
+              "dependencies": [],
+              "constraints": [
+                "必须保存唯一业务请求编号"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-d69b70f80aa98064a5df",
+                  "given": "借方与贷方各 100.00 元",
+                  "when": "提交过账",
+                  "then": "返回分录编号并保存两笔平衡分录"
+                },
+                {
+                  "id": "AC-77dff747145eda7a7e33",
+                  "given": "借方 100.00 元且贷方 90.00 元",
+                  "when": "提交过账",
+                  "then": "拒绝请求且账本无新增记录"
+                }
+              ]
+            },
+            {
+              "id": "FR-ceb605312220e6b15ae3",
+              "scopeKey": "fx",
+              "kind": "functional",
+              "title": "汇率快照",
+              "description": "用记账日期汇率换算金额并保存快照",
+              "value": "支持对账追溯",
+              "priority": "should",
+              "dependencies": [
+                "FR-4da5a603dfd62de7ae18"
+              ],
+              "constraints": [
+                "缺少当日汇率时拒绝过账"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-d0c79a7b04c68d895bf0",
+                  "given": "USD 100.00、当日 USD/CNY 汇率 7.2000",
+                  "when": "换算并过账",
+                  "then": "保存 CNY 720.00 和汇率 7.2000 的快照"
+                },
+                {
+                  "id": "AC-8b295d01a3038d0b293c",
+                  "given": "缺少记账日期的汇率",
+                  "when": "请求换算过账",
+                  "then": "返回缺失汇率错误且无部分分录"
+                }
+              ]
+            },
+            {
+              "id": "NFR-d176c258c08e3e27eb86",
+              "scopeKey": "atomic",
+              "kind": "nonfunctional",
+              "title": "事务幂等",
+              "description": "相同业务请求编号并发提交只产生一次过账",
+              "value": "避免重复入账",
+              "priority": "must",
+              "dependencies": [
+                "FR-4da5a603dfd62de7ae18"
+              ],
+              "constraints": [
+                "业务请求编号唯一，检查和写入必须原子完成"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-7248d591eb9e5d859400",
+                  "given": "两笔带相同业务请求编号的平衡分录请求",
+                  "when": "并发提交",
+                  "then": "只有一个分录编号和一组过账记录"
+                }
+              ]
+            }
+          ],
+          "changes": [
+            "初版草案"
+          ],
+          "trace": [
+            {
+              "issueIds": [
+                "issue-journal"
+              ],
+              "ideaAndDocumentIds": [
+                "idea-1"
+              ],
+              "proposal": {
+                "id": "proposal-2a818145-0404-4113-9280-3902a690d9c7",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "2ec27fd26bd15e23db452689d202f1932e23da5e05934499a70177c14b7dc73a"
+              },
+              "scopeKey": "journal",
+              "approvalId": "int-61b534a5",
+              "requirementId": "FR-4da5a603dfd62de7ae18",
+              "acceptanceIds": [
+                "AC-d69b70f80aa98064a5df",
+                "AC-77dff747145eda7a7e33"
+              ]
+            },
+            {
+              "issueIds": [
+                "issue-fx"
+              ],
+              "ideaAndDocumentIds": [
+                "idea-1"
+              ],
+              "proposal": {
+                "id": "proposal-2a818145-0404-4113-9280-3902a690d9c7",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "2ec27fd26bd15e23db452689d202f1932e23da5e05934499a70177c14b7dc73a"
+              },
+              "scopeKey": "fx",
+              "approvalId": "int-61b534a5",
+              "requirementId": "FR-ceb605312220e6b15ae3",
+              "acceptanceIds": [
+                "AC-d0c79a7b04c68d895bf0",
+                "AC-8b295d01a3038d0b293c"
+              ]
+            },
+            {
+              "issueIds": [
+                "issue-atomic"
+              ],
+              "ideaAndDocumentIds": [
+                "idea-1"
+              ],
+              "proposal": {
+                "id": "proposal-2a818145-0404-4113-9280-3902a690d9c7",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "2ec27fd26bd15e23db452689d202f1932e23da5e05934499a70177c14b7dc73a"
+              },
+              "scopeKey": "atomic",
+              "approvalId": "int-61b534a5",
+              "requirementId": "NFR-d176c258c08e3e27eb86",
+              "acceptanceIds": [
+                "AC-7248d591eb9e5d859400"
+              ]
+            }
+          ]
+        },
+        "sha256": "7bfa76e7872ad64cc4cb3e95ab7d5bf427a3d47a8e875d53001407fdee62ad71"
+      },
+      "workspace": {
+        "workspaceId": "ws-6fd6d856",
+        "name": "多币种记账服务",
+        "sourceCommit": "cad45dde810aefd49627451c5854b12ca1d6a016",
+        "existingPaths": [
+          "README.md"
+        ],
+        "entryPoints": [],
+        "manifests": [],
+        "dependencies": [],
+        "testCommands": [
+          {
+            "directory": ".",
+            "command": "node --test",
+            "source": "workspace.verifyCommand（配置值，尚未执行）"
+          }
+        ],
+        "proposedPaths": [],
+        "notes": [
+          "清单及依赖取自目标提交，未提交或未跟踪文件不计入该版本。",
+          "输入阶段尚未推导拟新增路径；生成后的拟建工件见设计正文 modules.files 中 action=create 的条目。"
+        ]
+      },
+      "reviewEligible": true,
+      "blockers": []
+    },
+    "body": {
+      "schemaVersion": 1,
+      "title": "多币种记账服务软件设计",
+      "goal": "保存平衡分录及可回查的汇率快照",
+      "inputs": [
+        "业务请求编号、日期、币种及借贷分录"
+      ],
+      "outputs": [
+        "分录编号或过账错误"
+      ],
+      "modules": [
+        {
+          "id": "entry",
+          "name": "记账接口",
+          "layer": "integration",
+          "responsibility": "校验业务请求、币种和记账日期，返回分录编号或明确错误",
+          "inputs": [
+            "业务请求编号、日期、币种及借贷分录"
+          ],
+          "outputs": [
+            "分录编号或过账错误"
+          ],
+          "requirementIds": [
+            "FR-4da5a603dfd62de7ae18",
+            "FR-ceb605312220e6b15ae3",
+            "NFR-d176c258c08e3e27eb86"
+          ],
+          "dependsOn": [
+            "core"
+          ],
+          "files": [
+            {
+              "path": "src/journal-api.ts",
+              "action": "create"
+            }
+          ]
+        },
+        {
+          "id": "core",
+          "name": "分录与汇率引擎",
+          "layer": "data",
+          "responsibility": "以十进制定点数检查借贷平衡，按日期汇率快照换算并四舍五入到分；按业务编号幂等地在单个事务过账",
+          "inputs": [
+            "业务请求编号、十进制金额、记账日期及汇率快照"
+          ],
+          "outputs": [
+            "平衡分录编号和换算金额"
+          ],
+          "requirementIds": [
+            "FR-4da5a603dfd62de7ae18",
+            "FR-ceb605312220e6b15ae3",
+            "NFR-d176c258c08e3e27eb86"
+          ],
+          "dependsOn": [],
+          "files": [
+            {
+              "path": "src/ledger.ts",
+              "action": "create"
+            }
+          ]
+        }
+      ],
+      "interfaces": [
+        {
+          "id": "operation",
+          "provider": "core",
+          "consumers": [
+            "entry"
+          ],
+          "kind": "function",
+          "input": "postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串",
+          "result": "返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00",
+          "failure": "借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号",
+          "sideEffects": "仅成功事务保存整组分录和汇率快照"
+        }
+      ],
+      "dataRules": [
+        "借方合计等于贷方合计才能过账",
+        "换算使用记账日期的汇率快照，四舍五入保留两位小数",
+        "十进制定点金额，借贷合计相等；记录日期、币种及汇率快照；业务请求编号唯一"
+      ],
+      "constraints": [
+        "金额使用十进制定点数，禁止二进制浮点金额计算",
+        "一次过账的所有写入在单个事务内完成",
+        "必须保存唯一业务请求编号",
+        "缺少当日汇率时拒绝过账",
+        "业务请求编号唯一，检查和写入必须原子完成"
+      ],
+      "quality": [
+        {
+          "requirementId": "NFR-d176c258c08e3e27eb86",
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "method": "准备：两笔带相同业务请求编号的平衡分录请求；执行：并发提交；记录可观察结果",
+          "passCondition": "只有一个分录编号和一组过账记录"
+        }
+      ],
+      "decisions": [
+        {
+          "id": "module-boundary",
+          "decision": "将请求接入和事务记账引擎分开",
+          "rationale": "明确实现职责、跨模块契约和验证入口",
+          "alternatives": [
+            "把所有职责放在单个入口中"
+          ],
+          "requirementIds": [
+            "FR-4da5a603dfd62de7ae18",
+            "FR-ceb605312220e6b15ae3",
+            "NFR-d176c258c08e3e27eb86"
+          ],
+          "evidence": [
+            "FR-4da5a603dfd62de7ae18",
+            "FR-ceb605312220e6b15ae3",
+            "NFR-d176c258c08e3e27eb86"
+          ]
+        }
+      ],
+      "assumptions": [],
+      "trace": [
+        {
+          "requirementId": "FR-4da5a603dfd62de7ae18",
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-d69b70f80aa98064a5df",
+              "method": "准备夹具：借方与贷方各 100.00 元；提交过账；断言：返回分录编号并保存两笔平衡分录",
+              "expectedEvidence": "返回分录编号并保存两笔平衡分录"
+            },
+            {
+              "acceptanceId": "AC-77dff747145eda7a7e33",
+              "method": "准备夹具：借方 100.00 元且贷方 90.00 元；提交过账；断言：拒绝请求且账本无新增记录",
+              "expectedEvidence": "拒绝请求且账本无新增记录"
+            }
+          ]
+        },
+        {
+          "requirementId": "FR-ceb605312220e6b15ae3",
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-d0c79a7b04c68d895bf0",
+              "method": "准备夹具：USD 100.00、当日 USD/CNY 汇率 7.2000；换算并过账；断言：保存 CNY 720.00 和汇率 7.2000 的快照",
+              "expectedEvidence": "保存 CNY 720.00 和汇率 7.2000 的快照"
+            },
+            {
+              "acceptanceId": "AC-8b295d01a3038d0b293c",
+              "method": "准备夹具：缺少记账日期的汇率；请求换算过账；断言：返回缺失汇率错误且无部分分录",
+              "expectedEvidence": "返回缺失汇率错误且无部分分录"
+            }
+          ]
+        },
+        {
+          "requirementId": "NFR-d176c258c08e3e27eb86",
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-7248d591eb9e5d859400",
+              "method": "准备夹具：两笔带相同业务请求编号的平衡分录请求；并发提交；断言：只有一个分录编号和一组过账记录",
+              "expectedEvidence": "只有一个分录编号和一组过账记录"
+            }
+          ]
+        }
+      ],
+      "unresolved": [],
+      "designChecks": [
+        {
+          "id": "DC-operation-failure",
+          "source": {
+            "kind": "interface",
+            "id": "operation"
+          },
+          "rationale": "核对设计新增的跨模块失败契约",
+          "requirementIds": [
+            "FR-4da5a603dfd62de7ae18"
+          ],
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "method": "向入口注入失败并核对调用方可见行为：借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号",
+          "expectedEvidence": "借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号"
+        }
+      ]
+    },
+    "contentSha256": "6dee9a207cee968687b8d2cb5081956197b3e1575f9e74631e1e3785957503d0",
+    "createdAt": "2026-11-24T06:59:30.556Z",
+    "metadata": {
+      "actor": "验收脚本模拟设计负责人",
+      "reason": "ledger",
+      "generationId": "generation-fabfca2c-c569-42dd-806b-4cbd0e899b00",
+      "resolutions": [],
+      "previousDesign": null,
+      "baselineDiff": null
+    },
+    "reviewMarkdown": "# 多币种记账服务软件设计\n\n## 目标\n保存平衡分录及可回查的汇率快照\n\n## 输入\n- 业务请求编号、日期、币种及借贷分录\n\n## 输出\n- 分录编号或过账错误\n\n## 需求\n- FR-01 [FR-4da5a603dfd62de7ae18] 验证借贷平衡后保存分录，失败时不保存部分分录 优先级 must\n- FR-02 [FR-ceb605312220e6b15ae3] 用记账日期汇率换算金额并保存快照 优先级 should\n- FR-03 [NFR-d176c258c08e3e27eb86] 相同业务请求编号并发提交只产生一次过账 优先级 must\n\n## 模块\n- 记账接口: 校验业务请求、币种和记账日期，返回分录编号或明确错误；依赖 core；接口 operation: postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串 → 返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00；失败 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；覆盖 FR-01, FR-02, FR-03 (`src/journal-api.ts`)\n- 分录与汇率引擎: 以十进制定点数检查借贷平衡，按日期汇率快照换算并四舍五入到分；按业务编号幂等地在单个事务过账；依赖 无；接口 operation: postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串 → 返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00；失败 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；覆盖 FR-01, FR-02, FR-03 (`src/ledger.ts`)\n\n## 约束\n- 金额使用十进制定点数，禁止二进制浮点金额计算\n- 一次过账的所有写入在单个事务内完成\n- FR-4da5a603dfd62de7ae18: 必须保存唯一业务请求编号\n- FR-ceb605312220e6b15ae3: 缺少当日汇率时拒绝过账\n- NFR-d176c258c08e3e27eb86: 业务请求编号唯一，检查和写入必须原子完成\n- 金额使用十进制定点数，禁止二进制浮点金额计算\n- 一次过账的所有写入在单个事务内完成\n- 必须保存唯一业务请求编号\n- 缺少当日汇率时拒绝过账\n- 业务请求编号唯一，检查和写入必须原子完成\n\n## 领域规则\n- 借方合计等于贷方合计才能过账\n- 换算使用记账日期的汇率快照，四舍五入保留两位小数\n- 借方合计等于贷方合计才能过账\n- 换算使用记账日期的汇率快照，四舍五入保留两位小数\n- 十进制定点金额，借贷合计相等；记录日期、币种及汇率快照；业务请求编号唯一\n\n## 验收\n- AC-01 FR-01 [AC-d69b70f80aa98064a5df] Given 借方与贷方各 100.00 元; When 提交过账; Then 返回分录编号并保存两笔平衡分录; 验证 准备夹具：借方与贷方各 100.00 元；提交过账；断言：返回分录编号并保存两笔平衡分录; 证据 返回分录编号并保存两笔平衡分录\n- AC-02 FR-01 [AC-77dff747145eda7a7e33] Given 借方 100.00 元且贷方 90.00 元; When 提交过账; Then 拒绝请求且账本无新增记录; 验证 准备夹具：借方 100.00 元且贷方 90.00 元；提交过账；断言：拒绝请求且账本无新增记录; 证据 拒绝请求且账本无新增记录\n- AC-03 FR-02 [AC-d0c79a7b04c68d895bf0] Given USD 100.00、当日 USD/CNY 汇率 7.2000; When 换算并过账; Then 保存 CNY 720.00 和汇率 7.2000 的快照; 验证 准备夹具：USD 100.00、当日 USD/CNY 汇率 7.2000；换算并过账；断言：保存 CNY 720.00 和汇率 7.2000 的快照; 证据 保存 CNY 720.00 和汇率 7.2000 的快照\n- AC-04 FR-02 [AC-8b295d01a3038d0b293c] Given 缺少记账日期的汇率; When 请求换算过账; Then 返回缺失汇率错误且无部分分录; 验证 准备夹具：缺少记账日期的汇率；请求换算过账；断言：返回缺失汇率错误且无部分分录; 证据 返回缺失汇率错误且无部分分录\n- AC-05 FR-03 [AC-7248d591eb9e5d859400] Given 两笔带相同业务请求编号的平衡分录请求; When 并发提交; Then 只有一个分录编号和一组过账记录; 验证 准备夹具：两笔带相同业务请求编号的平衡分录请求；并发提交；断言：只有一个分录编号和一组过账记录; 证据 只有一个分录编号和一组过账记录\n\n## 假设\n\n\n\n## 来源记录\n- 基线 baseline-run-5c1edfe7 / acceptance-ledger / v1 / 7bfa76e7872ad64cc4cb3e95ab7d5bf427a3d47a8e875d53001407fdee62ad71\n- 目标 ws-6fd6d856 / cad45dde810aefd49627451c5854b12ca1d6a016\n- 范围外 未列出的扩展功能\n\n## modules\n\n```json\n[\n  {\n    \"id\": \"entry\",\n    \"name\": \"记账接口\",\n    \"layer\": \"integration\",\n    \"responsibility\": \"校验业务请求、币种和记账日期，返回分录编号或明确错误\",\n    \"inputs\": [\n      \"业务请求编号、日期、币种及借贷分录\"\n    ],\n    \"outputs\": [\n      \"分录编号或过账错误\"\n    ],\n    \"requirementIds\": [\n      \"FR-4da5a603dfd62de7ae18\",\n      \"FR-ceb605312220e6b15ae3\",\n      \"NFR-d176c258c08e3e27eb86\"\n    ],\n    \"dependsOn\": [\n      \"core\"\n    ],\n    \"files\": [\n      {\n        \"path\": \"src/journal-api.ts\",\n        \"action\": \"create\"\n      }\n    ]\n  },\n  {\n    \"id\": \"core\",\n    \"name\": \"分录与汇率引擎\",\n    \"layer\": \"data\",\n    \"responsibility\": \"以十进制定点数检查借贷平衡，按日期汇率快照换算并四舍五入到分；按业务编号幂等地在单个事务过账\",\n    \"inputs\": [\n      \"业务请求编号、十进制金额、记账日期及汇率快照\"\n    ],\n    \"outputs\": [\n      \"平衡分录编号和换算金额\"\n    ],\n    \"requirementIds\": [\n      \"FR-4da5a603dfd62de7ae18\",\n      \"FR-ceb605312220e6b15ae3\",\n      \"NFR-d176c258c08e3e27eb86\"\n    ],\n    \"dependsOn\": [],\n    \"files\": [\n      {\n        \"path\": \"src/ledger.ts\",\n        \"action\": \"create\"\n      }\n    ]\n  }\n]\n```\n\n## interfaces\n\n```json\n[\n  {\n    \"id\": \"operation\",\n    \"provider\": \"core\",\n    \"consumers\": [\n      \"entry\"\n    ],\n    \"kind\": \"function\",\n    \"input\": \"postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串\",\n    \"result\": \"返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00\",\n    \"failure\": \"借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号\",\n    \"sideEffects\": \"仅成功事务保存整组分录和汇率快照\"\n  }\n]\n```\n\n## quality\n\n```json\n[\n  {\n    \"requirementId\": \"NFR-d176c258c08e3e27eb86\",\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"method\": \"准备：两笔带相同业务请求编号的平衡分录请求；执行：并发提交；记录可观察结果\",\n    \"passCondition\": \"只有一个分录编号和一组过账记录\"\n  }\n]\n```\n\n## decisions\n\n```json\n[\n  {\n    \"id\": \"module-boundary\",\n    \"decision\": \"将请求接入和事务记账引擎分开\",\n    \"rationale\": \"明确实现职责、跨模块契约和验证入口\",\n    \"alternatives\": [\n      \"把所有职责放在单个入口中\"\n    ],\n    \"requirementIds\": [\n      \"FR-4da5a603dfd62de7ae18\",\n      \"FR-ceb605312220e6b15ae3\",\n      \"NFR-d176c258c08e3e27eb86\"\n    ],\n    \"evidence\": [\n      \"FR-4da5a603dfd62de7ae18\",\n      \"FR-ceb605312220e6b15ae3\",\n      \"NFR-d176c258c08e3e27eb86\"\n    ]\n  }\n]\n```\n\n## assumptions\n\n```json\n[]\n```\n\n## trace\n\n```json\n[\n  {\n    \"requirementId\": \"FR-4da5a603dfd62de7ae18\",\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-d69b70f80aa98064a5df\",\n        \"method\": \"准备夹具：借方与贷方各 100.00 元；提交过账；断言：返回分录编号并保存两笔平衡分录\",\n        \"expectedEvidence\": \"返回分录编号并保存两笔平衡分录\"\n      },\n      {\n        \"acceptanceId\": \"AC-77dff747145eda7a7e33\",\n        \"method\": \"准备夹具：借方 100.00 元且贷方 90.00 元；提交过账；断言：拒绝请求且账本无新增记录\",\n        \"expectedEvidence\": \"拒绝请求且账本无新增记录\"\n      }\n    ]\n  },\n  {\n    \"requirementId\": \"FR-ceb605312220e6b15ae3\",\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-d0c79a7b04c68d895bf0\",\n        \"method\": \"准备夹具：USD 100.00、当日 USD/CNY 汇率 7.2000；换算并过账；断言：保存 CNY 720.00 和汇率 7.2000 的快照\",\n        \"expectedEvidence\": \"保存 CNY 720.00 和汇率 7.2000 的快照\"\n      },\n      {\n        \"acceptanceId\": \"AC-8b295d01a3038d0b293c\",\n        \"method\": \"准备夹具：缺少记账日期的汇率；请求换算过账；断言：返回缺失汇率错误且无部分分录\",\n        \"expectedEvidence\": \"返回缺失汇率错误且无部分分录\"\n      }\n    ]\n  },\n  {\n    \"requirementId\": \"NFR-d176c258c08e3e27eb86\",\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-7248d591eb9e5d859400\",\n        \"method\": \"准备夹具：两笔带相同业务请求编号的平衡分录请求；并发提交；断言：只有一个分录编号和一组过账记录\",\n        \"expectedEvidence\": \"只有一个分录编号和一组过账记录\"\n      }\n    ]\n  }\n]\n```\n\n## unresolved\n\n```json\n[]\n```\n\n## 设计补充检查（独立于 HAMA 原始 AC）\n\n```json\n[\n  {\n    \"id\": \"DC-operation-failure\",\n    \"source\": {\n      \"kind\": \"interface\",\n      \"id\": \"operation\"\n    },\n    \"rationale\": \"核对设计新增的跨模块失败契约\",\n    \"requirementIds\": [\n      \"FR-4da5a603dfd62de7ae18\"\n    ],\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"method\": \"向入口注入失败并核对调用方可见行为：借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号\",\n    \"expectedEvidence\": \"借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号\"\n  }\n]\n```",
+    "pmMarkdown": "# 多币种记账服务软件设计\n\n## 目标\n保存平衡分录及可回查的汇率快照\n\n## 输入\n- 业务请求编号、日期、币种及借贷分录\n\n## 输出\n- 分录编号或过账错误\n\n## 需求\n- FR-01 [FR-4da5a603dfd62de7ae18] 验证借贷平衡后保存分录，失败时不保存部分分录 优先级 must\n- FR-02 [FR-ceb605312220e6b15ae3] 用记账日期汇率换算金额并保存快照 优先级 should\n- FR-03 [NFR-d176c258c08e3e27eb86] 相同业务请求编号并发提交只产生一次过账 优先级 must\n\n## 模块\n- 记账接口: 校验业务请求、币种和记账日期，返回分录编号或明确错误；依赖 core；接口 operation: postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串 → 返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00；失败 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；覆盖 FR-01, FR-02, FR-03 (`src/journal-api.ts`)\n- 分录与汇率引擎: 以十进制定点数检查借贷平衡，按日期汇率快照换算并四舍五入到分；按业务编号幂等地在单个事务过账；依赖 无；接口 operation: postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串 → 返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00；失败 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；覆盖 FR-01, FR-02, FR-03 (`src/ledger.ts`)\n\n## 约束\n- 金额使用十进制定点数，禁止二进制浮点金额计算\n- 一次过账的所有写入在单个事务内完成\n- FR-4da5a603dfd62de7ae18: 必须保存唯一业务请求编号\n- FR-ceb605312220e6b15ae3: 缺少当日汇率时拒绝过账\n- NFR-d176c258c08e3e27eb86: 业务请求编号唯一，检查和写入必须原子完成\n- 金额使用十进制定点数，禁止二进制浮点金额计算\n- 一次过账的所有写入在单个事务内完成\n- 必须保存唯一业务请求编号\n- 缺少当日汇率时拒绝过账\n- 业务请求编号唯一，检查和写入必须原子完成\n\n## 领域规则\n- 借方合计等于贷方合计才能过账\n- 换算使用记账日期的汇率快照，四舍五入保留两位小数\n- 借方合计等于贷方合计才能过账\n- 换算使用记账日期的汇率快照，四舍五入保留两位小数\n- 十进制定点金额，借贷合计相等；记录日期、币种及汇率快照；业务请求编号唯一\n\n## 验收\n- AC-01 FR-01 [AC-d69b70f80aa98064a5df] Given 借方与贷方各 100.00 元; When 提交过账; Then 返回分录编号并保存两笔平衡分录; 验证 准备夹具：借方与贷方各 100.00 元；提交过账；断言：返回分录编号并保存两笔平衡分录; 证据 返回分录编号并保存两笔平衡分录\n- AC-02 FR-01 [AC-77dff747145eda7a7e33] Given 借方 100.00 元且贷方 90.00 元; When 提交过账; Then 拒绝请求且账本无新增记录; 验证 准备夹具：借方 100.00 元且贷方 90.00 元；提交过账；断言：拒绝请求且账本无新增记录; 证据 拒绝请求且账本无新增记录\n- AC-03 FR-02 [AC-d0c79a7b04c68d895bf0] Given USD 100.00、当日 USD/CNY 汇率 7.2000; When 换算并过账; Then 保存 CNY 720.00 和汇率 7.2000 的快照; 验证 准备夹具：USD 100.00、当日 USD/CNY 汇率 7.2000；换算并过账；断言：保存 CNY 720.00 和汇率 7.2000 的快照; 证据 保存 CNY 720.00 和汇率 7.2000 的快照\n- AC-04 FR-02 [AC-8b295d01a3038d0b293c] Given 缺少记账日期的汇率; When 请求换算过账; Then 返回缺失汇率错误且无部分分录; 验证 准备夹具：缺少记账日期的汇率；请求换算过账；断言：返回缺失汇率错误且无部分分录; 证据 返回缺失汇率错误且无部分分录\n- AC-05 FR-03 [AC-7248d591eb9e5d859400] Given 两笔带相同业务请求编号的平衡分录请求; When 并发提交; Then 只有一个分录编号和一组过账记录; 验证 准备夹具：两笔带相同业务请求编号的平衡分录请求；并发提交；断言：只有一个分录编号和一组过账记录; 证据 只有一个分录编号和一组过账记录\n\n## 假设\n\n",
+    "diagnostics": [],
+    "decisions": [
+      {
+        "decisionId": "52ae4ff3-c643-45f5-a7d9-d4c4c10e6aa1",
+        "designId": "design-a5f1d7f0-7572-4d38-b5c5-6c5ad43d4530",
+        "revision": 1,
+        "expectedHash": "6dee9a207cee968687b8d2cb5081956197b3e1575f9e74631e1e3785957503d0",
+        "actor": "验收脚本模拟评审人",
+        "action": "submit",
+        "scope": "technical",
+        "findings": [],
+        "decidedAt": "2026-11-24T06:59:30.558Z"
+      },
+      {
+        "decisionId": "fb35393b-148d-4ea7-a9bb-0a384ce1670d",
+        "designId": "design-a5f1d7f0-7572-4d38-b5c5-6c5ad43d4530",
+        "revision": 1,
+        "expectedHash": "6dee9a207cee968687b8d2cb5081956197b3e1575f9e74631e1e3785957503d0",
+        "actor": "验收脚本模拟评审人",
+        "action": "confirm",
+        "scope": "technical",
+        "findings": [],
+        "decidedAt": "2026-11-24T06:59:30.561Z"
+      }
+    ],
+    "handoffs": [],
+    "diff": {
+      "changedFields": [
+        "schemaVersion",
+        "title",
+        "goal",
+        "inputs",
+        "outputs",
+        "modules",
+        "interfaces",
+        "dataRules",
+        "constraints",
+        "quality",
+        "decisions",
+        "assumptions",
+        "trace",
+        "unresolved",
+        "designChecks"
+      ],
+      "changes": [
+        {
+          "field": "schemaVersion",
+          "before": null,
+          "after": 1
+        },
+        {
+          "field": "title",
+          "before": null,
+          "after": "多币种记账服务软件设计"
+        },
+        {
+          "field": "goal",
+          "before": null,
+          "after": "保存平衡分录及可回查的汇率快照"
+        },
+        {
+          "field": "inputs",
+          "before": null,
+          "after": [
+            "业务请求编号、日期、币种及借贷分录"
+          ]
+        },
+        {
+          "field": "outputs",
+          "before": null,
+          "after": [
+            "分录编号或过账错误"
+          ]
+        },
+        {
+          "field": "modules",
+          "before": null,
+          "after": [
+            {
+              "id": "entry",
+              "name": "记账接口",
+              "layer": "integration",
+              "responsibility": "校验业务请求、币种和记账日期，返回分录编号或明确错误",
+              "inputs": [
+                "业务请求编号、日期、币种及借贷分录"
+              ],
+              "outputs": [
+                "分录编号或过账错误"
+              ],
+              "requirementIds": [
+                "FR-4da5a603dfd62de7ae18",
+                "FR-ceb605312220e6b15ae3",
+                "NFR-d176c258c08e3e27eb86"
+              ],
+              "dependsOn": [
+                "core"
+              ],
+              "files": [
+                {
+                  "path": "src/journal-api.ts",
+                  "action": "create"
+                }
+              ]
+            },
+            {
+              "id": "core",
+              "name": "分录与汇率引擎",
+              "layer": "data",
+              "responsibility": "以十进制定点数检查借贷平衡，按日期汇率快照换算并四舍五入到分；按业务编号幂等地在单个事务过账",
+              "inputs": [
+                "业务请求编号、十进制金额、记账日期及汇率快照"
+              ],
+              "outputs": [
+                "平衡分录编号和换算金额"
+              ],
+              "requirementIds": [
+                "FR-4da5a603dfd62de7ae18",
+                "FR-ceb605312220e6b15ae3",
+                "NFR-d176c258c08e3e27eb86"
+              ],
+              "dependsOn": [],
+              "files": [
+                {
+                  "path": "src/ledger.ts",
+                  "action": "create"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "field": "interfaces",
+          "before": null,
+          "after": [
+            {
+              "id": "operation",
+              "provider": "core",
+              "consumers": [
+                "entry"
+              ],
+              "kind": "function",
+              "input": "postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串",
+              "result": "返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00",
+              "failure": "借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号",
+              "sideEffects": "仅成功事务保存整组分录和汇率快照"
+            }
+          ]
+        },
+        {
+          "field": "dataRules",
+          "before": null,
+          "after": [
+            "借方合计等于贷方合计才能过账",
+            "换算使用记账日期的汇率快照，四舍五入保留两位小数",
+            "十进制定点金额，借贷合计相等；记录日期、币种及汇率快照；业务请求编号唯一"
+          ]
+        },
+        {
+          "field": "constraints",
+          "before": null,
+          "after": [
+            "金额使用十进制定点数，禁止二进制浮点金额计算",
+            "一次过账的所有写入在单个事务内完成",
+            "必须保存唯一业务请求编号",
+            "缺少当日汇率时拒绝过账",
+            "业务请求编号唯一，检查和写入必须原子完成"
+          ]
+        },
+        {
+          "field": "quality",
+          "before": null,
+          "after": [
+            {
+              "requirementId": "NFR-d176c258c08e3e27eb86",
+              "moduleIds": [
+                "entry",
+                "core"
+              ],
+              "method": "准备：两笔带相同业务请求编号的平衡分录请求；执行：并发提交；记录可观察结果",
+              "passCondition": "只有一个分录编号和一组过账记录"
+            }
+          ]
+        },
+        {
+          "field": "decisions",
+          "before": null,
+          "after": [
+            {
+              "id": "module-boundary",
+              "decision": "将请求接入和事务记账引擎分开",
+              "rationale": "明确实现职责、跨模块契约和验证入口",
+              "alternatives": [
+                "把所有职责放在单个入口中"
+              ],
+              "requirementIds": [
+                "FR-4da5a603dfd62de7ae18",
+                "FR-ceb605312220e6b15ae3",
+                "NFR-d176c258c08e3e27eb86"
+              ],
+              "evidence": [
+                "FR-4da5a603dfd62de7ae18",
+                "FR-ceb605312220e6b15ae3",
+                "NFR-d176c258c08e3e27eb86"
+              ]
+            }
+          ]
+        },
+        {
+          "field": "assumptions",
+          "before": null,
+          "after": []
+        },
+        {
+          "field": "trace",
+          "before": null,
+          "after": [
+            {
+              "requirementId": "FR-4da5a603dfd62de7ae18",
+              "moduleIds": [
+                "entry",
+                "core"
+              ],
+              "acceptance": [
+                {
+                  "acceptanceId": "AC-d69b70f80aa98064a5df",
+                  "method": "准备夹具：借方与贷方各 100.00 元；提交过账；断言：返回分录编号并保存两笔平衡分录",
+                  "expectedEvidence": "返回分录编号并保存两笔平衡分录"
+                },
+                {
+                  "acceptanceId": "AC-77dff747145eda7a7e33",
+                  "method": "准备夹具：借方 100.00 元且贷方 90.00 元；提交过账；断言：拒绝请求且账本无新增记录",
+                  "expectedEvidence": "拒绝请求且账本无新增记录"
+                }
+              ]
+            },
+            {
+              "requirementId": "FR-ceb605312220e6b15ae3",
+              "moduleIds": [
+                "entry",
+                "core"
+              ],
+              "acceptance": [
+                {
+                  "acceptanceId": "AC-d0c79a7b04c68d895bf0",
+                  "method": "准备夹具：USD 100.00、当日 USD/CNY 汇率 7.2000；换算并过账；断言：保存 CNY 720.00 和汇率 7.2000 的快照",
+                  "expectedEvidence": "保存 CNY 720.00 和汇率 7.2000 的快照"
+                },
+                {
+                  "acceptanceId": "AC-8b295d01a3038d0b293c",
+                  "method": "准备夹具：缺少记账日期的汇率；请求换算过账；断言：返回缺失汇率错误且无部分分录",
+                  "expectedEvidence": "返回缺失汇率错误且无部分分录"
+                }
+              ]
+            },
+            {
+              "requirementId": "NFR-d176c258c08e3e27eb86",
+              "moduleIds": [
+                "entry",
+                "core"
+              ],
+              "acceptance": [
+                {
+                  "acceptanceId": "AC-7248d591eb9e5d859400",
+                  "method": "准备夹具：两笔带相同业务请求编号的平衡分录请求；并发提交；断言：只有一个分录编号和一组过账记录",
+                  "expectedEvidence": "只有一个分录编号和一组过账记录"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "field": "unresolved",
+          "before": null,
+          "after": []
+        },
+        {
+          "field": "designChecks",
+          "before": null,
+          "after": [
+            {
+              "id": "DC-operation-failure",
+              "source": {
+                "kind": "interface",
+                "id": "operation"
+              },
+              "rationale": "核对设计新增的跨模块失败契约",
+              "requirementIds": [
+                "FR-4da5a603dfd62de7ae18"
+              ],
+              "moduleIds": [
+                "entry",
+                "core"
+              ],
+              "method": "向入口注入失败并核对调用方可见行为：借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号",
+              "expectedEvidence": "借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号"
+            }
+          ]
+        }
+      ],
+      "addedFiles": [
+        "src/journal-api.ts",
+        "src/ledger.ts"
+      ],
+      "removedFiles": [],
+      "targetChanged": false
+    }
+  },
+  "receipt": {
+    "designRef": {
+      "designId": "design-a5f1d7f0-7572-4d38-b5c5-6c5ad43d4530",
+      "revision": 1,
+      "contentSha256": "6dee9a207cee968687b8d2cb5081956197b3e1575f9e74631e1e3785957503d0",
+      "workspaceId": "ws-6fd6d856",
+      "sourceCommit": "cad45dde810aefd49627451c5854b12ca1d6a016"
+    },
+    "workflowId": "wf-f7631008",
+    "pmReportId": "pm-91641362",
+    "status": "received",
+    "createdAt": "2026-11-24T06:59:31.116Z",
+    "diagnostics": [],
+    "workflow": {
+      "workflow": {
+        "id": "wf-f7631008",
+        "workspaceId": "ws-6fd6d856",
+        "code": "WF-004",
+        "title": "多币种记账服务软件设计",
+        "description": "保存平衡分录及可回查的汇率快照",
+        "status": "validated",
+        "currentVersionNumber": 0,
+        "permissionTier": "supervised",
+        "verifyCommand": "node --test",
+        "maxReworkIterations": 3,
+        "customization": {
+          "templatePreset": "fullstack_se",
+          "includeHumanGate": false,
+          "includeSecurityPass": true,
+          "includeQaAudit": true,
+          "maxParallelWorkers": 3,
+          "dddStrictCheck": true,
+          "pmAgentMode": "hybrid_llm",
+          "budgetUsdLimit": 2.5
+        },
+        "lastHumanReviewedAt": "2026-11-24T06:59:30.837Z",
+        "spacedReviewCount": 0,
+        "createdAt": "2026-11-24T06:59:30.837Z",
+        "updatedAt": "2026-11-24T06:59:30.837Z"
+      },
+      "goalSpec": {
+        "rawMarkdown": "# 多币种记账服务软件设计\n\n## 目标\n保存平衡分录及可回查的汇率快照\n\n## 输入\n- 业务请求编号、日期、币种及借贷分录\n\n## 输出\n- 分录编号或过账错误\n\n## 需求\n- FR-01 [FR-4da5a603dfd62de7ae18] 验证借贷平衡后保存分录，失败时不保存部分分录 优先级 must\n- FR-02 [FR-ceb605312220e6b15ae3] 用记账日期汇率换算金额并保存快照 优先级 should\n- FR-03 [NFR-d176c258c08e3e27eb86] 相同业务请求编号并发提交只产生一次过账 优先级 must\n\n## 模块\n- 记账接口: 校验业务请求、币种和记账日期，返回分录编号或明确错误；依赖 core；接口 operation: postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串 → 返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00；失败 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；覆盖 FR-01, FR-02, FR-03 (`src/journal-api.ts`)\n- 分录与汇率引擎: 以十进制定点数检查借贷平衡，按日期汇率快照换算并四舍五入到分；按业务编号幂等地在单个事务过账；依赖 无；接口 operation: postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串 → 返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00；失败 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；覆盖 FR-01, FR-02, FR-03 (`src/ledger.ts`)\n\n## 约束\n- 金额使用十进制定点数，禁止二进制浮点金额计算\n- 一次过账的所有写入在单个事务内完成\n- FR-4da5a603dfd62de7ae18: 必须保存唯一业务请求编号\n- FR-ceb605312220e6b15ae3: 缺少当日汇率时拒绝过账\n- NFR-d176c258c08e3e27eb86: 业务请求编号唯一，检查和写入必须原子完成\n- 金额使用十进制定点数，禁止二进制浮点金额计算\n- 一次过账的所有写入在单个事务内完成\n- 必须保存唯一业务请求编号\n- 缺少当日汇率时拒绝过账\n- 业务请求编号唯一，检查和写入必须原子完成\n\n## 领域规则\n- 借方合计等于贷方合计才能过账\n- 换算使用记账日期的汇率快照，四舍五入保留两位小数\n- 借方合计等于贷方合计才能过账\n- 换算使用记账日期的汇率快照，四舍五入保留两位小数\n- 十进制定点金额，借贷合计相等；记录日期、币种及汇率快照；业务请求编号唯一\n\n## 验收\n- AC-01 FR-01 [AC-d69b70f80aa98064a5df] Given 借方与贷方各 100.00 元; When 提交过账; Then 返回分录编号并保存两笔平衡分录; 验证 准备夹具：借方与贷方各 100.00 元；提交过账；断言：返回分录编号并保存两笔平衡分录; 证据 返回分录编号并保存两笔平衡分录\n- AC-02 FR-01 [AC-77dff747145eda7a7e33] Given 借方 100.00 元且贷方 90.00 元; When 提交过账; Then 拒绝请求且账本无新增记录; 验证 准备夹具：借方 100.00 元且贷方 90.00 元；提交过账；断言：拒绝请求且账本无新增记录; 证据 拒绝请求且账本无新增记录\n- AC-03 FR-02 [AC-d0c79a7b04c68d895bf0] Given USD 100.00、当日 USD/CNY 汇率 7.2000; When 换算并过账; Then 保存 CNY 720.00 和汇率 7.2000 的快照; 验证 准备夹具：USD 100.00、当日 USD/CNY 汇率 7.2000；换算并过账；断言：保存 CNY 720.00 和汇率 7.2000 的快照; 证据 保存 CNY 720.00 和汇率 7.2000 的快照\n- AC-04 FR-02 [AC-8b295d01a3038d0b293c] Given 缺少记账日期的汇率; When 请求换算过账; Then 返回缺失汇率错误且无部分分录; 验证 准备夹具：缺少记账日期的汇率；请求换算过账；断言：返回缺失汇率错误且无部分分录; 证据 返回缺失汇率错误且无部分分录\n- AC-05 FR-03 [AC-7248d591eb9e5d859400] Given 两笔带相同业务请求编号的平衡分录请求; When 并发提交; Then 只有一个分录编号和一组过账记录; 验证 准备夹具：两笔带相同业务请求编号的平衡分录请求；并发提交；断言：只有一个分录编号和一组过账记录; 证据 只有一个分录编号和一组过账记录\n\n## 假设\n\n\n\n## 来源记录\n- 基线 baseline-run-5c1edfe7 / acceptance-ledger / v1 / 7bfa76e7872ad64cc4cb3e95ab7d5bf427a3d47a8e875d53001407fdee62ad71\n- 目标 ws-6fd6d856 / cad45dde810aefd49627451c5854b12ca1d6a016\n- 范围外 未列出的扩展功能\n\n## modules\n\n```json\n[\n  {\n    \"id\": \"entry\",\n    \"name\": \"记账接口\",\n    \"layer\": \"integration\",\n    \"responsibility\": \"校验业务请求、币种和记账日期，返回分录编号或明确错误\",\n    \"inputs\": [\n      \"业务请求编号、日期、币种及借贷分录\"\n    ],\n    \"outputs\": [\n      \"分录编号或过账错误\"\n    ],\n    \"requirementIds\": [\n      \"FR-4da5a603dfd62de7ae18\",\n      \"FR-ceb605312220e6b15ae3\",\n      \"NFR-d176c258c08e3e27eb86\"\n    ],\n    \"dependsOn\": [\n      \"core\"\n    ],\n    \"files\": [\n      {\n        \"path\": \"src/journal-api.ts\",\n        \"action\": \"create\"\n      }\n    ]\n  },\n  {\n    \"id\": \"core\",\n    \"name\": \"分录与汇率引擎\",\n    \"layer\": \"data\",\n    \"responsibility\": \"以十进制定点数检查借贷平衡，按日期汇率快照换算并四舍五入到分；按业务编号幂等地在单个事务过账\",\n    \"inputs\": [\n      \"业务请求编号、十进制金额、记账日期及汇率快照\"\n    ],\n    \"outputs\": [\n      \"平衡分录编号和换算金额\"\n    ],\n    \"requirementIds\": [\n      \"FR-4da5a603dfd62de7ae18\",\n      \"FR-ceb605312220e6b15ae3\",\n      \"NFR-d176c258c08e3e27eb86\"\n    ],\n    \"dependsOn\": [],\n    \"files\": [\n      {\n        \"path\": \"src/ledger.ts\",\n        \"action\": \"create\"\n      }\n    ]\n  }\n]\n```\n\n## interfaces\n\n```json\n[\n  {\n    \"id\": \"operation\",\n    \"provider\": \"core\",\n    \"consumers\": [\n      \"entry\"\n    ],\n    \"kind\": \"function\",\n    \"input\": \"postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串\",\n    \"result\": \"返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00\",\n    \"failure\": \"借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号\",\n    \"sideEffects\": \"仅成功事务保存整组分录和汇率快照\"\n  }\n]\n```\n\n## quality\n\n```json\n[\n  {\n    \"requirementId\": \"NFR-d176c258c08e3e27eb86\",\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"method\": \"准备：两笔带相同业务请求编号的平衡分录请求；执行：并发提交；记录可观察结果\",\n    \"passCondition\": \"只有一个分录编号和一组过账记录\"\n  }\n]\n```\n\n## decisions\n\n```json\n[\n  {\n    \"id\": \"module-boundary\",\n    \"decision\": \"将请求接入和事务记账引擎分开\",\n    \"rationale\": \"明确实现职责、跨模块契约和验证入口\",\n    \"alternatives\": [\n      \"把所有职责放在单个入口中\"\n    ],\n    \"requirementIds\": [\n      \"FR-4da5a603dfd62de7ae18\",\n      \"FR-ceb605312220e6b15ae3\",\n      \"NFR-d176c258c08e3e27eb86\"\n    ],\n    \"evidence\": [\n      \"FR-4da5a603dfd62de7ae18\",\n      \"FR-ceb605312220e6b15ae3\",\n      \"NFR-d176c258c08e3e27eb86\"\n    ]\n  }\n]\n```\n\n## assumptions\n\n```json\n[]\n```\n\n## trace\n\n```json\n[\n  {\n    \"requirementId\": \"FR-4da5a603dfd62de7ae18\",\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-d69b70f80aa98064a5df\",\n        \"method\": \"准备夹具：借方与贷方各 100.00 元；提交过账；断言：返回分录编号并保存两笔平衡分录\",\n        \"expectedEvidence\": \"返回分录编号并保存两笔平衡分录\"\n      },\n      {\n        \"acceptanceId\": \"AC-77dff747145eda7a7e33\",\n        \"method\": \"准备夹具：借方 100.00 元且贷方 90.00 元；提交过账；断言：拒绝请求且账本无新增记录\",\n        \"expectedEvidence\": \"拒绝请求且账本无新增记录\"\n      }\n    ]\n  },\n  {\n    \"requirementId\": \"FR-ceb605312220e6b15ae3\",\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-d0c79a7b04c68d895bf0\",\n        \"method\": \"准备夹具：USD 100.00、当日 USD/CNY 汇率 7.2000；换算并过账；断言：保存 CNY 720.00 和汇率 7.2000 的快照\",\n        \"expectedEvidence\": \"保存 CNY 720.00 和汇率 7.2000 的快照\"\n      },\n      {\n        \"acceptanceId\": \"AC-8b295d01a3038d0b293c\",\n        \"method\": \"准备夹具：缺少记账日期的汇率；请求换算过账；断言：返回缺失汇率错误且无部分分录\",\n        \"expectedEvidence\": \"返回缺失汇率错误且无部分分录\"\n      }\n    ]\n  },\n  {\n    \"requirementId\": \"NFR-d176c258c08e3e27eb86\",\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-7248d591eb9e5d859400\",\n        \"method\": \"准备夹具：两笔带相同业务请求编号的平衡分录请求；并发提交；断言：只有一个分录编号和一组过账记录\",\n        \"expectedEvidence\": \"只有一个分录编号和一组过账记录\"\n      }\n    ]\n  }\n]\n```\n\n## unresolved\n\n```json\n[]\n```\n\n## 设计补充检查（独立于 HAMA 原始 AC）\n\n```json\n[\n  {\n    \"id\": \"DC-operation-failure\",\n    \"source\": {\n      \"kind\": \"interface\",\n      \"id\": \"operation\"\n    },\n    \"rationale\": \"核对设计新增的跨模块失败契约\",\n    \"requirementIds\": [\n      \"FR-4da5a603dfd62de7ae18\"\n    ],\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"method\": \"向入口注入失败并核对调用方可见行为：借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号\",\n    \"expectedEvidence\": \"借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号\"\n  }\n]\n```",
+        "title": "多币种记账服务软件设计",
+        "goal": "保存平衡分录及可回查的汇率快照",
+        "requirementsBaseline": {
+          "id": "baseline-run-5c1edfe7",
+          "projectId": "acceptance-ledger",
+          "revision": 1,
+          "sha256": "7bfa76e7872ad64cc4cb3e95ab7d5bf427a3d47a8e875d53001407fdee62ad71"
+        },
+        "inputs": [
+          "业务请求编号、日期、币种及借贷分录"
+        ],
+        "outputs": [
+          "分录编号或过账错误"
+        ],
+        "constraints": [
+          "金额使用十进制定点数，禁止二进制浮点金额计算",
+          "一次过账的所有写入在单个事务内完成",
+          "必须保存唯一业务请求编号",
+          "缺少当日汇率时拒绝过账",
+          "业务请求编号唯一，检查和写入必须原子完成"
+        ],
+        "domainRules": [
+          "借方合计等于贷方合计才能过账",
+          "换算使用记账日期的汇率快照，四舍五入保留两位小数",
+          "十进制定点金额，借贷合计相等；记录日期、币种及汇率快照；业务请求编号唯一"
+        ],
+        "assumptions": [],
+        "requirements": [
+          {
+            "id": "FR-4da5a603dfd62de7ae18",
+            "code": "FR-4da5a603dfd62de7ae18",
+            "title": "分录过账",
+            "description": "验证借贷平衡后保存分录，失败时不保存部分分录",
+            "priority": "must",
+            "verifyHint": "[AC-d69b70f80aa98064a5df] 前提：借方与贷方各 100.00 元。操作：提交过账。预期：返回分录编号并保存两笔平衡分录。 验证：准备夹具：借方与贷方各 100.00 元；提交过账；断言：返回分录编号并保存两笔平衡分录。证据：返回分录编号并保存两笔平衡分录。\n[AC-77dff747145eda7a7e33] 前提：借方 100.00 元且贷方 90.00 元。操作：提交过账。预期：拒绝请求且账本无新增记录。 验证：准备夹具：借方 100.00 元且贷方 90.00 元；提交过账；断言：拒绝请求且账本无新增记录。证据：拒绝请求且账本无新增记录。\n设计补充检查 [DC-operation-failure]（非原始 AC，来源 interface:operation）：向入口注入失败并核对调用方可见行为：借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；证据 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号"
+          },
+          {
+            "id": "FR-ceb605312220e6b15ae3",
+            "code": "FR-ceb605312220e6b15ae3",
+            "title": "汇率快照",
+            "description": "用记账日期汇率换算金额并保存快照",
+            "priority": "should",
+            "verifyHint": "[AC-d0c79a7b04c68d895bf0] 前提：USD 100.00、当日 USD/CNY 汇率 7.2000。操作：换算并过账。预期：保存 CNY 720.00 和汇率 7.2000 的快照。 验证：准备夹具：USD 100.00、当日 USD/CNY 汇率 7.2000；换算并过账；断言：保存 CNY 720.00 和汇率 7.2000 的快照。证据：保存 CNY 720.00 和汇率 7.2000 的快照。\n[AC-8b295d01a3038d0b293c] 前提：缺少记账日期的汇率。操作：请求换算过账。预期：返回缺失汇率错误且无部分分录。 验证：准备夹具：缺少记账日期的汇率；请求换算过账；断言：返回缺失汇率错误且无部分分录。证据：返回缺失汇率错误且无部分分录。"
+          },
+          {
+            "id": "NFR-d176c258c08e3e27eb86",
+            "code": "NFR-d176c258c08e3e27eb86",
+            "title": "事务幂等",
+            "description": "相同业务请求编号并发提交只产生一次过账",
+            "priority": "must",
+            "verifyHint": "[AC-7248d591eb9e5d859400] 前提：两笔带相同业务请求编号的平衡分录请求。操作：并发提交。预期：只有一个分录编号和一组过账记录。 验证：准备夹具：两笔带相同业务请求编号的平衡分录请求；并发提交；断言：只有一个分录编号和一组过账记录。证据：只有一个分录编号和一组过账记录。"
+          }
+        ],
+        "acceptanceCriteria": [
+          {
+            "id": "AC-d69b70f80aa98064a5df",
+            "code": "AC-d69b70f80aa98064a5df",
+            "requirementId": "FR-4da5a603dfd62de7ae18",
+            "label": "前提：借方与贷方各 100.00 元。操作：提交过账。预期：返回分录编号并保存两笔平衡分录。",
+            "verified": false
+          },
+          {
+            "id": "AC-77dff747145eda7a7e33",
+            "code": "AC-77dff747145eda7a7e33",
+            "requirementId": "FR-4da5a603dfd62de7ae18",
+            "label": "前提：借方 100.00 元且贷方 90.00 元。操作：提交过账。预期：拒绝请求且账本无新增记录。",
+            "verified": false
+          },
+          {
+            "id": "AC-d0c79a7b04c68d895bf0",
+            "code": "AC-d0c79a7b04c68d895bf0",
+            "requirementId": "FR-ceb605312220e6b15ae3",
+            "label": "前提：USD 100.00、当日 USD/CNY 汇率 7.2000。操作：换算并过账。预期：保存 CNY 720.00 和汇率 7.2000 的快照。",
+            "verified": false
+          },
+          {
+            "id": "AC-8b295d01a3038d0b293c",
+            "code": "AC-8b295d01a3038d0b293c",
+            "requirementId": "FR-ceb605312220e6b15ae3",
+            "label": "前提：缺少记账日期的汇率。操作：请求换算过账。预期：返回缺失汇率错误且无部分分录。",
+            "verified": false
+          },
+          {
+            "id": "AC-7248d591eb9e5d859400",
+            "code": "AC-7248d591eb9e5d859400",
+            "requirementId": "NFR-d176c258c08e3e27eb86",
+            "label": "前提：两笔带相同业务请求编号的平衡分录请求。操作：并发提交。预期：只有一个分录编号和一组过账记录。",
+            "verified": false
+          }
+        ],
+        "modules": [
+          {
+            "name": "记账接口",
+            "layer": "integration",
+            "artifacts": [
+              "src/journal-api.ts"
+            ],
+            "relatedFrCodes": [
+              "FR-4da5a603dfd62de7ae18",
+              "FR-ceb605312220e6b15ae3",
+              "NFR-d176c258c08e3e27eb86"
+            ],
+            "summary": "模块 entry：校验业务请求、币种和记账日期，返回分录编号或明确错误\n输入：业务请求编号、日期、币种及借贷分录\n输出：分录编号或过账错误\n依赖：core (分录与汇率引擎)\n接口 operation [function]；提供方 core；消费方 entry；输入 postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串；结果 返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00；失败 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；副作用 仅成功事务保存整组分录和汇率快照\n文件动作：create src/journal-api.ts\n质量要求 NFR-d176c258c08e3e27eb86：准备：两笔带相同业务请求编号的平衡分录请求；执行：并发提交；记录可观察结果；通过条件 只有一个分录编号和一组过账记录\n设计补充检查 DC-operation-failure（非原始 AC，来源 interface:operation，关联需求 FR-4da5a603dfd62de7ae18）：向入口注入失败并核对调用方可见行为：借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；证据 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号"
+          },
+          {
+            "name": "分录与汇率引擎",
+            "layer": "data",
+            "artifacts": [
+              "src/ledger.ts"
+            ],
+            "relatedFrCodes": [
+              "FR-4da5a603dfd62de7ae18",
+              "FR-ceb605312220e6b15ae3",
+              "NFR-d176c258c08e3e27eb86"
+            ],
+            "summary": "模块 core：以十进制定点数检查借贷平衡，按日期汇率快照换算并四舍五入到分；按业务编号幂等地在单个事务过账\n输入：业务请求编号、十进制金额、记账日期及汇率快照\n输出：平衡分录编号和换算金额\n依赖：无\n接口 operation [function]；提供方 core；消费方 entry；输入 postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串；结果 返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00；失败 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；副作用 仅成功事务保存整组分录和汇率快照\n文件动作：create src/ledger.ts\n质量要求 NFR-d176c258c08e3e27eb86：准备：两笔带相同业务请求编号的平衡分录请求；执行：并发提交；记录可观察结果；通过条件 只有一个分录编号和一组过账记录\n设计补充检查 DC-operation-failure（非原始 AC，来源 interface:operation，关联需求 FR-4da5a603dfd62de7ae18）：向入口注入失败并核对调用方可见行为：借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；证据 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号"
+          }
+        ],
+        "id": "goal-wf-f7631008",
+        "workflowId": "wf-f7631008",
+        "updatedAt": "2026-11-24T06:59:30.836Z"
+      },
+      "nodes": [
+        {
+          "id": "p1-e6d39da7",
+          "scopeId": "wf-f7631008",
+          "code": "P1",
+          "parentWbsId": null,
+          "containerNodeId": null,
+          "phaseId": "p1-e6d39da7",
+          "phaseTitle": "Phase 1 · Design Spec & Contract Plan",
+          "depth": 0,
+          "kind": "phase_container",
+          "executorKind": "control",
+          "capabilityId": "control:plane",
+          "assignedRole": "lead",
+          "assignedModel": null,
+          "title": "Phase 1 · Design Spec & Contracts",
+          "description": "Synthesize GoalSpec contracts, DDD glossary bindings, and PM decomposition baseline (fullstack_se).",
+          "planningRationale": "Separates architectural planning and schema locking from downstream parallel code generation.",
+          "requirementRefs": [
+            "FR-4da5a603dfd62de7ae18",
+            "FR-ceb605312220e6b15ae3"
+          ],
+          "inputContract": "业务请求编号、日期、币种及借贷分录",
+          "outputContract": "Verified Shared Contracts & WBS Decomposition",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 1,
+          "collapsed": false,
+          "positionX": 40,
+          "positionY": 20,
+          "width": 840,
+          "height": 174,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:30.837Z"
+        },
+        {
+          "id": "p2-fcb265a9",
+          "scopeId": "wf-f7631008",
+          "code": "P2",
+          "parentWbsId": null,
+          "containerNodeId": null,
+          "phaseId": "p2-fcb265a9",
+          "phaseTitle": "Phase 2 · Parallel PM Task Execution",
+          "depth": 0,
+          "kind": "phase_container",
+          "executorKind": "control",
+          "capabilityId": "control:plane",
+          "assignedRole": "worker",
+          "assignedModel": null,
+          "title": "Phase 2 · Parallel Tasks (2 streams)",
+          "description": "Execute PM-decomposed module slices on disjoint fileScopes, conditional routing, optional security pass, and Join barrier.",
+          "planningRationale": "Maximizes safe throughput with disjoint scopes and fail-closed Join convergence.",
+          "requirementRefs": [
+            "FR-4da5a603dfd62de7ae18",
+            "FR-ceb605312220e6b15ae3",
+            "NFR-d176c258c08e3e27eb86"
+          ],
+          "inputContract": "Phase 1 Git Baseline SHA",
+          "outputContract": "Integrated Feature Diff & Artifacts",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 1,
+          "collapsed": false,
+          "positionX": 40,
+          "positionY": 388,
+          "width": 840,
+          "height": 424,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:30.837Z"
+        },
+        {
+          "id": "p3-30ea891e",
+          "scopeId": "wf-f7631008",
+          "code": "P3",
+          "parentWbsId": null,
+          "containerNodeId": null,
+          "phaseId": "p3-30ea891e",
+          "phaseTitle": "Phase 3 · Verification & Recovery",
+          "depth": 0,
+          "kind": "phase_container",
+          "executorKind": "control",
+          "capabilityId": "control:plane",
+          "assignedRole": "evaluator",
+          "assignedModel": null,
+          "title": "Phase 3 · Verification & Recovery",
+          "description": "Deterministic shell gate, DDD/Diff self-check, optional independent QA audit, Git checkpoint, and bounded rewind loop.",
+          "planningRationale": "Separates objective command gates from independent QA review with bounded automatic rollback.",
+          "requirementRefs": [
+            "AC-d69b70f80aa98064a5df",
+            "AC-77dff747145eda7a7e33",
+            "AC-d0c79a7b04c68d895bf0",
+            "AC-8b295d01a3038d0b293c",
+            "AC-7248d591eb9e5d859400"
+          ],
+          "inputContract": "Phase 2 Integrated Git Commit SHA",
+          "outputContract": "分录编号或过账错误",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 1,
+          "collapsed": false,
+          "positionX": 40,
+          "positionY": 1002,
+          "width": 840,
+          "height": 320,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:30.837Z"
+        },
+        {
+          "id": "start-8a77c703",
+          "scopeId": "wf-f7631008",
+          "code": "START",
+          "parentWbsId": "p1-e6d39da7",
+          "containerNodeId": "p1-e6d39da7",
+          "phaseId": "p1-e6d39da7",
+          "phaseTitle": "Phase 1 · Design Spec & Contract Plan",
+          "depth": 1,
+          "kind": "start",
+          "executorKind": "control",
+          "capabilityId": "control:plane",
+          "assignedRole": "lead",
+          "assignedModel": null,
+          "title": "Workflow Start",
+          "description": "Anchor base Git SHA and freeze Design Spec baseline for \"多币种记账服务软件设计\".",
+          "planningRationale": "Establishes deterministic root state and initial Git rollback anchor.",
+          "requirementRefs": [
+            "FR-4da5a603dfd62de7ae18"
+          ],
+          "inputContract": "业务请求编号、日期、币种及借贷分录",
+          "outputContract": "Baseline Commit Anchor",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 1,
+          "collapsed": false,
+          "positionX": 64,
+          "positionY": 76,
+          "width": 196,
+          "height": 72,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:30.837Z"
+        },
+        {
+          "id": "p1t1-aac726cd",
+          "scopeId": "wf-f7631008",
+          "code": "P1.T1",
+          "parentWbsId": "p1-e6d39da7",
+          "containerNodeId": "p1-e6d39da7",
+          "phaseId": "p1-e6d39da7",
+          "phaseTitle": "Phase 1 · Design Spec & Contract Plan",
+          "depth": 1,
+          "kind": "task",
+          "executorKind": "agent",
+          "capabilityId": "native-api",
+          "assignedRole": "lead",
+          "assignedModel": null,
+          "title": "Lock Interfaces & Shared Schemas",
+          "description": "Produce shared contracts and interface boundaries covering FR-4da5a603dfd62de7ae18, FR-ceb605312220e6b15ae3, NFR-d176c258c08e3e27eb86. Enforce DDD glossary: EnrollmentTicket, JournalEntry, ReworkLoop, TwinGraph.",
+          "planningRationale": "Defining shared contracts upfront prevents merge conflicts across PM-decomposed parallel tasks.",
+          "requirementRefs": [
+            "FR-4da5a603dfd62de7ae18",
+            "FR-ceb605312220e6b15ae3",
+            "NFR-d176c258c08e3e27eb86"
+          ],
+          "inputContract": "Baseline Commit Anchor",
+          "outputContract": "Verified Shared Contracts",
+          "fileScope": [
+            "src/shared/**"
+          ],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 2,
+          "collapsed": false,
+          "positionX": 336,
+          "positionY": 76,
+          "width": 212,
+          "height": 72,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:30.837Z"
+        },
+        {
+          "id": "p1ckpt-99e4c1ca",
+          "scopeId": "wf-f7631008",
+          "code": "P1.CKPT",
+          "parentWbsId": null,
+          "containerNodeId": null,
+          "phaseId": null,
+          "phaseTitle": "Phase 1 -> Phase 2 Physical Checkpoint",
+          "depth": 1,
+          "kind": "checkpoint",
+          "executorKind": "control",
+          "capabilityId": "control:plane",
+          "assignedRole": "lead",
+          "assignedModel": null,
+          "title": "Phase 1 基线物理检查点",
+          "description": "Commit Phase 1 design contracts and create a recoverable Git baseline checkpoint before parallel execution.",
+          "planningRationale": "Anchors an immutable Git commit before Phase 2 parallel workers mutate the worktree.",
+          "requirementRefs": [
+            "FR-4da5a603dfd62de7ae18"
+          ],
+          "inputContract": "Verified Shared Contracts",
+          "outputContract": "Phase 1 Git Baseline SHA",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 1,
+          "collapsed": false,
+          "positionX": 336,
+          "positionY": 248,
+          "width": 212,
+          "height": 68,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:30.837Z"
+        },
+        {
+          "id": "p2t1-c4a80f8a",
+          "scopeId": "wf-f7631008",
+          "code": "P2.T1",
+          "parentWbsId": "p2-fcb265a9",
+          "containerNodeId": "p2-fcb265a9",
+          "phaseId": "p2-fcb265a9",
+          "phaseTitle": "Phase 2 · Parallel PM Task Execution",
+          "depth": 1,
+          "kind": "task",
+          "executorKind": "agent",
+          "capabilityId": "native-api",
+          "assignedRole": "worker",
+          "assignedModel": null,
+          "title": "记账接口",
+          "description": "Implement [integration] module slice for FR-4da5a603dfd62de7ae18, FR-ceb605312220e6b15ae3, NFR-d176c258c08e3e27eb86",
+          "planningRationale": "模块 entry：校验业务请求、币种和记账日期，返回分录编号或明确错误\n输入：业务请求编号、日期、币种及借贷分录\n输出：分录编号或过账错误\n依赖：core (分录与汇率引擎)\n接口 operation [function]；提供方 core；消费方 entry；输入 postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串；结果 返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00；失败 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；副作用 仅成功事务保存整组分录和汇率快照\n文件动作：create src/journal-api.ts\n质量要求 NFR-d176c258c08e3e27eb86：准备：两笔带相同业务请求编号的平衡分录请求；执行：并发提交；记录可观察结果；通过条件 只有一个分录编号和一组过账记录\n设计补充检查 DC-operation-failure（非原始 AC，来源 interface:operation，关联需求 FR-4da5a603dfd62de7ae18）：向入口注入失败并核对调用方可见行为：借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；证据 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号 [Layer=integration, Scope=src/journal-api.ts]. Follow DDD canonical terms (EnrollmentTicket, JournalEntry, ReworkLoop).",
+          "requirementRefs": [
+            "FR-4da5a603dfd62de7ae18",
+            "FR-ceb605312220e6b15ae3",
+            "NFR-d176c258c08e3e27eb86"
+          ],
+          "inputContract": "Phase 1 Git Baseline SHA",
+          "outputContract": "记账接口 Diff",
+          "fileScope": [
+            "src/journal-api.ts"
+          ],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 3,
+          "collapsed": false,
+          "positionX": 64,
+          "positionY": 446,
+          "width": 212,
+          "height": 76,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:30.837Z"
+        },
+        {
+          "id": "p2t2-ae38c30a",
+          "scopeId": "wf-f7631008",
+          "code": "P2.T2",
+          "parentWbsId": "p2-fcb265a9",
+          "containerNodeId": "p2-fcb265a9",
+          "phaseId": "p2-fcb265a9",
+          "phaseTitle": "Phase 2 · Parallel PM Task Execution",
+          "depth": 1,
+          "kind": "task",
+          "executorKind": "agent",
+          "capabilityId": "native-api",
+          "assignedRole": "worker",
+          "assignedModel": null,
+          "title": "分录与汇率引擎",
+          "description": "Implement [data] module slice for FR-4da5a603dfd62de7ae18, FR-ceb605312220e6b15ae3, NFR-d176c258c08e3e27eb86",
+          "planningRationale": "模块 core：以十进制定点数检查借贷平衡，按日期汇率快照换算并四舍五入到分；按业务编号幂等地在单个事务过账\n输入：业务请求编号、十进制金额、记账日期及汇率快照\n输出：平衡分录编号和换算金额\n依赖：无\n接口 operation [function]；提供方 core；消费方 entry；输入 postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串；结果 返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00；失败 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；副作用 仅成功事务保存整组分录和汇率快照\n文件动作：create src/ledger.ts\n质量要求 NFR-d176c258c08e3e27eb86：准备：两笔带相同业务请求编号的平衡分录请求；执行：并发提交；记录可观察结果；通过条件 只有一个分录编号和一组过账记录\n设计补充检查 DC-operation-failure（非原始 AC，来源 interface:operation，关联需求 FR-4da5a603dfd62de7ae18）：向入口注入失败并核对调用方可见行为：借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；证据 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号 [Layer=data, Scope=src/ledger.ts]. Follow DDD canonical terms (EnrollmentTicket, JournalEntry, ReworkLoop).",
+          "requirementRefs": [
+            "FR-4da5a603dfd62de7ae18",
+            "FR-ceb605312220e6b15ae3",
+            "NFR-d176c258c08e3e27eb86"
+          ],
+          "inputContract": "Phase 1 Git Baseline SHA",
+          "outputContract": "分录与汇率引擎 Diff",
+          "fileScope": [
+            "src/ledger.ts"
+          ],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 3,
+          "collapsed": false,
+          "positionX": 336,
+          "positionY": 446,
+          "width": 212,
+          "height": 76,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:30.837Z"
+        },
+        {
+          "id": "p2d1-b83db500",
+          "scopeId": "wf-f7631008",
+          "code": "P2.D1",
+          "parentWbsId": "p2-fcb265a9",
+          "containerNodeId": "p2-fcb265a9",
+          "phaseId": "p2-fcb265a9",
+          "phaseTitle": "Phase 2 · Parallel PM Task Execution",
+          "depth": 1,
+          "kind": "decision",
+          "executorKind": "control",
+          "capabilityId": "control:plane",
+          "assignedRole": "lead",
+          "assignedModel": null,
+          "title": "Execution Profile Router",
+          "description": "Select standard integration path or extended verification path based on change scope.",
+          "planningRationale": "Avoids unnecessary latency for standard changes while routing complex diffs through extended hardening.",
+          "requirementRefs": [
+            "FR-4da5a603dfd62de7ae18"
+          ],
+          "inputContract": "Primary Slice Output",
+          "outputContract": "Routing Decision (standard | extended)",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": "standard",
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 1,
+          "collapsed": false,
+          "positionX": 64,
+          "positionY": 578,
+          "width": 212,
+          "height": 76,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:30.837Z"
+        },
+        {
+          "id": "p2std-8ce5e533",
+          "scopeId": "wf-f7631008",
+          "code": "P2.STD",
+          "parentWbsId": "p2-fcb265a9",
+          "containerNodeId": "p2-fcb265a9",
+          "phaseId": "p2-fcb265a9",
+          "phaseTitle": "Phase 2 · Parallel PM Task Execution",
+          "depth": 1,
+          "kind": "task",
+          "executorKind": "agent",
+          "capabilityId": "native-api",
+          "assignedRole": "worker",
+          "assignedModel": null,
+          "title": "Standard Integration & Docs",
+          "description": "Wire cross-module interfaces and finalize runtime wiring.",
+          "planningRationale": "Fast integration branch when extended hardening path is not triggered.",
+          "requirementRefs": [
+            "FR-4da5a603dfd62de7ae18"
+          ],
+          "inputContract": "Primary Slice Output",
+          "outputContract": "Standard Integration Diff",
+          "fileScope": [
+            "src/index.ts"
+          ],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 2,
+          "collapsed": false,
+          "positionX": 336,
+          "positionY": 578,
+          "width": 212,
+          "height": 76,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:30.837Z"
+        },
+        {
+          "id": "p2ext-6f521a22",
+          "scopeId": "wf-f7631008",
+          "code": "P2.EXT",
+          "parentWbsId": "p2-fcb265a9",
+          "containerNodeId": "p2-fcb265a9",
+          "phaseId": "p2-fcb265a9",
+          "phaseTitle": "Phase 2 · Parallel PM Task Execution",
+          "depth": 1,
+          "kind": "task",
+          "executorKind": "agent",
+          "capabilityId": "native-api",
+          "assignedRole": "evaluator",
+          "assignedModel": null,
+          "title": "Extended Contract & Stress Pass",
+          "description": "Deep edge-case and resilience checks before Phase 3 certification.",
+          "planningRationale": "Explicit alternate conditional branch selectable during risk-heavy iterations.",
+          "requirementRefs": [
+            "NFR-d176c258c08e3e27eb86"
+          ],
+          "inputContract": "Primary Slice Output",
+          "outputContract": "Extended Verification Notes",
+          "fileScope": [
+            "docs/**"
+          ],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 2,
+          "collapsed": false,
+          "positionX": 336,
+          "positionY": 710,
+          "width": 212,
+          "height": 76,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:30.837Z"
+        },
+        {
+          "id": "p2sec-ad532271",
+          "scopeId": "wf-f7631008",
+          "code": "P2.SEC",
+          "parentWbsId": "p2-fcb265a9",
+          "containerNodeId": "p2-fcb265a9",
+          "phaseId": "p2-fcb265a9",
+          "phaseTitle": "Phase 2 · Parallel PM Task Execution",
+          "depth": 1,
+          "kind": "task",
+          "executorKind": "agent",
+          "capabilityId": "native-api",
+          "assignedRole": "evaluator",
+          "assignedModel": null,
+          "title": "Security & Guardrail Scan",
+          "description": "Verify constitution compliance, path confinement, and auth boundaries across all Phase 2 diffs.",
+          "planningRationale": "Enabled by workflow template customization to enforce pre-merge security posture.",
+          "requirementRefs": [
+            "FR-4da5a603dfd62de7ae18",
+            "FR-ceb605312220e6b15ae3",
+            "NFR-d176c258c08e3e27eb86"
+          ],
+          "inputContract": "Integrated Module Diffs",
+          "outputContract": "Security Posture Check",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 2,
+          "collapsed": false,
+          "positionX": 608,
+          "positionY": 578,
+          "width": 212,
+          "height": 76,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:30.837Z"
+        },
+        {
+          "id": "p2join-f17d7073",
+          "scopeId": "wf-f7631008",
+          "code": "P2.JOIN",
+          "parentWbsId": "p2-fcb265a9",
+          "containerNodeId": "p2-fcb265a9",
+          "phaseId": "p2-fcb265a9",
+          "phaseTitle": "Phase 2 · Parallel PM Task Execution",
+          "depth": 1,
+          "kind": "join",
+          "executorKind": "control",
+          "capabilityId": "control:plane",
+          "assignedRole": "lead",
+          "assignedModel": null,
+          "title": "Phase 2 Join Barrier",
+          "description": "Synchronize parallel PM slices and routed branches into unified verification snapshot.",
+          "planningRationale": "Guarantees no verification gate executes against partially completed slices.",
+          "requirementRefs": [
+            "FR-4da5a603dfd62de7ae18",
+            "FR-ceb605312220e6b15ae3",
+            "NFR-d176c258c08e3e27eb86"
+          ],
+          "inputContract": "All Phase 2 Active Branch Artifacts",
+          "outputContract": "Unified Ready-to-Verify Snapshot",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 1,
+          "collapsed": false,
+          "positionX": 608,
+          "positionY": 710,
+          "width": 212,
+          "height": 76,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:30.837Z"
+        },
+        {
+          "id": "p2ckpt-0f0e4e47",
+          "scopeId": "wf-f7631008",
+          "code": "P2.CKPT",
+          "parentWbsId": null,
+          "containerNodeId": null,
+          "phaseId": null,
+          "phaseTitle": "Phase 2 -> Phase 3 Physical Checkpoint",
+          "depth": 1,
+          "kind": "checkpoint",
+          "executorKind": "control",
+          "capabilityId": "control:plane",
+          "assignedRole": "evaluator",
+          "assignedModel": null,
+          "title": "Phase 2 集成物理检查点",
+          "description": "Commit integrated Phase 2 parallel worker diffs into a clean Git checkpoint prior to Phase 3 verification.",
+          "planningRationale": "Separates worker implementation state from Phase 3 shell gates and rewind boundaries.",
+          "requirementRefs": [
+            "FR-4da5a603dfd62de7ae18",
+            "FR-ceb605312220e6b15ae3",
+            "NFR-d176c258c08e3e27eb86"
+          ],
+          "inputContract": "Unified Ready-to-Verify Snapshot",
+          "outputContract": "Phase 2 Integrated Git Commit SHA",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 1,
+          "collapsed": false,
+          "positionX": 336,
+          "positionY": 862,
+          "width": 212,
+          "height": 68,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:30.837Z"
+        },
+        {
+          "id": "p3gate-40010294",
+          "scopeId": "wf-f7631008",
+          "code": "P3.GATE",
+          "parentWbsId": "p3-30ea891e",
+          "containerNodeId": "p3-30ea891e",
+          "phaseId": "p3-30ea891e",
+          "phaseTitle": "Phase 3 · Verification & Recovery",
+          "depth": 1,
+          "kind": "gate_shell",
+          "executorKind": "tool",
+          "capabilityId": "tool:shell",
+          "assignedRole": "evaluator",
+          "assignedModel": null,
+          "title": "Deterministic Shell Gate",
+          "description": "Run verification command: node --test",
+          "planningRationale": "Objective exit-code gate prevents self-grading before QA review.",
+          "requirementRefs": [
+            "AC-d69b70f80aa98064a5df",
+            "AC-77dff747145eda7a7e33",
+            "AC-d0c79a7b04c68d895bf0",
+            "AC-8b295d01a3038d0b293c",
+            "AC-7248d591eb9e5d859400"
+          ],
+          "inputContract": "Phase 2 Integrated Git Commit SHA",
+          "outputContract": "Gate Exit Code & Logs",
+          "fileScope": [],
+          "gateCommand": "node --test",
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 2,
+          "collapsed": false,
+          "positionX": 64,
+          "positionY": 1060,
+          "width": 212,
+          "height": 74,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:30.837Z"
+        },
+        {
+          "id": "p3sc-4bcb36b4",
+          "scopeId": "wf-f7631008",
+          "code": "P3.SC",
+          "parentWbsId": "p3-30ea891e",
+          "containerNodeId": "p3-30ea891e",
+          "phaseId": "p3-30ea891e",
+          "phaseTitle": "Phase 3 · Verification & Recovery",
+          "depth": 1,
+          "kind": "selfcheck",
+          "executorKind": "tool",
+          "capabilityId": "tool:shell",
+          "assignedRole": "evaluator",
+          "assignedModel": null,
+          "title": "Diff, AC & DDD Drift Check",
+          "description": "Inspect git diff, verify AC coverage, and check DDD ubiquitous terminology alignment.",
+          "planningRationale": "Catches terminology drift and incomplete acceptance evidence early.",
+          "requirementRefs": [
+            "AC-d69b70f80aa98064a5df",
+            "AC-77dff747145eda7a7e33",
+            "AC-d0c79a7b04c68d895bf0",
+            "AC-8b295d01a3038d0b293c",
+            "AC-7248d591eb9e5d859400"
+          ],
+          "inputContract": "Gate Exit Code & Logs",
+          "outputContract": "Diff & DDD Evidence Manifest",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 2,
+          "collapsed": false,
+          "positionX": 336,
+          "positionY": 1060,
+          "width": 212,
+          "height": 74,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:30.837Z"
+        },
+        {
+          "id": "p3qa-16ff1cc9",
+          "scopeId": "wf-f7631008",
+          "code": "P3.QA",
+          "parentWbsId": "p3-30ea891e",
+          "containerNodeId": "p3-30ea891e",
+          "phaseId": "p3-30ea891e",
+          "phaseTitle": "Phase 3 · Verification & Recovery",
+          "depth": 1,
+          "kind": "qa_audit",
+          "executorKind": "agent",
+          "capabilityId": "native-api",
+          "assignedRole": "evaluator",
+          "assignedModel": null,
+          "title": "Independent QA Audit",
+          "description": "Evaluate deliverable strictly against GoalSpec constraints and acceptance criteria.",
+          "planningRationale": "Independent evaluator verdict separates pass commit checkpoint from bounded fail-rewind.",
+          "requirementRefs": [
+            "AC-d69b70f80aa98064a5df",
+            "AC-77dff747145eda7a7e33",
+            "AC-d0c79a7b04c68d895bf0",
+            "AC-8b295d01a3038d0b293c",
+            "AC-7248d591eb9e5d859400"
+          ],
+          "inputContract": "Diff & DDD Evidence Manifest",
+          "outputContract": "Fail-Closed JSON Audit Verdict",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 3,
+          "collapsed": false,
+          "positionX": 608,
+          "positionY": 1060,
+          "width": 212,
+          "height": 74,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:30.837Z"
+        },
+        {
+          "id": "p3ckpt-9dfbd065",
+          "scopeId": "wf-f7631008",
+          "code": "P3.CKPT",
+          "parentWbsId": "p3-30ea891e",
+          "containerNodeId": "p3-30ea891e",
+          "phaseId": "p3-30ea891e",
+          "phaseTitle": "Phase 3 · Verification & Recovery",
+          "depth": 1,
+          "kind": "checkpoint",
+          "executorKind": "control",
+          "capabilityId": "control:plane",
+          "assignedRole": "evaluator",
+          "assignedModel": null,
+          "title": "Physical Git Checkpoint",
+          "description": "Commit certified worktree state and tag durable snapshot.",
+          "planningRationale": "Persists recoverable milestone snapshot on verified pass.",
+          "requirementRefs": [
+            "AC-d69b70f80aa98064a5df"
+          ],
+          "inputContract": "Pass Audit Verdict",
+          "outputContract": "Git Commit SHA & Tag",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 1,
+          "collapsed": false,
+          "positionX": 336,
+          "positionY": 1196,
+          "width": 212,
+          "height": 74,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:30.837Z"
+        },
+        {
+          "id": "p3rst-0475535a",
+          "scopeId": "wf-f7631008",
+          "code": "P3.RST",
+          "parentWbsId": "p3-30ea891e",
+          "containerNodeId": "p3-30ea891e",
+          "phaseId": "p3-30ea891e",
+          "phaseTitle": "Phase 3 · Verification & Recovery",
+          "depth": 1,
+          "kind": "restore",
+          "executorKind": "control",
+          "capabilityId": "control:plane",
+          "assignedRole": "evaluator",
+          "assignedModel": null,
+          "title": "Bounded Rescue Rewind",
+          "description": "Create non-destructive git rescue ref and rewind execution frontier on failure.",
+          "planningRationale": "Preserves debug artifacts in rescue branch while deterministically retrying up to maxReworkIterations.",
+          "requirementRefs": [
+            "AC-d69b70f80aa98064a5df"
+          ],
+          "inputContract": "Fail Audit / Gate Error",
+          "outputContract": "Rescue Branch Ref & Re-armed Frontier",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 3,
+          "collapsed": false,
+          "positionX": 64,
+          "positionY": 1196,
+          "width": 212,
+          "height": 74,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:30.837Z"
+        },
+        {
+          "id": "p3done-17b84427",
+          "scopeId": "wf-f7631008",
+          "code": "DONE",
+          "parentWbsId": "p3-30ea891e",
+          "containerNodeId": "p3-30ea891e",
+          "phaseId": "p3-30ea891e",
+          "phaseTitle": "Phase 3 · Verification & Recovery",
+          "depth": 1,
+          "kind": "done",
+          "executorKind": "control",
+          "capabilityId": "control:plane",
+          "assignedRole": "lead",
+          "assignedModel": null,
+          "title": "Certified Release Complete",
+          "description": "All gates, constraints, and acceptance criteria satisfied.",
+          "planningRationale": "Terminal sink asserting full specification closure.",
+          "requirementRefs": [
+            "AC-d69b70f80aa98064a5df",
+            "AC-77dff747145eda7a7e33",
+            "AC-d0c79a7b04c68d895bf0",
+            "AC-8b295d01a3038d0b293c",
+            "AC-7248d591eb9e5d859400"
+          ],
+          "inputContract": "Git Commit SHA & Tag",
+          "outputContract": "分录编号或过账错误",
+          "fileScope": [],
+          "gateCommand": null,
+          "branchCondition": null,
+          "status": "pending",
+          "attemptCount": 0,
+          "maxAttempts": 1,
+          "collapsed": false,
+          "positionX": 608,
+          "positionY": 1196,
+          "width": 212,
+          "height": 74,
+          "outputSummary": "",
+          "restoreTargetCheckpointId": null,
+          "updatedAt": "2026-11-24T06:59:30.837Z"
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge-fc6e79fb",
+          "scopeId": "wf-f7631008",
+          "sourceNodeId": "start-8a77c703",
+          "targetNodeId": "p1t1-aac726cd",
+          "kind": "dep",
+          "label": "init",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-4c238f71",
+          "scopeId": "wf-f7631008",
+          "sourceNodeId": "p1t1-aac726cd",
+          "targetNodeId": "p1ckpt-99e4c1ca",
+          "kind": "dep",
+          "label": "anchor",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-bffae774",
+          "scopeId": "wf-f7631008",
+          "sourceNodeId": "p1ckpt-99e4c1ca",
+          "targetNodeId": "p2t1-c4a80f8a",
+          "kind": "dep",
+          "label": "fork-1",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-f0c4e511",
+          "scopeId": "wf-f7631008",
+          "sourceNodeId": "p1ckpt-99e4c1ca",
+          "targetNodeId": "p2t2-ae38c30a",
+          "kind": "dep",
+          "label": "fork-2",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-82218184",
+          "scopeId": "wf-f7631008",
+          "sourceNodeId": "p2t1-c4a80f8a",
+          "targetNodeId": "p2d1-b83db500",
+          "kind": "dep",
+          "label": "route",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-4b7eb441",
+          "scopeId": "wf-f7631008",
+          "sourceNodeId": "p2d1-b83db500",
+          "targetNodeId": "p2std-8ce5e533",
+          "kind": "pass",
+          "label": "standard",
+          "conditionExpr": "standard"
+        },
+        {
+          "id": "edge-9ab8e80b",
+          "scopeId": "wf-f7631008",
+          "sourceNodeId": "p2d1-b83db500",
+          "targetNodeId": "p2ext-6f521a22",
+          "kind": "pass",
+          "label": "extended",
+          "conditionExpr": "extended"
+        },
+        {
+          "id": "edge-52aef487",
+          "scopeId": "wf-f7631008",
+          "sourceNodeId": "p2t2-ae38c30a",
+          "targetNodeId": "p2sec-ad532271",
+          "kind": "dep",
+          "label": "sync",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-0927b81f",
+          "scopeId": "wf-f7631008",
+          "sourceNodeId": "p2std-8ce5e533",
+          "targetNodeId": "p2sec-ad532271",
+          "kind": "dep",
+          "label": "sync",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-a7f73002",
+          "scopeId": "wf-f7631008",
+          "sourceNodeId": "p2ext-6f521a22",
+          "targetNodeId": "p2sec-ad532271",
+          "kind": "dep",
+          "label": "sync",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-3d530099",
+          "scopeId": "wf-f7631008",
+          "sourceNodeId": "p2sec-ad532271",
+          "targetNodeId": "p2join-f17d7073",
+          "kind": "dep",
+          "label": "cleared",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-b8430788",
+          "scopeId": "wf-f7631008",
+          "sourceNodeId": "p2join-f17d7073",
+          "targetNodeId": "p2ckpt-0f0e4e47",
+          "kind": "dep",
+          "label": "checkpoint",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-6a4727fe",
+          "scopeId": "wf-f7631008",
+          "sourceNodeId": "p2ckpt-0f0e4e47",
+          "targetNodeId": "p3gate-40010294",
+          "kind": "dep",
+          "label": "verify",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-ca1f8be6",
+          "scopeId": "wf-f7631008",
+          "sourceNodeId": "p3gate-40010294",
+          "targetNodeId": "p3sc-4bcb36b4",
+          "kind": "pass",
+          "label": "exit 0",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-2d5ad682",
+          "scopeId": "wf-f7631008",
+          "sourceNodeId": "p3gate-40010294",
+          "targetNodeId": "p3rst-0475535a",
+          "kind": "fail",
+          "label": "gate fail",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-10a1a3c3",
+          "scopeId": "wf-f7631008",
+          "sourceNodeId": "p3sc-4bcb36b4",
+          "targetNodeId": "p3qa-16ff1cc9",
+          "kind": "dep",
+          "label": "audit",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-89f702bc",
+          "scopeId": "wf-f7631008",
+          "sourceNodeId": "p3qa-16ff1cc9",
+          "targetNodeId": "p3ckpt-9dfbd065",
+          "kind": "pass",
+          "label": "pass",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-b9dce2ee",
+          "scopeId": "wf-f7631008",
+          "sourceNodeId": "p3qa-16ff1cc9",
+          "targetNodeId": "p3rst-0475535a",
+          "kind": "fail",
+          "label": "qa fail",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-89816b14",
+          "scopeId": "wf-f7631008",
+          "sourceNodeId": "p3rst-0475535a",
+          "targetNodeId": "p3gate-40010294",
+          "kind": "loop",
+          "label": "rework",
+          "conditionExpr": null
+        },
+        {
+          "id": "edge-fb065ca4",
+          "scopeId": "wf-f7631008",
+          "sourceNodeId": "p3ckpt-9dfbd065",
+          "targetNodeId": "p3done-17b84427",
+          "kind": "dep",
+          "label": "certify",
+          "conditionExpr": null
+        }
+      ],
+      "validation": {
+        "workflowId": "wf-f7631008",
+        "valid": true,
+        "errorCount": 0,
+        "warningCount": 0,
+        "infoCount": 0,
+        "issues": [],
+        "checkedAt": "2026-11-24T06:59:30.837Z"
+      },
+      "latestTrial": null,
+      "lastImpact": null,
+      "versions": [],
+      "pmReport": {
+        "id": "pm-91641362",
+        "workflowId": "wf-f7631008",
+        "mode": "structural_pm",
+        "templatePreset": "fullstack_se",
+        "detectedModules": [
+          {
+            "name": "记账接口",
+            "layer": "integration",
+            "artifacts": [
+              "src/journal-api.ts"
+            ],
+            "relatedFrCodes": [
+              "FR-4da5a603dfd62de7ae18",
+              "FR-ceb605312220e6b15ae3",
+              "NFR-d176c258c08e3e27eb86"
+            ],
+            "summary": "模块 entry：校验业务请求、币种和记账日期，返回分录编号或明确错误\n输入：业务请求编号、日期、币种及借贷分录\n输出：分录编号或过账错误\n依赖：core (分录与汇率引擎)\n接口 operation [function]；提供方 core；消费方 entry；输入 postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串；结果 返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00；失败 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；副作用 仅成功事务保存整组分录和汇率快照\n文件动作：create src/journal-api.ts\n质量要求 NFR-d176c258c08e3e27eb86：准备：两笔带相同业务请求编号的平衡分录请求；执行：并发提交；记录可观察结果；通过条件 只有一个分录编号和一组过账记录\n设计补充检查 DC-operation-failure（非原始 AC，来源 interface:operation，关联需求 FR-4da5a603dfd62de7ae18）：向入口注入失败并核对调用方可见行为：借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；证据 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号"
+          },
+          {
+            "name": "分录与汇率引擎",
+            "layer": "data",
+            "artifacts": [
+              "src/ledger.ts"
+            ],
+            "relatedFrCodes": [
+              "FR-4da5a603dfd62de7ae18",
+              "FR-ceb605312220e6b15ae3",
+              "NFR-d176c258c08e3e27eb86"
+            ],
+            "summary": "模块 core：以十进制定点数检查借贷平衡，按日期汇率快照换算并四舍五入到分；按业务编号幂等地在单个事务过账\n输入：业务请求编号、十进制金额、记账日期及汇率快照\n输出：平衡分录编号和换算金额\n依赖：无\n接口 operation [function]；提供方 core；消费方 entry；输入 postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串；结果 返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00；失败 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；副作用 仅成功事务保存整组分录和汇率快照\n文件动作：create src/ledger.ts\n质量要求 NFR-d176c258c08e3e27eb86：准备：两笔带相同业务请求编号的平衡分录请求；执行：并发提交；记录可观察结果；通过条件 只有一个分录编号和一组过账记录\n设计补充检查 DC-operation-failure（非原始 AC，来源 interface:operation，关联需求 FR-4da5a603dfd62de7ae18）：向入口注入失败并核对调用方可见行为：借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；证据 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号"
+          }
+        ],
+        "slices": [
+          {
+            "code": "P2.T1",
+            "title": "记账接口",
+            "phase": "P2",
+            "layer": "integration",
+            "requirementRefs": [
+              "FR-4da5a603dfd62de7ae18",
+              "FR-ceb605312220e6b15ae3",
+              "NFR-d176c258c08e3e27eb86"
+            ],
+            "dependsOnCodes": [
+              "P1.T1"
+            ],
+            "assignedRole": "worker",
+            "executorKind": "agent",
+            "fileScope": [
+              "src/journal-api.ts"
+            ],
+            "rationale": "模块 entry：校验业务请求、币种和记账日期，返回分录编号或明确错误\n输入：业务请求编号、日期、币种及借贷分录\n输出：分录编号或过账错误\n依赖：core (分录与汇率引擎)\n接口 operation [function]；提供方 core；消费方 entry；输入 postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串；结果 返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00；失败 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；副作用 仅成功事务保存整组分录和汇率快照\n文件动作：create src/journal-api.ts\n质量要求 NFR-d176c258c08e3e27eb86：准备：两笔带相同业务请求编号的平衡分录请求；执行：并发提交；记录可观察结果；通过条件 只有一个分录编号和一组过账记录\n设计补充检查 DC-operation-failure（非原始 AC，来源 interface:operation，关联需求 FR-4da5a603dfd62de7ae18）：向入口注入失败并核对调用方可见行为：借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；证据 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号 [Layer=integration, Scope=src/journal-api.ts]. Follow DDD canonical terms (EnrollmentTicket, JournalEntry, ReworkLoop)."
+          },
+          {
+            "code": "P2.T2",
+            "title": "分录与汇率引擎",
+            "phase": "P2",
+            "layer": "data",
+            "requirementRefs": [
+              "FR-4da5a603dfd62de7ae18",
+              "FR-ceb605312220e6b15ae3",
+              "NFR-d176c258c08e3e27eb86"
+            ],
+            "dependsOnCodes": [
+              "P1.T1"
+            ],
+            "assignedRole": "worker",
+            "executorKind": "agent",
+            "fileScope": [
+              "src/ledger.ts"
+            ],
+            "rationale": "模块 core：以十进制定点数检查借贷平衡，按日期汇率快照换算并四舍五入到分；按业务编号幂等地在单个事务过账\n输入：业务请求编号、十进制金额、记账日期及汇率快照\n输出：平衡分录编号和换算金额\n依赖：无\n接口 operation [function]；提供方 core；消费方 entry；输入 postJournal({requestId,date,currency,debits,credits,exchangeRateSnapshot})，金额使用十进制字符串；结果 返回分录编号、换算后本币金额和汇率快照；USD 100.00 × 7.2000 = CNY 720.00；失败 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；副作用 仅成功事务保存整组分录和汇率快照\n文件动作：create src/ledger.ts\n质量要求 NFR-d176c258c08e3e27eb86：准备：两笔带相同业务请求编号的平衡分录请求；执行：并发提交；记录可观察结果；通过条件 只有一个分录编号和一组过账记录\n设计补充检查 DC-operation-failure（非原始 AC，来源 interface:operation，关联需求 FR-4da5a603dfd62de7ae18）：向入口注入失败并核对调用方可见行为：借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号；证据 借贷不平衡或缺失当日汇率时拒绝整个事务，不保存部分分录；重复业务编号返回原分录编号 [Layer=data, Scope=src/ledger.ts]. Follow DDD canonical terms (EnrollmentTicket, JournalEntry, ReworkLoop)."
+          }
+        ],
+        "pmNarrative": "PM Agent analyzed \"多币种记账服务软件设计\" using template \"fullstack_se\" (2 explicit Design Spec modules -> 2 parallel P2 task slices, maxWorkers=3). Autonomous Phase 1 -> Phase 2 handoff enabled. Pre-merge Security & Guardrail scan armed.",
+        "skillsApplied": [
+          "worktree-isolation-safety",
+          "fail-closed-gates",
+          "pm-modular-decomposition"
+        ],
+        "createdAt": "2026-11-24T06:59:30.836Z"
+      }
+    }
+  },
+  "coverage": [
+    {
+      "requirementId": "FR-4da5a603dfd62de7ae18",
+      "scopeKey": "journal",
+      "kind": "functional",
+      "priority": "must",
+      "dependencies": [],
+      "constraints": [
+        "必须保存唯一业务请求编号"
+      ],
+      "moduleIds": [
+        "entry",
+        "core"
+      ],
+      "acceptance": [
+        {
+          "id": "AC-d69b70f80aa98064a5df",
+          "given": "借方与贷方各 100.00 元",
+          "when": "提交过账",
+          "then": "返回分录编号并保存两笔平衡分录",
+          "acceptanceId": "AC-d69b70f80aa98064a5df",
+          "method": "准备夹具：借方与贷方各 100.00 元；提交过账；断言：返回分录编号并保存两笔平衡分录",
+          "expectedEvidence": "返回分录编号并保存两笔平衡分录"
+        },
+        {
+          "id": "AC-77dff747145eda7a7e33",
+          "given": "借方 100.00 元且贷方 90.00 元",
+          "when": "提交过账",
+          "then": "拒绝请求且账本无新增记录",
+          "acceptanceId": "AC-77dff747145eda7a7e33",
+          "method": "准备夹具：借方 100.00 元且贷方 90.00 元；提交过账；断言：拒绝请求且账本无新增记录",
+          "expectedEvidence": "拒绝请求且账本无新增记录"
+        }
+      ],
+      "issueIds": [
+        "issue-journal"
+      ],
+      "proposalId": "proposal-2a818145-0404-4113-9280-3902a690d9c7"
+    },
+    {
+      "requirementId": "FR-ceb605312220e6b15ae3",
+      "scopeKey": "fx",
+      "kind": "functional",
+      "priority": "should",
+      "dependencies": [
+        "FR-4da5a603dfd62de7ae18"
+      ],
+      "constraints": [
+        "缺少当日汇率时拒绝过账"
+      ],
+      "moduleIds": [
+        "entry",
+        "core"
+      ],
+      "acceptance": [
+        {
+          "id": "AC-d0c79a7b04c68d895bf0",
+          "given": "USD 100.00、当日 USD/CNY 汇率 7.2000",
+          "when": "换算并过账",
+          "then": "保存 CNY 720.00 和汇率 7.2000 的快照",
+          "acceptanceId": "AC-d0c79a7b04c68d895bf0",
+          "method": "准备夹具：USD 100.00、当日 USD/CNY 汇率 7.2000；换算并过账；断言：保存 CNY 720.00 和汇率 7.2000 的快照",
+          "expectedEvidence": "保存 CNY 720.00 和汇率 7.2000 的快照"
+        },
+        {
+          "id": "AC-8b295d01a3038d0b293c",
+          "given": "缺少记账日期的汇率",
+          "when": "请求换算过账",
+          "then": "返回缺失汇率错误且无部分分录",
+          "acceptanceId": "AC-8b295d01a3038d0b293c",
+          "method": "准备夹具：缺少记账日期的汇率；请求换算过账；断言：返回缺失汇率错误且无部分分录",
+          "expectedEvidence": "返回缺失汇率错误且无部分分录"
+        }
+      ],
+      "issueIds": [
+        "issue-fx"
+      ],
+      "proposalId": "proposal-2a818145-0404-4113-9280-3902a690d9c7"
+    },
+    {
+      "requirementId": "NFR-d176c258c08e3e27eb86",
+      "scopeKey": "atomic",
+      "kind": "nonfunctional",
+      "priority": "must",
+      "dependencies": [
+        "FR-4da5a603dfd62de7ae18"
+      ],
+      "constraints": [
+        "业务请求编号唯一，检查和写入必须原子完成"
+      ],
+      "moduleIds": [
+        "entry",
+        "core"
+      ],
+      "acceptance": [
+        {
+          "id": "AC-7248d591eb9e5d859400",
+          "given": "两笔带相同业务请求编号的平衡分录请求",
+          "when": "并发提交",
+          "then": "只有一个分录编号和一组过账记录",
+          "acceptanceId": "AC-7248d591eb9e5d859400",
+          "method": "准备夹具：两笔带相同业务请求编号的平衡分录请求；并发提交；断言：只有一个分录编号和一组过账记录",
+          "expectedEvidence": "只有一个分录编号和一组过账记录"
+        }
+      ],
+      "issueIds": [
+        "issue-atomic"
+      ],
+      "proposalId": "proposal-2a818145-0404-4113-9280-3902a690d9c7"
+    }
+  ]
+}

@@ -10,3 +10,31 @@ coverage/
 test-results/
 playwright-report/
 *.tmp
+
+# Reference orchestrator runtime and build artifacts
+# Dependencies & Build Outputs
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+renderer/dist/
+**/renderer/dist/
+release/
+**/release/
+
+# Runtime State & Local Databases
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.db
+.orchestrator/
+**/.orchestrator/
+tmp/
+**/tmp/
+
+# Secrets & Logs
+.env
+.env.*
+*.log
+npm-debug.log*
+*.tsbuildinfo

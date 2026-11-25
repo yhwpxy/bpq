@@ -1,0 +1,320 @@
+{
+  "generationId": "generation-ea883b0e-9ae8-4e5b-9329-948e0a23fed6",
+  "designId": "design-2b14103c-5ace-4165-92c8-bdeceab10cde",
+  "revision": 1,
+  "createdAt": "2026-11-24T03:44:05.155Z",
+  "input": {
+    "designId": "design-2b14103c-5ace-4165-92c8-bdeceab10cde",
+    "revision": 1,
+    "state": "draft",
+    "stage": "input_ready",
+    "createdAt": "2026-11-24T03:44:05.116Z",
+    "contentSha256": "2d446811798eb898c7a20ed043d94b833ff53e83a05bb2f963376d51b5b25e5b",
+    "baselineRef": {
+      "id": "baseline-count",
+      "projectId": "line-counter",
+      "revision": 1,
+      "sha256": "f4da3ad58ed43189936646e892724b5383139a5483db2d84f26d11cf18cc2c2e",
+      "schemaVersion": 1,
+      "mode": "live"
+    },
+    "baseline": {
+      "schemaVersion": 1,
+      "id": "baseline-count",
+      "projectId": "line-counter",
+      "revision": 1,
+      "parentId": null,
+      "mode": "live",
+      "approvedPrd": {
+        "id": "prd-count",
+        "kind": "prd",
+        "revision": 1,
+        "hash": "3661d0d2793b5c1c58b0a508a7e25d7bc2aa59502167cb4f57e32f10e074e248"
+      },
+      "approval": {
+        "actor": "测试评审人",
+        "scope": "proposal",
+        "issueIds": [],
+        "feedback": "",
+        "gateKind": "approval",
+        "targetRevision": 1,
+        "decidedAt": "2026-11-24T00:00:00.000Z",
+        "id": "approval-count",
+        "action": "approve",
+        "targetId": "proposal-count",
+        "targetHash": "7246fe9e90507246c57b4396d08c6508ad5b20a7ddfec94371f62b968a6220c6"
+      },
+      "confirmation": {
+        "actor": "测试评审人",
+        "scope": "proposal",
+        "issueIds": [],
+        "feedback": "",
+        "gateKind": "confirmation",
+        "targetRevision": 1,
+        "decidedAt": "2026-11-24T00:00:00.000Z",
+        "id": "confirm-count",
+        "action": "confirm",
+        "targetId": "prd-count",
+        "targetHash": "3661d0d2793b5c1c58b0a508a7e25d7bc2aa59502167cb4f57e32f10e074e248"
+      },
+      "prd": {
+        "title": "非空行统计",
+        "revision": 1,
+        "proposal": {
+          "id": "proposal-count",
+          "kind": "proposal",
+          "revision": 1,
+          "hash": "7246fe9e90507246c57b4396d08c6508ad5b20a7ddfec94371f62b968a6220c6"
+        },
+        "approvalId": "approval-count",
+        "sections": {
+          "goals": [
+            "统计文本文件非空行数"
+          ],
+          "summary": "提供命令行统计工具",
+          "approach": [
+            "读取文件并计数"
+          ],
+          "scope": [
+            {
+              "key": "count",
+              "kind": "functional",
+              "title": "统计非空行",
+              "decision": "输出非空行数",
+              "issueIds": [
+                "issue-count"
+              ]
+            }
+          ],
+          "outOfScope": [],
+          "constraints": [
+            "仅本地文件"
+          ],
+          "tradeoffs": [],
+          "risks": [],
+          "unresolved": [],
+          "businessRules": [],
+          "externalDependencies": []
+        },
+        "background": "需要快速统计文本",
+        "scenarios": [
+          "在终端查看文件行数"
+        ],
+        "changes": [
+          "首次建立"
+        ],
+        "requirements": [
+          {
+            "id": "FR-count",
+            "scopeKey": "count",
+            "kind": "functional",
+            "title": "统计非空行",
+            "description": "输入文件路径，输出非空行数",
+            "value": "减少人工计数",
+            "priority": "must",
+            "dependencies": [],
+            "constraints": [
+              "空白字符组成的行不计数"
+            ],
+            "state": "baselined",
+            "acceptance": [
+              {
+                "id": "AC-count-normal",
+                "given": "文件含两行文本和一行空白",
+                "when": "执行计数命令",
+                "then": "输出 2"
+              },
+              {
+                "id": "AC-count-missing",
+                "given": "文件不存在",
+                "when": "执行计数命令",
+                "then": "报告文件不存在并非零退出"
+              }
+            ]
+          }
+        ],
+        "trace": [
+          {
+            "ideaAndDocumentIds": [
+              "idea-count"
+            ],
+            "issueIds": [
+              "issue-count"
+            ],
+            "proposal": {
+              "id": "proposal-count",
+              "kind": "proposal",
+              "revision": 1,
+              "hash": "7246fe9e90507246c57b4396d08c6508ad5b20a7ddfec94371f62b968a6220c6"
+            },
+            "scopeKey": "count",
+            "approvalId": "approval-count",
+            "requirementId": "FR-count",
+            "acceptanceIds": [
+              "AC-count-normal",
+              "AC-count-missing"
+            ]
+          }
+        ]
+      },
+      "sha256": "f4da3ad58ed43189936646e892724b5383139a5483db2d84f26d11cf18cc2c2e"
+    },
+    "workspace": {
+      "workspaceId": "ws-332a6b70",
+      "name": "cli",
+      "sourceCommit": null,
+      "existingPaths": [],
+      "entryPoints": [],
+      "manifests": [],
+      "dependencies": [],
+      "testCommands": [
+        {
+          "directory": ".",
+          "command": "echo Verification gate passed",
+          "source": "workspace.verifyCommand（配置值，尚未执行）"
+        }
+      ],
+      "proposedPaths": [],
+      "notes": [
+        "目标尚无提交：仅记录概念设计；绑定初始提交后才能进入正式评审。源码清单在初始提交后生成。",
+        "输入阶段尚未推导拟新增路径；生成后的拟建工件见设计正文 modules.files 中 action=create 的条目。"
+      ]
+    },
+    "reviewEligible": false,
+    "blockers": [
+      "目标工程尚无提交，请绑定初始提交后进入正式评审。"
+    ]
+  },
+  "request": {
+    "expectedHash": "2d446811798eb898c7a20ed043d94b833ff53e83a05bb2f963376d51b5b25e5b",
+    "providerId": "openai",
+    "model": "design-fixture",
+    "feedback": "补齐所有原始验收与失败语义"
+  },
+  "status": "ready",
+  "body": {
+    "schemaVersion": 1,
+    "title": "新建非空行命令",
+    "goal": "统计文本文件非空行数",
+    "inputs": [
+      "UTF-8 文件路径"
+    ],
+    "outputs": [
+      "非空行数；失败时错误消息及非零退出码"
+    ],
+    "modules": [
+      {
+        "id": "entry",
+        "name": "命令行入口",
+        "layer": "integration",
+        "responsibility": "接收路径，调用计数逻辑并将结果输出；异常转为错误消息",
+        "inputs": [
+          "文件路径"
+        ],
+        "outputs": [
+          "计数结果或错误"
+        ],
+        "requirementIds": [
+          "FR-count"
+        ],
+        "dependsOn": [
+          "counter"
+        ],
+        "files": [
+          {
+            "path": "src/cli.ts",
+            "action": "create"
+          }
+        ]
+      },
+      {
+        "id": "counter",
+        "name": "非空行计数",
+        "layer": "backend",
+        "responsibility": "读取 UTF-8 文件，trim 后非空则计数，文件不存在时抛出错误",
+        "inputs": [
+          "路径"
+        ],
+        "outputs": [
+          "非负整数"
+        ],
+        "requirementIds": [
+          "FR-count"
+        ],
+        "dependsOn": [],
+        "files": [
+          {
+            "path": "src/count.ts",
+            "action": "create"
+          }
+        ]
+      }
+    ],
+    "interfaces": [
+      {
+        "id": "count-file",
+        "provider": "counter",
+        "consumers": [
+          "entry"
+        ],
+        "kind": "function",
+        "input": "countFile(path: string)",
+        "result": "Promise<number> 非空行数",
+        "failure": "文件不存在或读取失败时抛出带路径的错误；调用方返回非零退出码",
+        "sideEffects": "只读取指定文件，不改动原文件"
+      }
+    ],
+    "dataRules": [
+      "按换行拆分，trim 后长度为零的行不计入"
+    ],
+    "constraints": [
+      "仅本地文件",
+      "空白字符组成的行不计数"
+    ],
+    "quality": [],
+    "decisions": [
+      {
+        "id": "separate-count",
+        "decision": "分离入口与纯计数逻辑",
+        "rationale": "便于命令和服务复用及自动化验证",
+        "alternatives": [
+          "全部写在入口中"
+        ],
+        "requirementIds": [
+          "FR-count"
+        ],
+        "evidence": [
+          "FR-count"
+        ]
+      }
+    ],
+    "assumptions": [],
+    "trace": [
+      {
+        "requirementId": "FR-count",
+        "moduleIds": [
+          "entry",
+          "counter"
+        ],
+        "acceptance": [
+          {
+            "acceptanceId": "AC-count-normal",
+            "method": "准备夹具：文件含两行文本和一行空白；执行计数命令，对输出及退出码断言",
+            "expectedEvidence": "输出 2"
+          },
+          {
+            "acceptanceId": "AC-count-missing",
+            "method": "准备夹具：文件不存在；执行计数命令，对输出及退出码断言",
+            "expectedEvidence": "报告文件不存在并非零退出"
+          }
+        ]
+      }
+    ],
+    "unresolved": []
+  },
+  "contentSha256": "3c2e30b9ad606ac079282a76a5b6d9e0c245d4807dac2395260708ffec0ff67e",
+  "reviewMarkdown": "# 新建非空行命令\n\n## 目标\n统计文本文件非空行数\n\n## 输入\n- UTF-8 文件路径\n\n## 输出\n- 非空行数；失败时错误消息及非零退出码\n\n## 需求\n- FR-01 [FR-count] 输入文件路径，输出非空行数 优先级 must\n\n## 模块\n- 命令行入口: 接收路径，调用计数逻辑并将结果输出；异常转为错误消息；依赖 counter；接口 count-file: countFile(path: string) → Promise<number> 非空行数；失败 文件不存在或读取失败时抛出带路径的错误；调用方返回非零退出码；覆盖 FR-01 (`src/cli.ts`)\n- 非空行计数: 读取 UTF-8 文件，trim 后非空则计数，文件不存在时抛出错误；依赖 无；接口 count-file: countFile(path: string) → Promise<number> 非空行数；失败 文件不存在或读取失败时抛出带路径的错误；调用方返回非零退出码；覆盖 FR-01 (`src/count.ts`)\n\n## 约束\n- 仅本地文件\n- FR-count: 空白字符组成的行不计数\n- 仅本地文件\n- 空白字符组成的行不计数\n\n## 领域规则\n- 按换行拆分，trim 后长度为零的行不计入\n\n## 验收\n- AC-01 FR-01 [AC-count-normal] Given 文件含两行文本和一行空白; When 执行计数命令; Then 输出 2; 验证 准备夹具：文件含两行文本和一行空白；执行计数命令，对输出及退出码断言; 证据 输出 2\n- AC-02 FR-01 [AC-count-missing] Given 文件不存在; When 执行计数命令; Then 报告文件不存在并非零退出; 验证 准备夹具：文件不存在；执行计数命令，对输出及退出码断言; 证据 报告文件不存在并非零退出\n\n## 假设\n\n\n\n## 来源记录\n- 基线 baseline-count / line-counter / v1 / f4da3ad58ed43189936646e892724b5383139a5483db2d84f26d11cf18cc2c2e\n- 目标 ws-332a6b70 / 概念设计\n- 范围外 无\n\n## modules\n\n```json\n[\n  {\n    \"id\": \"entry\",\n    \"name\": \"命令行入口\",\n    \"layer\": \"integration\",\n    \"responsibility\": \"接收路径，调用计数逻辑并将结果输出；异常转为错误消息\",\n    \"inputs\": [\n      \"文件路径\"\n    ],\n    \"outputs\": [\n      \"计数结果或错误\"\n    ],\n    \"requirementIds\": [\n      \"FR-count\"\n    ],\n    \"dependsOn\": [\n      \"counter\"\n    ],\n    \"files\": [\n      {\n        \"path\": \"src/cli.ts\",\n        \"action\": \"create\"\n      }\n    ]\n  },\n  {\n    \"id\": \"counter\",\n    \"name\": \"非空行计数\",\n    \"layer\": \"backend\",\n    \"responsibility\": \"读取 UTF-8 文件，trim 后非空则计数，文件不存在时抛出错误\",\n    \"inputs\": [\n      \"路径\"\n    ],\n    \"outputs\": [\n      \"非负整数\"\n    ],\n    \"requirementIds\": [\n      \"FR-count\"\n    ],\n    \"dependsOn\": [],\n    \"files\": [\n      {\n        \"path\": \"src/count.ts\",\n        \"action\": \"create\"\n      }\n    ]\n  }\n]\n```\n\n## interfaces\n\n```json\n[\n  {\n    \"id\": \"count-file\",\n    \"provider\": \"counter\",\n    \"consumers\": [\n      \"entry\"\n    ],\n    \"kind\": \"function\",\n    \"input\": \"countFile(path: string)\",\n    \"result\": \"Promise<number> 非空行数\",\n    \"failure\": \"文件不存在或读取失败时抛出带路径的错误；调用方返回非零退出码\",\n    \"sideEffects\": \"只读取指定文件，不改动原文件\"\n  }\n]\n```\n\n## quality\n\n```json\n[]\n```\n\n## decisions\n\n```json\n[\n  {\n    \"id\": \"separate-count\",\n    \"decision\": \"分离入口与纯计数逻辑\",\n    \"rationale\": \"便于命令和服务复用及自动化验证\",\n    \"alternatives\": [\n      \"全部写在入口中\"\n    ],\n    \"requirementIds\": [\n      \"FR-count\"\n    ],\n    \"evidence\": [\n      \"FR-count\"\n    ]\n  }\n]\n```\n\n## assumptions\n\n```json\n[]\n```\n\n## trace\n\n```json\n[\n  {\n    \"requirementId\": \"FR-count\",\n    \"moduleIds\": [\n      \"entry\",\n      \"counter\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-count-normal\",\n        \"method\": \"准备夹具：文件含两行文本和一行空白；执行计数命令，对输出及退出码断言\",\n        \"expectedEvidence\": \"输出 2\"\n      },\n      {\n        \"acceptanceId\": \"AC-count-missing\",\n        \"method\": \"准备夹具：文件不存在；执行计数命令，对输出及退出码断言\",\n        \"expectedEvidence\": \"报告文件不存在并非零退出\"\n      }\n    ]\n  }\n]\n```\n\n## unresolved\n\n```json\n[]\n```",
+  "pmMarkdown": "# 新建非空行命令\n\n## 目标\n统计文本文件非空行数\n\n## 输入\n- UTF-8 文件路径\n\n## 输出\n- 非空行数；失败时错误消息及非零退出码\n\n## 需求\n- FR-01 [FR-count] 输入文件路径，输出非空行数 优先级 must\n\n## 模块\n- 命令行入口: 接收路径，调用计数逻辑并将结果输出；异常转为错误消息；依赖 counter；接口 count-file: countFile(path: string) → Promise<number> 非空行数；失败 文件不存在或读取失败时抛出带路径的错误；调用方返回非零退出码；覆盖 FR-01 (`src/cli.ts`)\n- 非空行计数: 读取 UTF-8 文件，trim 后非空则计数，文件不存在时抛出错误；依赖 无；接口 count-file: countFile(path: string) → Promise<number> 非空行数；失败 文件不存在或读取失败时抛出带路径的错误；调用方返回非零退出码；覆盖 FR-01 (`src/count.ts`)\n\n## 约束\n- 仅本地文件\n- FR-count: 空白字符组成的行不计数\n- 仅本地文件\n- 空白字符组成的行不计数\n\n## 领域规则\n- 按换行拆分，trim 后长度为零的行不计入\n\n## 验收\n- AC-01 FR-01 [AC-count-normal] Given 文件含两行文本和一行空白; When 执行计数命令; Then 输出 2; 验证 准备夹具：文件含两行文本和一行空白；执行计数命令，对输出及退出码断言; 证据 输出 2\n- AC-02 FR-01 [AC-count-missing] Given 文件不存在; When 执行计数命令; Then 报告文件不存在并非零退出; 验证 准备夹具：文件不存在；执行计数命令，对输出及退出码断言; 证据 报告文件不存在并非零退出\n\n## 假设\n\n",
+  "diagnostics": [],
+  "reviewEligible": false
+}

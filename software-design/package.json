@@ -1,0 +1,8 @@
+{
+  "name": "software-design",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --experimental-transform-types --test verify/*.test.ts"
+  }
+}

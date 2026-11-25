@@ -1,0 +1,441 @@
+{
+  "scope": "真实 HAMA / 设计 / Planner / SQLite / HTTP，本地模型协议夹具与脚本化审批；非在线质量评测",
+  "calls": [
+    {
+      "role": "Idea Decomposition",
+      "domain": "counter-v1",
+      "requestSha256": "78649f350015f5ff99ca50e6721b3da7dd4d89b6c8e247be51aeed3f6846b2ff"
+    },
+    {
+      "role": "Dependency Analysis",
+      "domain": "counter-v1",
+      "requestSha256": "9257961161a802ab23b84158fff2ff1f88022a216a6c706a185e3b479246b826"
+    },
+    {
+      "role": "Moderator",
+      "domain": "counter-v1",
+      "requestSha256": "30bfbb20820e1ffbdc38e60b5e584539635994bec090130ccdc5074eeffc942b"
+    },
+    {
+      "role": "product",
+      "domain": "counter-v1",
+      "requestSha256": "0a92798b7290ae305684aa06974f3ec23c1789f61c1199085d4486cf4610ba11"
+    },
+    {
+      "role": "architecture",
+      "domain": "counter-v1",
+      "requestSha256": "0a92798b7290ae305684aa06974f3ec23c1789f61c1199085d4486cf4610ba11"
+    },
+    {
+      "role": "product",
+      "domain": "counter-v1",
+      "requestSha256": "d604395a5e514f0dce687a6f095b9e3548d1c4e17a513e4e3fc5f8f2dcc258c2"
+    },
+    {
+      "role": "architecture",
+      "domain": "counter-v1",
+      "requestSha256": "7e0e99ae30f220b2de6a695cddd1d08cf4bce5125491d067a64c09ac6b0207b0"
+    },
+    {
+      "role": "Moderator",
+      "domain": "counter-v1",
+      "requestSha256": "5da1baf19c09b91d682d17de0101e04706c1fbd671cf062cc1452fcca8cc5956"
+    },
+    {
+      "role": "product",
+      "domain": "counter-v1",
+      "requestSha256": "3006f02e0720305d74a073547e1d6be8258f6f15ce1577b67bbf79f74431d09b"
+    },
+    {
+      "role": "architecture",
+      "domain": "counter-v1",
+      "requestSha256": "3006f02e0720305d74a073547e1d6be8258f6f15ce1577b67bbf79f74431d09b"
+    },
+    {
+      "role": "product",
+      "domain": "counter-v1",
+      "requestSha256": "e372f616535c38f26f3aba8fce8ab88925bebd1f049d6419fc8045046a991ae5"
+    },
+    {
+      "role": "architecture",
+      "domain": "counter-v1",
+      "requestSha256": "f046aaa2bfe479c3d7cfde0c6b2f4e2910b9008717572ae4dec6871e049ca183"
+    },
+    {
+      "role": "Moderator",
+      "domain": "counter-v1",
+      "requestSha256": "16fcf576ad51b03438a9edcd0498608b4043d3a7168502da863cf2e24b8a72ba"
+    },
+    {
+      "role": "Consensus Agent",
+      "domain": "counter-v1",
+      "requestSha256": "bb2999761d4a7d646832ba6a09f4e13a09c5e8862157ee011596b03ed6b6a3cf"
+    },
+    {
+      "role": "用户价值",
+      "domain": "counter-v1",
+      "requestSha256": "f4c234fde51049cdb9fec0fa3f05b385df29aaa2d30824ca11dc1c53aee0505f"
+    },
+    {
+      "role": "技术可行性",
+      "domain": "counter-v1",
+      "requestSha256": "f4c234fde51049cdb9fec0fa3f05b385df29aaa2d30824ca11dc1c53aee0505f"
+    },
+    {
+      "role": "产品完整性",
+      "domain": "counter-v1",
+      "requestSha256": "f4c234fde51049cdb9fec0fa3f05b385df29aaa2d30824ca11dc1c53aee0505f"
+    },
+    {
+      "role": "成本与风险",
+      "domain": "counter-v1",
+      "requestSha256": "f4c234fde51049cdb9fec0fa3f05b385df29aaa2d30824ca11dc1c53aee0505f"
+    },
+    {
+      "role": "Requirements Agent",
+      "domain": "counter-v1",
+      "requestSha256": "b8ae39d2bfcf7a278fdb785108d5133faf036601d60c4eff80f620b41b339354"
+    },
+    {
+      "role": "design",
+      "domain": "acceptance-counter",
+      "baselineId": "baseline-run-8d4b1432",
+      "requestSha256": "0a201e61db6bdb13c22f23f527a83c7df6d024a845d8f23c42c37cdfd4b30309"
+    },
+    {
+      "role": "Idea Decomposition",
+      "domain": "ledger",
+      "requestSha256": "0f3a43a45eadce4821fb32a4ff9e7f9c22c9adedde74b20ef7e30a8ac7e22508"
+    },
+    {
+      "role": "Dependency Analysis",
+      "domain": "ledger",
+      "requestSha256": "5d221d624922631858fdb98c515bd7d12f68c2270eebfdb729ebd2f30ea90045"
+    },
+    {
+      "role": "Moderator",
+      "domain": "ledger",
+      "requestSha256": "4011e63ea801d4c250538da8f4cabeb0fc5b165bcaec8217e30ecd4e198166d0"
+    },
+    {
+      "role": "product",
+      "domain": "ledger",
+      "requestSha256": "dc7209cfa946f2e6d115aabc1042a6f91a0a8b14e68bac6cc57b61cb9989d5fa"
+    },
+    {
+      "role": "architecture",
+      "domain": "ledger",
+      "requestSha256": "dc7209cfa946f2e6d115aabc1042a6f91a0a8b14e68bac6cc57b61cb9989d5fa"
+    },
+    {
+      "role": "product",
+      "domain": "ledger",
+      "requestSha256": "d11fa8f0f273ea23396087014345ddee20fa85d6c20921be6e2e26f6a82dcd6b"
+    },
+    {
+      "role": "architecture",
+      "domain": "ledger",
+      "requestSha256": "2ac9bfeede16326de7b705b500fb408aa35bae40949505054095193b211d0746"
+    },
+    {
+      "role": "Moderator",
+      "domain": "ledger",
+      "requestSha256": "5431abb5f150b7ca98ad8002f57d3bd6d9e4123902ccbb1c30f7f4af3a1bda4f"
+    },
+    {
+      "role": "product",
+      "domain": "ledger",
+      "requestSha256": "ff6072b7cd6be7d79dd2efe009da44e1612b5657bd67acf586fd6af3e442268d"
+    },
+    {
+      "role": "architecture",
+      "domain": "ledger",
+      "requestSha256": "ff6072b7cd6be7d79dd2efe009da44e1612b5657bd67acf586fd6af3e442268d"
+    },
+    {
+      "role": "product",
+      "domain": "ledger",
+      "requestSha256": "2322365a2cd619aeeb088ec36b836aee788bced6714b737c3e69605d6a67feae"
+    },
+    {
+      "role": "architecture",
+      "domain": "ledger",
+      "requestSha256": "49543ced757ae6fdd6e9dc09580c7a0614a3e25552b2c42964436f7c0f91770f"
+    },
+    {
+      "role": "Moderator",
+      "domain": "ledger",
+      "requestSha256": "5fa184643111cab1fb63032aa874df9364e533cbee2078e0d4534ad796621190"
+    },
+    {
+      "role": "product",
+      "domain": "ledger",
+      "requestSha256": "8b24685529794d48c72f5bc8ce98cb8052254bfd8f89451e26b33581da8ad5ee"
+    },
+    {
+      "role": "architecture",
+      "domain": "ledger",
+      "requestSha256": "8b24685529794d48c72f5bc8ce98cb8052254bfd8f89451e26b33581da8ad5ee"
+    },
+    {
+      "role": "product",
+      "domain": "ledger",
+      "requestSha256": "06749a4a7716864c27fd7de802a3bdceb07fc1edb298aece91cf3e8c5fac5e21"
+    },
+    {
+      "role": "architecture",
+      "domain": "ledger",
+      "requestSha256": "6f288f07c186b66ea8c8061db1c7b8f35253f85ff8b649c4397d57701e551360"
+    },
+    {
+      "role": "Moderator",
+      "domain": "ledger",
+      "requestSha256": "8bf5c784e3f19193c56ba753c3a823fbc2c10ab24d19823ce8118adb937d6fe0"
+    },
+    {
+      "role": "Consensus Agent",
+      "domain": "ledger",
+      "requestSha256": "84927b68498c980b5842b8040f325bac95ac038c5d59d130354334025f949f38"
+    },
+    {
+      "role": "用户价值",
+      "domain": "ledger",
+      "requestSha256": "f9d84f2414497d4baac0429e837ce100bf1ae667f05f9ee94481d8a907f6f3e5"
+    },
+    {
+      "role": "技术可行性",
+      "domain": "ledger",
+      "requestSha256": "f9d84f2414497d4baac0429e837ce100bf1ae667f05f9ee94481d8a907f6f3e5"
+    },
+    {
+      "role": "产品完整性",
+      "domain": "ledger",
+      "requestSha256": "f9d84f2414497d4baac0429e837ce100bf1ae667f05f9ee94481d8a907f6f3e5"
+    },
+    {
+      "role": "成本与风险",
+      "domain": "ledger",
+      "requestSha256": "f9d84f2414497d4baac0429e837ce100bf1ae667f05f9ee94481d8a907f6f3e5"
+    },
+    {
+      "role": "Requirements Agent",
+      "domain": "ledger",
+      "requestSha256": "f2ca2d3b7e266334d2269e7b575042cc47c0f8f41c5835f6b1408a6d505fed21"
+    },
+    {
+      "role": "design",
+      "domain": "acceptance-ledger",
+      "baselineId": "baseline-run-5c1edfe7",
+      "requestSha256": "163d0beca975c6b973a63effdd4b94a13c5a4252bf84e6f7f64b94f47e780522"
+    },
+    {
+      "role": "design",
+      "domain": "acceptance-campus",
+      "baselineId": "baseline-run-8becd703",
+      "requestSha256": "9fa8e6ea78017693dcb63483548297a33244647568c43edb1cbadf4ca60d60e9"
+    },
+    {
+      "role": "Idea Decomposition",
+      "domain": "counter-v2",
+      "requestSha256": "d12796ecbb1461b008dd160096a6efbda69d20456e176be2450e6430e96128f0"
+    },
+    {
+      "role": "Dependency Analysis",
+      "domain": "counter-v2",
+      "requestSha256": "c8f73737eceb868046e9796ac02c80b41a82e7e1a7b75bd317f3f1b2059cf5f7"
+    },
+    {
+      "role": "Moderator",
+      "domain": "counter-v2",
+      "requestSha256": "7eba3c754a1d72c52c3dec6ecb3128f074a46f7fae52e72675940ae3daff0263"
+    },
+    {
+      "role": "product",
+      "domain": "counter-v2",
+      "requestSha256": "a62ec36301ca9ad8314f6b872c851fe932ff7b9e90f660b8fe505bc29b202924"
+    },
+    {
+      "role": "architecture",
+      "domain": "counter-v2",
+      "requestSha256": "a62ec36301ca9ad8314f6b872c851fe932ff7b9e90f660b8fe505bc29b202924"
+    },
+    {
+      "role": "product",
+      "domain": "counter-v2",
+      "requestSha256": "0122e0755ee05e416ec5e63a9a51363774fc6114d720509bd6963ebe005843b5"
+    },
+    {
+      "role": "architecture",
+      "domain": "counter-v2",
+      "requestSha256": "b511ee7efc5e07b5d40dc012af458b4e6fe75a4911f6597a03d4be410fa0027e"
+    },
+    {
+      "role": "Moderator",
+      "domain": "counter-v2",
+      "requestSha256": "64510740ef65d6135228175f790deb31531fb1b888d756758dd29f02f556dfde"
+    },
+    {
+      "role": "product",
+      "domain": "counter-v2",
+      "requestSha256": "6643042889c8d6d6482ee5651de7190d57db829e047a0d29072bc8251cd776be"
+    },
+    {
+      "role": "architecture",
+      "domain": "counter-v2",
+      "requestSha256": "6643042889c8d6d6482ee5651de7190d57db829e047a0d29072bc8251cd776be"
+    },
+    {
+      "role": "product",
+      "domain": "counter-v2",
+      "requestSha256": "a326192cf11eb9571100781d92d97d052322d823a59de669956d5204bdb2775a"
+    },
+    {
+      "role": "architecture",
+      "domain": "counter-v2",
+      "requestSha256": "d2b40443c275fd9ceb5509e383526f1a40bb38ab141269a8b2805941b22e597c"
+    },
+    {
+      "role": "Moderator",
+      "domain": "counter-v2",
+      "requestSha256": "3d4913c157955f46d2664c17f5db65c272b4da3c94c08dbd59e883e41b59d812"
+    },
+    {
+      "role": "Consensus Agent",
+      "domain": "counter-v2",
+      "requestSha256": "a81f2b5d313aff449d89fbf25151264cf7904499b16f1537b4a2b3a950ab2930"
+    },
+    {
+      "role": "用户价值",
+      "domain": "counter-v2",
+      "requestSha256": "12c1cf04191172ac46add317945c4d0f7e1516f6b2376c163385f8e16309674b"
+    },
+    {
+      "role": "技术可行性",
+      "domain": "counter-v2",
+      "requestSha256": "12c1cf04191172ac46add317945c4d0f7e1516f6b2376c163385f8e16309674b"
+    },
+    {
+      "role": "产品完整性",
+      "domain": "counter-v2",
+      "requestSha256": "12c1cf04191172ac46add317945c4d0f7e1516f6b2376c163385f8e16309674b"
+    },
+    {
+      "role": "成本与风险",
+      "domain": "counter-v2",
+      "requestSha256": "12c1cf04191172ac46add317945c4d0f7e1516f6b2376c163385f8e16309674b"
+    },
+    {
+      "role": "Requirements Agent",
+      "domain": "counter-v2",
+      "requestSha256": "036c67975e41f739e94d0f9b3c4478167c854faf4410f7a2c8836e7eadf5d855"
+    },
+    {
+      "role": "design",
+      "domain": "acceptance-counter",
+      "baselineId": "baseline-run-bacc14cc",
+      "requestSha256": "f63e5b27b2ee4576fac3b9324bdd8ea7cd7c7134a2fcb7710846baf4de50f600"
+    }
+  ],
+  "rows": [
+    {
+      "caseId": "counter-v1",
+      "projectId": "acceptance-counter",
+      "baselineId": "baseline-run-8d4b1432",
+      "baselineRevision": 1,
+      "baselineSha256": "1ac6e5d59f2d18b4cbb997c8b440158e2e5ebf7c6ed8cc5f5cb14e268fc12757",
+      "workspaceId": "ws-88011696",
+      "sourceCommit": "4ee2cce7f1b53fc0004d1dd322c3533ea4bd1fae",
+      "designId": "design-d18a7274-6419-44ce-ae20-691ad28d35bc",
+      "designRevision": 1,
+      "designSha256": "4505125e3d9b281e8c5259e1521de33fd2475007948ac107dbb41faf4d868074",
+      "workflowId": "wf-ed9c79c7",
+      "pmReportId": "pm-6e9a047b",
+      "status": "received",
+      "requirements": 2,
+      "acceptance": 4,
+      "sample": {
+        "requirementId": "FR-75b955fe0e1a99fbbb8f",
+        "acceptanceId": "AC-87b89be3d72b4d847e19",
+        "moduleId": "entry",
+        "file": "src/cli.ts",
+        "pmSliceCode": "P2.T1"
+      },
+      "evidence": "counter-v1.json"
+    },
+    {
+      "caseId": "ledger",
+      "projectId": "acceptance-ledger",
+      "baselineId": "baseline-run-5c1edfe7",
+      "baselineRevision": 1,
+      "baselineSha256": "7bfa76e7872ad64cc4cb3e95ab7d5bf427a3d47a8e875d53001407fdee62ad71",
+      "workspaceId": "ws-6fd6d856",
+      "sourceCommit": "cad45dde810aefd49627451c5854b12ca1d6a016",
+      "designId": "design-a5f1d7f0-7572-4d38-b5c5-6c5ad43d4530",
+      "designRevision": 1,
+      "designSha256": "6dee9a207cee968687b8d2cb5081956197b3e1575f9e74631e1e3785957503d0",
+      "workflowId": "wf-f7631008",
+      "pmReportId": "pm-91641362",
+      "status": "received",
+      "requirements": 3,
+      "acceptance": 5,
+      "sample": {
+        "requirementId": "FR-4da5a603dfd62de7ae18",
+        "acceptanceId": "AC-d69b70f80aa98064a5df",
+        "moduleId": "entry",
+        "file": "src/journal-api.ts",
+        "pmSliceCode": "P2.T1"
+      },
+      "evidence": "ledger.json"
+    },
+    {
+      "caseId": "campus-demo",
+      "projectId": "acceptance-campus",
+      "baselineId": "baseline-run-8becd703",
+      "baselineRevision": 1,
+      "baselineSha256": "1d9ed1bbf4b5cab718f21ca9dc86b164609967a6ec6f3c6e5f4fe6bd88fa0173",
+      "workspaceId": "ws-080d15a7",
+      "sourceCommit": "62852e9f6f71de8a3e948a7466c9be694bedf35c",
+      "designId": "design-c0d7ddde-3751-4354-8f10-c8fa0ce396a7",
+      "designRevision": 1,
+      "designSha256": "5f85ad1e5d0a8e3a67191d14a53836a1277d18e6da782032aabde3b1974d60d6",
+      "workflowId": null,
+      "pmReportId": null,
+      "status": "demo_draft_only",
+      "requirements": 4,
+      "acceptance": 4,
+      "sample": {
+        "requirementId": "FR-e9c0c1e97f4001b50b8d",
+        "acceptanceId": "AC-751562f2dc980d63c9e2",
+        "moduleId": "entry",
+        "file": "src/registration-view.tsx",
+        "pmSliceCode": null
+      },
+      "evidence": "campus-demo.json"
+    },
+    {
+      "caseId": "counter-v2",
+      "projectId": "acceptance-counter",
+      "baselineId": "baseline-run-bacc14cc",
+      "baselineRevision": 2,
+      "baselineSha256": "3a738516324ef9961e9bf34dee9950d1ffd9ca07887748a2d53c0dd2f7d3ac00",
+      "workspaceId": "ws-88011696",
+      "sourceCommit": "4ee2cce7f1b53fc0004d1dd322c3533ea4bd1fae",
+      "designId": "design-c11544b2-6c6e-405c-ac5b-28b3ff75731f",
+      "designRevision": 1,
+      "designSha256": "412e31a09f1fe5a52489c3eae10b169fc2162e258c7ad5e31ff98a868455eeb0",
+      "workflowId": "wf-9e5d5b2a",
+      "pmReportId": "pm-87c81588",
+      "status": "received",
+      "requirements": 2,
+      "acceptance": 4,
+      "sample": {
+        "requirementId": "FR-75b955fe0e1a99fbbb8f",
+        "acceptanceId": "AC-87b89be3d72b4d847e19",
+        "moduleId": "entry",
+        "file": "src/cli.ts",
+        "pmSliceCode": "P2.T1"
+      },
+      "evidence": "counter-v2.json"
+    }
+  ]
+}

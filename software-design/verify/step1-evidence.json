@@ -1,0 +1,201 @@
+{
+  "designId": "design-8d671762-57e2-4399-ab86-a8e8f408422a",
+  "revision": 1,
+  "state": "draft",
+  "stage": "input_ready",
+  "createdAt": "2026-11-24T03:28:12.891Z",
+  "contentSha256": "aa4d6e2277b179032ef75fb11ea385416bbab16c95e96217499bdc40a5788674",
+  "baselineRef": {
+    "id": "baseline-count",
+    "projectId": "line-counter",
+    "revision": 1,
+    "sha256": "f4da3ad58ed43189936646e892724b5383139a5483db2d84f26d11cf18cc2c2e",
+    "schemaVersion": 1,
+    "mode": "live"
+  },
+  "baseline": {
+    "schemaVersion": 1,
+    "id": "baseline-count",
+    "projectId": "line-counter",
+    "revision": 1,
+    "parentId": null,
+    "mode": "live",
+    "approvedPrd": {
+      "id": "prd-count",
+      "kind": "prd",
+      "revision": 1,
+      "hash": "3661d0d2793b5c1c58b0a508a7e25d7bc2aa59502167cb4f57e32f10e074e248"
+    },
+    "approval": {
+      "actor": "测试评审人",
+      "scope": "proposal",
+      "issueIds": [],
+      "feedback": "",
+      "gateKind": "approval",
+      "targetRevision": 1,
+      "decidedAt": "2026-11-24T00:00:00.000Z",
+      "id": "approval-count",
+      "action": "approve",
+      "targetId": "proposal-count",
+      "targetHash": "7246fe9e90507246c57b4396d08c6508ad5b20a7ddfec94371f62b968a6220c6"
+    },
+    "confirmation": {
+      "actor": "测试评审人",
+      "scope": "proposal",
+      "issueIds": [],
+      "feedback": "",
+      "gateKind": "confirmation",
+      "targetRevision": 1,
+      "decidedAt": "2026-11-24T00:00:00.000Z",
+      "id": "confirm-count",
+      "action": "confirm",
+      "targetId": "prd-count",
+      "targetHash": "3661d0d2793b5c1c58b0a508a7e25d7bc2aa59502167cb4f57e32f10e074e248"
+    },
+    "prd": {
+      "title": "非空行统计",
+      "revision": 1,
+      "proposal": {
+        "id": "proposal-count",
+        "kind": "proposal",
+        "revision": 1,
+        "hash": "7246fe9e90507246c57b4396d08c6508ad5b20a7ddfec94371f62b968a6220c6"
+      },
+      "approvalId": "approval-count",
+      "sections": {
+        "goals": [
+          "统计文本文件非空行数"
+        ],
+        "summary": "提供命令行统计工具",
+        "approach": [
+          "读取文件并计数"
+        ],
+        "scope": [
+          {
+            "key": "count",
+            "kind": "functional",
+            "title": "统计非空行",
+            "decision": "输出非空行数",
+            "issueIds": [
+              "issue-count"
+            ]
+          }
+        ],
+        "outOfScope": [],
+        "constraints": [
+          "仅本地文件"
+        ],
+        "tradeoffs": [],
+        "risks": [],
+        "unresolved": [],
+        "businessRules": [],
+        "externalDependencies": []
+      },
+      "background": "需要快速统计文本",
+      "scenarios": [
+        "在终端查看文件行数"
+      ],
+      "changes": [
+        "首次建立"
+      ],
+      "requirements": [
+        {
+          "id": "FR-count",
+          "scopeKey": "count",
+          "kind": "functional",
+          "title": "统计非空行",
+          "description": "输入文件路径，输出非空行数",
+          "value": "减少人工计数",
+          "priority": "must",
+          "dependencies": [],
+          "constraints": [
+            "空白字符组成的行不计数"
+          ],
+          "state": "baselined",
+          "acceptance": [
+            {
+              "id": "AC-count-normal",
+              "given": "文件含两行文本和一行空白",
+              "when": "执行计数命令",
+              "then": "输出 2"
+            },
+            {
+              "id": "AC-count-missing",
+              "given": "文件不存在",
+              "when": "执行计数命令",
+              "then": "报告文件不存在并非零退出"
+            }
+          ]
+        }
+      ],
+      "trace": [
+        {
+          "ideaAndDocumentIds": [
+            "idea-count"
+          ],
+          "issueIds": [
+            "issue-count"
+          ],
+          "proposal": {
+            "id": "proposal-count",
+            "kind": "proposal",
+            "revision": 1,
+            "hash": "7246fe9e90507246c57b4396d08c6508ad5b20a7ddfec94371f62b968a6220c6"
+          },
+          "scopeKey": "count",
+          "approvalId": "approval-count",
+          "requirementId": "FR-count",
+          "acceptanceIds": [
+            "AC-count-normal",
+            "AC-count-missing"
+          ]
+        }
+      ]
+    },
+    "sha256": "f4da3ad58ed43189936646e892724b5383139a5483db2d84f26d11cf18cc2c2e"
+  },
+  "workspace": {
+    "workspaceId": "target",
+    "name": "Line counter",
+    "sourceCommit": "5f13f27849ac085bb0ed5f2db57edb776879cf5a",
+    "existingPaths": [
+      "package.json",
+      "src/cli.ts"
+    ],
+    "entryPoints": [
+      "src/cli.ts"
+    ],
+    "manifests": [
+      {
+        "path": "package.json",
+        "content": "{\"name\":\"line-counter\",\"scripts\":{\"test\":\"node --test\"},\"dependencies\":{\"example\":\"1.0.0\"}}"
+      }
+    ],
+    "dependencies": [
+      {
+        "manifest": "package.json",
+        "name": "example",
+        "version": "1.0.0"
+      }
+    ],
+    "testCommands": [
+      {
+        "directory": ".",
+        "command": "npm run test",
+        "source": "package.json"
+      },
+      {
+        "directory": ".",
+        "command": "npm test",
+        "source": "workspace.verifyCommand（配置值，尚未执行）"
+      }
+    ],
+    "proposedPaths": [],
+    "notes": [
+      "清单及依赖取自目标提交，未提交或未跟踪文件不计入该版本。",
+      "proposedPaths 单独记录拟新增路径，当前未进行正文生成。"
+    ]
+  },
+  "reviewEligible": true,
+  "blockers": []
+}

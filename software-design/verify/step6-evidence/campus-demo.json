@@ -1,0 +1,2163 @@
+{
+  "caseId": "campus-demo",
+  "baseline": {
+    "schemaVersion": 1,
+    "id": "baseline-run-8becd703",
+    "projectId": "acceptance-campus",
+    "revision": 1,
+    "parentId": null,
+    "mode": "demo",
+    "approvedPrd": {
+      "id": "prd-7a16d04a-1f78-4567-a8e7-d650964b83e5",
+      "kind": "prd",
+      "revision": 1,
+      "hash": "6d530f7b9f0b5ee3861adcff8e2779f5c69db7263ccafff7b4e68f31e8fc675f"
+    },
+    "approval": {
+      "targetId": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916",
+      "targetHash": "93e0ab577abb35e4bf9681f0a4b22919e97eab253f07ecd4d3e9375a26b5750c",
+      "actor": "验收脚本模拟审批人",
+      "action": "approve",
+      "feedback": "",
+      "scope": "local",
+      "issueIds": [],
+      "id": "int-3f6f1948",
+      "gateKind": "approval",
+      "targetRevision": 1,
+      "decidedAt": "2026-11-24T06:59:31.166Z"
+    },
+    "confirmation": {
+      "targetId": "prd-7a16d04a-1f78-4567-a8e7-d650964b83e5",
+      "targetHash": "6d530f7b9f0b5ee3861adcff8e2779f5c69db7263ccafff7b4e68f31e8fc675f",
+      "actor": "验收脚本模拟审批人",
+      "action": "confirm",
+      "feedback": "",
+      "scope": "local",
+      "issueIds": [],
+      "id": "int-8dee98e6",
+      "gateKind": "confirmation",
+      "targetRevision": 1,
+      "decidedAt": "2026-11-24T06:59:31.176Z"
+    },
+    "prd": {
+      "title": "校园服务平台活动报名",
+      "revision": 1,
+      "proposal": {
+        "id": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916",
+        "kind": "proposal",
+        "revision": 1,
+        "hash": "93e0ab577abb35e4bf9681f0a4b22919e97eab253f07ecd4d3e9375a26b5750c"
+      },
+      "approvalId": "int-3f6f1948",
+      "sections": {
+        "goals": [
+          "完成移动活动报名，保证名额上限"
+        ],
+        "summary": "复用校园身份和活动列表，明确报名状态。",
+        "approach": [
+          "确认报名时以原子操作扣减容量",
+          "取消成功后释放名额"
+        ],
+        "scope": [
+          {
+            "key": "browse",
+            "kind": "functional",
+            "title": "浏览可报名活动",
+            "decision": "浏览可报名活动",
+            "issueIds": [
+              "issue-browse"
+            ]
+          },
+          {
+            "key": "register",
+            "kind": "functional",
+            "title": "报名或取消",
+            "decision": "报名或取消",
+            "issueIds": [
+              "issue-register"
+            ]
+          },
+          {
+            "key": "capacity",
+            "kind": "functional",
+            "title": "确认报名时校验容量",
+            "decision": "确认报名时校验容量",
+            "issueIds": [
+              "issue-capacity"
+            ]
+          },
+          {
+            "key": "mobile",
+            "kind": "nonfunctional",
+            "title": "移动端易用",
+            "decision": "移动端易用",
+            "issueIds": [
+              "issue-mobile"
+            ]
+          }
+        ],
+        "outOfScope": [
+          "候补队列"
+        ],
+        "constraints": [
+          "复用已有校园登录",
+          "首版使用现有活动列表"
+        ],
+        "tradeoffs": [
+          "先交付报名与容量校验"
+        ],
+        "risks": [
+          "需验证末席并发报名"
+        ],
+        "unresolved": [],
+        "businessRules": [
+          "同一学生不可重复报名同一活动"
+        ],
+        "externalDependencies": [
+          "校园统一身份认证"
+        ]
+      },
+      "background": "校园服务平台的学生需要在移动端完成活动报名。",
+      "scenarios": [
+        "学生浏览活动、确认报名、取消报名。"
+      ],
+      "requirements": [
+        {
+          "id": "FR-e9c0c1e97f4001b50b8d",
+          "scopeKey": "browse",
+          "kind": "functional",
+          "title": "浏览可报名活动",
+          "description": "浏览可报名活动",
+          "value": "便于学生管理活动报名。",
+          "priority": "must",
+          "dependencies": [],
+          "constraints": [
+            "复用已有校园登录"
+          ],
+          "state": "baselined",
+          "acceptance": [
+            {
+              "id": "AC-751562f2dc980d63c9e2",
+              "given": "存在一个可报名活动",
+              "when": "学生打开活动列表",
+              "then": "列表显示该活动及其报名状态"
+            }
+          ]
+        },
+        {
+          "id": "FR-520bfb92acff99939347",
+          "scopeKey": "register",
+          "kind": "functional",
+          "title": "报名或取消",
+          "description": "报名或取消",
+          "value": "便于学生管理活动报名。",
+          "priority": "must",
+          "dependencies": [
+            "FR-0df462187b29853037bd"
+          ],
+          "constraints": [
+            "复用已有校园登录"
+          ],
+          "state": "baselined",
+          "acceptance": [
+            {
+              "id": "AC-c5c889d4f9c2a753c6fa",
+              "given": "用户尚未报名且有余量",
+              "when": "用户连续提交两次报名",
+              "then": "仅产生一个有效报名记录"
+            }
+          ]
+        },
+        {
+          "id": "FR-0df462187b29853037bd",
+          "scopeKey": "capacity",
+          "kind": "functional",
+          "title": "确认报名时校验容量",
+          "description": "确认报名时校验容量",
+          "value": "便于学生管理活动报名。",
+          "priority": "must",
+          "dependencies": [],
+          "constraints": [
+            "复用已有校园登录"
+          ],
+          "state": "baselined",
+          "acceptance": [
+            {
+              "id": "AC-3a11937d775f8249f835",
+              "given": "活动仅余一个名额",
+              "when": "两名学生同时报名",
+              "then": "仅一人成功，另一人收到名额已满提示"
+            }
+          ]
+        },
+        {
+          "id": "NFR-21ebdff2a2462461e259",
+          "scopeKey": "mobile",
+          "kind": "nonfunctional",
+          "title": "移动端易用",
+          "description": "移动端易用",
+          "value": "便于学生管理活动报名。",
+          "priority": "must",
+          "dependencies": [],
+          "constraints": [
+            "复用已有校园登录"
+          ],
+          "state": "baselined",
+          "acceptance": [
+            {
+              "id": "AC-62d430e271899c0bbf4a",
+              "given": "视口宽度为 360 CSS 像素",
+              "when": "学生打开并操作报名页面",
+              "then": "页面无横向滚动且可完成报名"
+            }
+          ]
+        }
+      ],
+      "changes": [
+        "初版草案"
+      ],
+      "trace": [
+        {
+          "issueIds": [
+            "issue-browse"
+          ],
+          "ideaAndDocumentIds": [
+            "idea-1"
+          ],
+          "proposal": {
+            "id": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916",
+            "kind": "proposal",
+            "revision": 1,
+            "hash": "93e0ab577abb35e4bf9681f0a4b22919e97eab253f07ecd4d3e9375a26b5750c"
+          },
+          "scopeKey": "browse",
+          "approvalId": "int-3f6f1948",
+          "requirementId": "FR-e9c0c1e97f4001b50b8d",
+          "acceptanceIds": [
+            "AC-751562f2dc980d63c9e2"
+          ]
+        },
+        {
+          "issueIds": [
+            "issue-register"
+          ],
+          "ideaAndDocumentIds": [
+            "idea-1"
+          ],
+          "proposal": {
+            "id": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916",
+            "kind": "proposal",
+            "revision": 1,
+            "hash": "93e0ab577abb35e4bf9681f0a4b22919e97eab253f07ecd4d3e9375a26b5750c"
+          },
+          "scopeKey": "register",
+          "approvalId": "int-3f6f1948",
+          "requirementId": "FR-520bfb92acff99939347",
+          "acceptanceIds": [
+            "AC-c5c889d4f9c2a753c6fa"
+          ]
+        },
+        {
+          "issueIds": [
+            "issue-capacity"
+          ],
+          "ideaAndDocumentIds": [
+            "idea-1"
+          ],
+          "proposal": {
+            "id": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916",
+            "kind": "proposal",
+            "revision": 1,
+            "hash": "93e0ab577abb35e4bf9681f0a4b22919e97eab253f07ecd4d3e9375a26b5750c"
+          },
+          "scopeKey": "capacity",
+          "approvalId": "int-3f6f1948",
+          "requirementId": "FR-0df462187b29853037bd",
+          "acceptanceIds": [
+            "AC-3a11937d775f8249f835"
+          ]
+        },
+        {
+          "issueIds": [
+            "issue-mobile"
+          ],
+          "ideaAndDocumentIds": [
+            "idea-1"
+          ],
+          "proposal": {
+            "id": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916",
+            "kind": "proposal",
+            "revision": 1,
+            "hash": "93e0ab577abb35e4bf9681f0a4b22919e97eab253f07ecd4d3e9375a26b5750c"
+          },
+          "scopeKey": "mobile",
+          "approvalId": "int-3f6f1948",
+          "requirementId": "NFR-21ebdff2a2462461e259",
+          "acceptanceIds": [
+            "AC-62d430e271899c0bbf4a"
+          ]
+        }
+      ]
+    },
+    "sha256": "1d9ed1bbf4b5cab718f21ca9dc86b164609967a6ec6f3c6e5f4fe6bd88fa0173"
+  },
+  "input": {
+    "designId": "design-c0d7ddde-3751-4354-8f10-c8fa0ce396a7",
+    "revision": 1,
+    "state": "draft",
+    "stage": "input_ready",
+    "createdAt": "2026-11-24T06:59:31.906Z",
+    "contentSha256": "2b41d02d3f9fa17008889e66879d65d1051116dd7c3678ed313d42ce88ae69dd",
+    "baselineRef": {
+      "id": "baseline-run-8becd703",
+      "projectId": "acceptance-campus",
+      "revision": 1,
+      "sha256": "1d9ed1bbf4b5cab718f21ca9dc86b164609967a6ec6f3c6e5f4fe6bd88fa0173",
+      "schemaVersion": 1,
+      "mode": "demo"
+    },
+    "baseline": {
+      "schemaVersion": 1,
+      "id": "baseline-run-8becd703",
+      "projectId": "acceptance-campus",
+      "revision": 1,
+      "parentId": null,
+      "mode": "demo",
+      "approvedPrd": {
+        "id": "prd-7a16d04a-1f78-4567-a8e7-d650964b83e5",
+        "kind": "prd",
+        "revision": 1,
+        "hash": "6d530f7b9f0b5ee3861adcff8e2779f5c69db7263ccafff7b4e68f31e8fc675f"
+      },
+      "approval": {
+        "targetId": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916",
+        "targetHash": "93e0ab577abb35e4bf9681f0a4b22919e97eab253f07ecd4d3e9375a26b5750c",
+        "actor": "验收脚本模拟审批人",
+        "action": "approve",
+        "feedback": "",
+        "scope": "local",
+        "issueIds": [],
+        "id": "int-3f6f1948",
+        "gateKind": "approval",
+        "targetRevision": 1,
+        "decidedAt": "2026-11-24T06:59:31.166Z"
+      },
+      "confirmation": {
+        "targetId": "prd-7a16d04a-1f78-4567-a8e7-d650964b83e5",
+        "targetHash": "6d530f7b9f0b5ee3861adcff8e2779f5c69db7263ccafff7b4e68f31e8fc675f",
+        "actor": "验收脚本模拟审批人",
+        "action": "confirm",
+        "feedback": "",
+        "scope": "local",
+        "issueIds": [],
+        "id": "int-8dee98e6",
+        "gateKind": "confirmation",
+        "targetRevision": 1,
+        "decidedAt": "2026-11-24T06:59:31.176Z"
+      },
+      "prd": {
+        "title": "校园服务平台活动报名",
+        "revision": 1,
+        "proposal": {
+          "id": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916",
+          "kind": "proposal",
+          "revision": 1,
+          "hash": "93e0ab577abb35e4bf9681f0a4b22919e97eab253f07ecd4d3e9375a26b5750c"
+        },
+        "approvalId": "int-3f6f1948",
+        "sections": {
+          "goals": [
+            "完成移动活动报名，保证名额上限"
+          ],
+          "summary": "复用校园身份和活动列表，明确报名状态。",
+          "approach": [
+            "确认报名时以原子操作扣减容量",
+            "取消成功后释放名额"
+          ],
+          "scope": [
+            {
+              "key": "browse",
+              "kind": "functional",
+              "title": "浏览可报名活动",
+              "decision": "浏览可报名活动",
+              "issueIds": [
+                "issue-browse"
+              ]
+            },
+            {
+              "key": "register",
+              "kind": "functional",
+              "title": "报名或取消",
+              "decision": "报名或取消",
+              "issueIds": [
+                "issue-register"
+              ]
+            },
+            {
+              "key": "capacity",
+              "kind": "functional",
+              "title": "确认报名时校验容量",
+              "decision": "确认报名时校验容量",
+              "issueIds": [
+                "issue-capacity"
+              ]
+            },
+            {
+              "key": "mobile",
+              "kind": "nonfunctional",
+              "title": "移动端易用",
+              "decision": "移动端易用",
+              "issueIds": [
+                "issue-mobile"
+              ]
+            }
+          ],
+          "outOfScope": [
+            "候补队列"
+          ],
+          "constraints": [
+            "复用已有校园登录",
+            "首版使用现有活动列表"
+          ],
+          "tradeoffs": [
+            "先交付报名与容量校验"
+          ],
+          "risks": [
+            "需验证末席并发报名"
+          ],
+          "unresolved": [],
+          "businessRules": [
+            "同一学生不可重复报名同一活动"
+          ],
+          "externalDependencies": [
+            "校园统一身份认证"
+          ]
+        },
+        "background": "校园服务平台的学生需要在移动端完成活动报名。",
+        "scenarios": [
+          "学生浏览活动、确认报名、取消报名。"
+        ],
+        "requirements": [
+          {
+            "id": "FR-e9c0c1e97f4001b50b8d",
+            "scopeKey": "browse",
+            "kind": "functional",
+            "title": "浏览可报名活动",
+            "description": "浏览可报名活动",
+            "value": "便于学生管理活动报名。",
+            "priority": "must",
+            "dependencies": [],
+            "constraints": [
+              "复用已有校园登录"
+            ],
+            "state": "baselined",
+            "acceptance": [
+              {
+                "id": "AC-751562f2dc980d63c9e2",
+                "given": "存在一个可报名活动",
+                "when": "学生打开活动列表",
+                "then": "列表显示该活动及其报名状态"
+              }
+            ]
+          },
+          {
+            "id": "FR-520bfb92acff99939347",
+            "scopeKey": "register",
+            "kind": "functional",
+            "title": "报名或取消",
+            "description": "报名或取消",
+            "value": "便于学生管理活动报名。",
+            "priority": "must",
+            "dependencies": [
+              "FR-0df462187b29853037bd"
+            ],
+            "constraints": [
+              "复用已有校园登录"
+            ],
+            "state": "baselined",
+            "acceptance": [
+              {
+                "id": "AC-c5c889d4f9c2a753c6fa",
+                "given": "用户尚未报名且有余量",
+                "when": "用户连续提交两次报名",
+                "then": "仅产生一个有效报名记录"
+              }
+            ]
+          },
+          {
+            "id": "FR-0df462187b29853037bd",
+            "scopeKey": "capacity",
+            "kind": "functional",
+            "title": "确认报名时校验容量",
+            "description": "确认报名时校验容量",
+            "value": "便于学生管理活动报名。",
+            "priority": "must",
+            "dependencies": [],
+            "constraints": [
+              "复用已有校园登录"
+            ],
+            "state": "baselined",
+            "acceptance": [
+              {
+                "id": "AC-3a11937d775f8249f835",
+                "given": "活动仅余一个名额",
+                "when": "两名学生同时报名",
+                "then": "仅一人成功，另一人收到名额已满提示"
+              }
+            ]
+          },
+          {
+            "id": "NFR-21ebdff2a2462461e259",
+            "scopeKey": "mobile",
+            "kind": "nonfunctional",
+            "title": "移动端易用",
+            "description": "移动端易用",
+            "value": "便于学生管理活动报名。",
+            "priority": "must",
+            "dependencies": [],
+            "constraints": [
+              "复用已有校园登录"
+            ],
+            "state": "baselined",
+            "acceptance": [
+              {
+                "id": "AC-62d430e271899c0bbf4a",
+                "given": "视口宽度为 360 CSS 像素",
+                "when": "学生打开并操作报名页面",
+                "then": "页面无横向滚动且可完成报名"
+              }
+            ]
+          }
+        ],
+        "changes": [
+          "初版草案"
+        ],
+        "trace": [
+          {
+            "issueIds": [
+              "issue-browse"
+            ],
+            "ideaAndDocumentIds": [
+              "idea-1"
+            ],
+            "proposal": {
+              "id": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916",
+              "kind": "proposal",
+              "revision": 1,
+              "hash": "93e0ab577abb35e4bf9681f0a4b22919e97eab253f07ecd4d3e9375a26b5750c"
+            },
+            "scopeKey": "browse",
+            "approvalId": "int-3f6f1948",
+            "requirementId": "FR-e9c0c1e97f4001b50b8d",
+            "acceptanceIds": [
+              "AC-751562f2dc980d63c9e2"
+            ]
+          },
+          {
+            "issueIds": [
+              "issue-register"
+            ],
+            "ideaAndDocumentIds": [
+              "idea-1"
+            ],
+            "proposal": {
+              "id": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916",
+              "kind": "proposal",
+              "revision": 1,
+              "hash": "93e0ab577abb35e4bf9681f0a4b22919e97eab253f07ecd4d3e9375a26b5750c"
+            },
+            "scopeKey": "register",
+            "approvalId": "int-3f6f1948",
+            "requirementId": "FR-520bfb92acff99939347",
+            "acceptanceIds": [
+              "AC-c5c889d4f9c2a753c6fa"
+            ]
+          },
+          {
+            "issueIds": [
+              "issue-capacity"
+            ],
+            "ideaAndDocumentIds": [
+              "idea-1"
+            ],
+            "proposal": {
+              "id": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916",
+              "kind": "proposal",
+              "revision": 1,
+              "hash": "93e0ab577abb35e4bf9681f0a4b22919e97eab253f07ecd4d3e9375a26b5750c"
+            },
+            "scopeKey": "capacity",
+            "approvalId": "int-3f6f1948",
+            "requirementId": "FR-0df462187b29853037bd",
+            "acceptanceIds": [
+              "AC-3a11937d775f8249f835"
+            ]
+          },
+          {
+            "issueIds": [
+              "issue-mobile"
+            ],
+            "ideaAndDocumentIds": [
+              "idea-1"
+            ],
+            "proposal": {
+              "id": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916",
+              "kind": "proposal",
+              "revision": 1,
+              "hash": "93e0ab577abb35e4bf9681f0a4b22919e97eab253f07ecd4d3e9375a26b5750c"
+            },
+            "scopeKey": "mobile",
+            "approvalId": "int-3f6f1948",
+            "requirementId": "NFR-21ebdff2a2462461e259",
+            "acceptanceIds": [
+              "AC-62d430e271899c0bbf4a"
+            ]
+          }
+        ]
+      },
+      "sha256": "1d9ed1bbf4b5cab718f21ca9dc86b164609967a6ec6f3c6e5f4fe6bd88fa0173"
+    },
+    "workspace": {
+      "workspaceId": "ws-080d15a7",
+      "name": "校园服务平台活动报名",
+      "sourceCommit": "62852e9f6f71de8a3e948a7466c9be694bedf35c",
+      "existingPaths": [
+        "README.md"
+      ],
+      "entryPoints": [],
+      "manifests": [],
+      "dependencies": [],
+      "testCommands": [
+        {
+          "directory": ".",
+          "command": "node --test",
+          "source": "workspace.verifyCommand（配置值，尚未执行）"
+        }
+      ],
+      "proposedPaths": [],
+      "notes": [
+        "清单及依赖取自目标提交，未提交或未跟踪文件不计入该版本。",
+        "输入阶段尚未推导拟新增路径；生成后的拟建工件见设计正文 modules.files 中 action=create 的条目。"
+      ]
+    },
+    "reviewEligible": false,
+    "blockers": [
+      "演示基线仅供演练；正式交接需要 live 基线。"
+    ]
+  },
+  "generation": {
+    "generationId": "generation-d36fea01-b4b7-4efa-a717-c6834fe731d9",
+    "designId": "design-c0d7ddde-3751-4354-8f10-c8fa0ce396a7",
+    "revision": 1,
+    "createdAt": "2026-11-24T06:59:31.910Z",
+    "input": {
+      "designId": "design-c0d7ddde-3751-4354-8f10-c8fa0ce396a7",
+      "revision": 1,
+      "state": "draft",
+      "stage": "input_ready",
+      "createdAt": "2026-11-24T06:59:31.906Z",
+      "contentSha256": "2b41d02d3f9fa17008889e66879d65d1051116dd7c3678ed313d42ce88ae69dd",
+      "baselineRef": {
+        "id": "baseline-run-8becd703",
+        "projectId": "acceptance-campus",
+        "revision": 1,
+        "sha256": "1d9ed1bbf4b5cab718f21ca9dc86b164609967a6ec6f3c6e5f4fe6bd88fa0173",
+        "schemaVersion": 1,
+        "mode": "demo"
+      },
+      "baseline": {
+        "schemaVersion": 1,
+        "id": "baseline-run-8becd703",
+        "projectId": "acceptance-campus",
+        "revision": 1,
+        "parentId": null,
+        "mode": "demo",
+        "approvedPrd": {
+          "id": "prd-7a16d04a-1f78-4567-a8e7-d650964b83e5",
+          "kind": "prd",
+          "revision": 1,
+          "hash": "6d530f7b9f0b5ee3861adcff8e2779f5c69db7263ccafff7b4e68f31e8fc675f"
+        },
+        "approval": {
+          "targetId": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916",
+          "targetHash": "93e0ab577abb35e4bf9681f0a4b22919e97eab253f07ecd4d3e9375a26b5750c",
+          "actor": "验收脚本模拟审批人",
+          "action": "approve",
+          "feedback": "",
+          "scope": "local",
+          "issueIds": [],
+          "id": "int-3f6f1948",
+          "gateKind": "approval",
+          "targetRevision": 1,
+          "decidedAt": "2026-11-24T06:59:31.166Z"
+        },
+        "confirmation": {
+          "targetId": "prd-7a16d04a-1f78-4567-a8e7-d650964b83e5",
+          "targetHash": "6d530f7b9f0b5ee3861adcff8e2779f5c69db7263ccafff7b4e68f31e8fc675f",
+          "actor": "验收脚本模拟审批人",
+          "action": "confirm",
+          "feedback": "",
+          "scope": "local",
+          "issueIds": [],
+          "id": "int-8dee98e6",
+          "gateKind": "confirmation",
+          "targetRevision": 1,
+          "decidedAt": "2026-11-24T06:59:31.176Z"
+        },
+        "prd": {
+          "title": "校园服务平台活动报名",
+          "revision": 1,
+          "proposal": {
+            "id": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916",
+            "kind": "proposal",
+            "revision": 1,
+            "hash": "93e0ab577abb35e4bf9681f0a4b22919e97eab253f07ecd4d3e9375a26b5750c"
+          },
+          "approvalId": "int-3f6f1948",
+          "sections": {
+            "goals": [
+              "完成移动活动报名，保证名额上限"
+            ],
+            "summary": "复用校园身份和活动列表，明确报名状态。",
+            "approach": [
+              "确认报名时以原子操作扣减容量",
+              "取消成功后释放名额"
+            ],
+            "scope": [
+              {
+                "key": "browse",
+                "kind": "functional",
+                "title": "浏览可报名活动",
+                "decision": "浏览可报名活动",
+                "issueIds": [
+                  "issue-browse"
+                ]
+              },
+              {
+                "key": "register",
+                "kind": "functional",
+                "title": "报名或取消",
+                "decision": "报名或取消",
+                "issueIds": [
+                  "issue-register"
+                ]
+              },
+              {
+                "key": "capacity",
+                "kind": "functional",
+                "title": "确认报名时校验容量",
+                "decision": "确认报名时校验容量",
+                "issueIds": [
+                  "issue-capacity"
+                ]
+              },
+              {
+                "key": "mobile",
+                "kind": "nonfunctional",
+                "title": "移动端易用",
+                "decision": "移动端易用",
+                "issueIds": [
+                  "issue-mobile"
+                ]
+              }
+            ],
+            "outOfScope": [
+              "候补队列"
+            ],
+            "constraints": [
+              "复用已有校园登录",
+              "首版使用现有活动列表"
+            ],
+            "tradeoffs": [
+              "先交付报名与容量校验"
+            ],
+            "risks": [
+              "需验证末席并发报名"
+            ],
+            "unresolved": [],
+            "businessRules": [
+              "同一学生不可重复报名同一活动"
+            ],
+            "externalDependencies": [
+              "校园统一身份认证"
+            ]
+          },
+          "background": "校园服务平台的学生需要在移动端完成活动报名。",
+          "scenarios": [
+            "学生浏览活动、确认报名、取消报名。"
+          ],
+          "requirements": [
+            {
+              "id": "FR-e9c0c1e97f4001b50b8d",
+              "scopeKey": "browse",
+              "kind": "functional",
+              "title": "浏览可报名活动",
+              "description": "浏览可报名活动",
+              "value": "便于学生管理活动报名。",
+              "priority": "must",
+              "dependencies": [],
+              "constraints": [
+                "复用已有校园登录"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-751562f2dc980d63c9e2",
+                  "given": "存在一个可报名活动",
+                  "when": "学生打开活动列表",
+                  "then": "列表显示该活动及其报名状态"
+                }
+              ]
+            },
+            {
+              "id": "FR-520bfb92acff99939347",
+              "scopeKey": "register",
+              "kind": "functional",
+              "title": "报名或取消",
+              "description": "报名或取消",
+              "value": "便于学生管理活动报名。",
+              "priority": "must",
+              "dependencies": [
+                "FR-0df462187b29853037bd"
+              ],
+              "constraints": [
+                "复用已有校园登录"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-c5c889d4f9c2a753c6fa",
+                  "given": "用户尚未报名且有余量",
+                  "when": "用户连续提交两次报名",
+                  "then": "仅产生一个有效报名记录"
+                }
+              ]
+            },
+            {
+              "id": "FR-0df462187b29853037bd",
+              "scopeKey": "capacity",
+              "kind": "functional",
+              "title": "确认报名时校验容量",
+              "description": "确认报名时校验容量",
+              "value": "便于学生管理活动报名。",
+              "priority": "must",
+              "dependencies": [],
+              "constraints": [
+                "复用已有校园登录"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-3a11937d775f8249f835",
+                  "given": "活动仅余一个名额",
+                  "when": "两名学生同时报名",
+                  "then": "仅一人成功，另一人收到名额已满提示"
+                }
+              ]
+            },
+            {
+              "id": "NFR-21ebdff2a2462461e259",
+              "scopeKey": "mobile",
+              "kind": "nonfunctional",
+              "title": "移动端易用",
+              "description": "移动端易用",
+              "value": "便于学生管理活动报名。",
+              "priority": "must",
+              "dependencies": [],
+              "constraints": [
+                "复用已有校园登录"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-62d430e271899c0bbf4a",
+                  "given": "视口宽度为 360 CSS 像素",
+                  "when": "学生打开并操作报名页面",
+                  "then": "页面无横向滚动且可完成报名"
+                }
+              ]
+            }
+          ],
+          "changes": [
+            "初版草案"
+          ],
+          "trace": [
+            {
+              "issueIds": [
+                "issue-browse"
+              ],
+              "ideaAndDocumentIds": [
+                "idea-1"
+              ],
+              "proposal": {
+                "id": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "93e0ab577abb35e4bf9681f0a4b22919e97eab253f07ecd4d3e9375a26b5750c"
+              },
+              "scopeKey": "browse",
+              "approvalId": "int-3f6f1948",
+              "requirementId": "FR-e9c0c1e97f4001b50b8d",
+              "acceptanceIds": [
+                "AC-751562f2dc980d63c9e2"
+              ]
+            },
+            {
+              "issueIds": [
+                "issue-register"
+              ],
+              "ideaAndDocumentIds": [
+                "idea-1"
+              ],
+              "proposal": {
+                "id": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "93e0ab577abb35e4bf9681f0a4b22919e97eab253f07ecd4d3e9375a26b5750c"
+              },
+              "scopeKey": "register",
+              "approvalId": "int-3f6f1948",
+              "requirementId": "FR-520bfb92acff99939347",
+              "acceptanceIds": [
+                "AC-c5c889d4f9c2a753c6fa"
+              ]
+            },
+            {
+              "issueIds": [
+                "issue-capacity"
+              ],
+              "ideaAndDocumentIds": [
+                "idea-1"
+              ],
+              "proposal": {
+                "id": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "93e0ab577abb35e4bf9681f0a4b22919e97eab253f07ecd4d3e9375a26b5750c"
+              },
+              "scopeKey": "capacity",
+              "approvalId": "int-3f6f1948",
+              "requirementId": "FR-0df462187b29853037bd",
+              "acceptanceIds": [
+                "AC-3a11937d775f8249f835"
+              ]
+            },
+            {
+              "issueIds": [
+                "issue-mobile"
+              ],
+              "ideaAndDocumentIds": [
+                "idea-1"
+              ],
+              "proposal": {
+                "id": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "93e0ab577abb35e4bf9681f0a4b22919e97eab253f07ecd4d3e9375a26b5750c"
+              },
+              "scopeKey": "mobile",
+              "approvalId": "int-3f6f1948",
+              "requirementId": "NFR-21ebdff2a2462461e259",
+              "acceptanceIds": [
+                "AC-62d430e271899c0bbf4a"
+              ]
+            }
+          ]
+        },
+        "sha256": "1d9ed1bbf4b5cab718f21ca9dc86b164609967a6ec6f3c6e5f4fe6bd88fa0173"
+      },
+      "workspace": {
+        "workspaceId": "ws-080d15a7",
+        "name": "校园服务平台活动报名",
+        "sourceCommit": "62852e9f6f71de8a3e948a7466c9be694bedf35c",
+        "existingPaths": [
+          "README.md"
+        ],
+        "entryPoints": [],
+        "manifests": [],
+        "dependencies": [],
+        "testCommands": [
+          {
+            "directory": ".",
+            "command": "node --test",
+            "source": "workspace.verifyCommand（配置值，尚未执行）"
+          }
+        ],
+        "proposedPaths": [],
+        "notes": [
+          "清单及依赖取自目标提交，未提交或未跟踪文件不计入该版本。",
+          "输入阶段尚未推导拟新增路径；生成后的拟建工件见设计正文 modules.files 中 action=create 的条目。"
+        ]
+      },
+      "reviewEligible": false,
+      "blockers": [
+        "演示基线仅供演练；正式交接需要 live 基线。"
+      ]
+    },
+    "request": {
+      "expectedHash": "2b41d02d3f9fa17008889e66879d65d1051116dd7c3678ed313d42ce88ae69dd",
+      "providerId": "openai",
+      "model": "acceptance-fixture",
+      "feedback": "按本项目原始需求推导具体契约，保留未知项和来源"
+    },
+    "status": "ready",
+    "body": {
+      "schemaVersion": 1,
+      "title": "校园服务平台活动报名软件设计",
+      "goal": "完成移动活动报名，保证名额上限",
+      "inputs": [
+        "活动、校园身份和用户操作"
+      ],
+      "outputs": [
+        "报名状态和失败提示"
+      ],
+      "modules": [
+        {
+          "id": "entry",
+          "name": "移动报名界面",
+          "layer": "frontend",
+          "responsibility": "在 360 CSS 像素视口中显示活动状态并完成报名和取消，避免横向滚动",
+          "inputs": [
+            "活动、校园身份和用户操作"
+          ],
+          "outputs": [
+            "报名状态和失败提示"
+          ],
+          "requirementIds": [
+            "FR-e9c0c1e97f4001b50b8d",
+            "FR-520bfb92acff99939347",
+            "NFR-21ebdff2a2462461e259"
+          ],
+          "dependsOn": [
+            "core"
+          ],
+          "files": [
+            {
+              "path": "src/registration-view.tsx",
+              "action": "create"
+            }
+          ]
+        },
+        {
+          "id": "core",
+          "name": "报名名额服务",
+          "layer": "backend",
+          "responsibility": "按学生和活动唯一键防重复，原子检查容量和写入报名，取消时释放名额",
+          "inputs": [
+            "活动编号、学生编号、报名或取消操作"
+          ],
+          "outputs": [
+            "有效报名或明确业务状态"
+          ],
+          "requirementIds": [
+            "FR-e9c0c1e97f4001b50b8d",
+            "FR-520bfb92acff99939347",
+            "FR-0df462187b29853037bd"
+          ],
+          "dependsOn": [],
+          "files": [
+            {
+              "path": "src/registration.ts",
+              "action": "create"
+            }
+          ]
+        }
+      ],
+      "interfaces": [
+        {
+          "id": "operation",
+          "provider": "core",
+          "consumers": [
+            "entry"
+          ],
+          "kind": "http",
+          "input": "POST /registrations 或 DELETE /registrations/{id}；携带有效校园身份及活动编号",
+          "result": "返回有效报名和剩余名额或取消状态",
+          "failure": "无名额或重复报名时返回明确状态，不多扣名额；身份无效时拒绝报名",
+          "sideEffects": "成功报名占用一个名额，成功取消释放名额"
+        }
+      ],
+      "dataRules": [
+        "同一学生不可重复报名同一活动",
+        "学生与活动唯一，名额扣减和报名写入原子完成"
+      ],
+      "constraints": [
+        "复用已有校园登录",
+        "首版使用现有活动列表"
+      ],
+      "quality": [
+        {
+          "requirementId": "NFR-21ebdff2a2462461e259",
+          "moduleIds": [
+            "entry"
+          ],
+          "method": "准备：视口宽度为 360 CSS 像素；执行：学生打开并操作报名页面；记录可观察结果",
+          "passCondition": "页面无横向滚动且可完成报名"
+        }
+      ],
+      "decisions": [
+        {
+          "id": "module-boundary",
+          "decision": "将移动交互与名额原子事务分开",
+          "rationale": "明确实现职责、跨模块契约和验证入口",
+          "alternatives": [
+            "把所有职责放在单个入口中"
+          ],
+          "requirementIds": [
+            "FR-e9c0c1e97f4001b50b8d",
+            "FR-520bfb92acff99939347",
+            "FR-0df462187b29853037bd",
+            "NFR-21ebdff2a2462461e259"
+          ],
+          "evidence": [
+            "FR-e9c0c1e97f4001b50b8d",
+            "FR-520bfb92acff99939347",
+            "FR-0df462187b29853037bd",
+            "NFR-21ebdff2a2462461e259"
+          ]
+        }
+      ],
+      "assumptions": [],
+      "trace": [
+        {
+          "requirementId": "FR-e9c0c1e97f4001b50b8d",
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-751562f2dc980d63c9e2",
+              "method": "准备夹具：存在一个可报名活动；学生打开活动列表；断言：列表显示该活动及其报名状态",
+              "expectedEvidence": "列表显示该活动及其报名状态"
+            }
+          ]
+        },
+        {
+          "requirementId": "FR-520bfb92acff99939347",
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-c5c889d4f9c2a753c6fa",
+              "method": "准备夹具：用户尚未报名且有余量；用户连续提交两次报名；断言：仅产生一个有效报名记录",
+              "expectedEvidence": "仅产生一个有效报名记录"
+            }
+          ]
+        },
+        {
+          "requirementId": "FR-0df462187b29853037bd",
+          "moduleIds": [
+            "core"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-3a11937d775f8249f835",
+              "method": "准备夹具：活动仅余一个名额；两名学生同时报名；断言：仅一人成功，另一人收到名额已满提示",
+              "expectedEvidence": "仅一人成功，另一人收到名额已满提示"
+            }
+          ]
+        },
+        {
+          "requirementId": "NFR-21ebdff2a2462461e259",
+          "moduleIds": [
+            "entry"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-62d430e271899c0bbf4a",
+              "method": "准备夹具：视口宽度为 360 CSS 像素；学生打开并操作报名页面；断言：页面无横向滚动且可完成报名",
+              "expectedEvidence": "页面无横向滚动且可完成报名"
+            }
+          ]
+        }
+      ],
+      "unresolved": [],
+      "designChecks": [
+        {
+          "id": "DC-operation-failure",
+          "source": {
+            "kind": "interface",
+            "id": "operation"
+          },
+          "rationale": "核对设计新增的跨模块失败契约",
+          "requirementIds": [
+            "FR-520bfb92acff99939347"
+          ],
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "method": "向入口注入失败并核对调用方可见行为：无名额或重复报名时返回明确状态，不多扣名额；身份无效时拒绝报名",
+          "expectedEvidence": "无名额或重复报名时返回明确状态，不多扣名额；身份无效时拒绝报名"
+        }
+      ]
+    },
+    "contentSha256": "6176572f5816add6be1e4096fa726c9176fcb362dc281cacdd05d32ae1857652",
+    "reviewMarkdown": "# 校园服务平台活动报名软件设计\n\n## 目标\n完成移动活动报名，保证名额上限\n\n## 输入\n- 活动、校园身份和用户操作\n\n## 输出\n- 报名状态和失败提示\n\n## 需求\n- FR-01 [FR-e9c0c1e97f4001b50b8d] 浏览可报名活动 优先级 must\n- FR-02 [FR-520bfb92acff99939347] 报名或取消 优先级 must\n- FR-03 [FR-0df462187b29853037bd] 确认报名时校验容量 优先级 must\n- FR-04 [NFR-21ebdff2a2462461e259] 移动端易用 优先级 must\n\n## 模块\n- 移动报名界面: 在 360 CSS 像素视口中显示活动状态并完成报名和取消，避免横向滚动；依赖 core；接口 operation: POST /registrations 或 DELETE /registrations/{id}；携带有效校园身份及活动编号 → 返回有效报名和剩余名额或取消状态；失败 无名额或重复报名时返回明确状态，不多扣名额；身份无效时拒绝报名；覆盖 FR-01, FR-02, FR-04 (`src/registration-view.tsx`)\n- 报名名额服务: 按学生和活动唯一键防重复，原子检查容量和写入报名，取消时释放名额；依赖 无；接口 operation: POST /registrations 或 DELETE /registrations/{id}；携带有效校园身份及活动编号 → 返回有效报名和剩余名额或取消状态；失败 无名额或重复报名时返回明确状态，不多扣名额；身份无效时拒绝报名；覆盖 FR-01, FR-02, FR-03 (`src/registration.ts`)\n\n## 约束\n- 复用已有校园登录\n- 首版使用现有活动列表\n- FR-e9c0c1e97f4001b50b8d: 复用已有校园登录\n- FR-520bfb92acff99939347: 复用已有校园登录\n- FR-0df462187b29853037bd: 复用已有校园登录\n- NFR-21ebdff2a2462461e259: 复用已有校园登录\n- 复用已有校园登录\n- 首版使用现有活动列表\n\n## 领域规则\n- 同一学生不可重复报名同一活动\n- 同一学生不可重复报名同一活动\n- 学生与活动唯一，名额扣减和报名写入原子完成\n\n## 验收\n- AC-01 FR-01 [AC-751562f2dc980d63c9e2] Given 存在一个可报名活动; When 学生打开活动列表; Then 列表显示该活动及其报名状态; 验证 准备夹具：存在一个可报名活动；学生打开活动列表；断言：列表显示该活动及其报名状态; 证据 列表显示该活动及其报名状态\n- AC-02 FR-02 [AC-c5c889d4f9c2a753c6fa] Given 用户尚未报名且有余量; When 用户连续提交两次报名; Then 仅产生一个有效报名记录; 验证 准备夹具：用户尚未报名且有余量；用户连续提交两次报名；断言：仅产生一个有效报名记录; 证据 仅产生一个有效报名记录\n- AC-03 FR-03 [AC-3a11937d775f8249f835] Given 活动仅余一个名额; When 两名学生同时报名; Then 仅一人成功，另一人收到名额已满提示; 验证 准备夹具：活动仅余一个名额；两名学生同时报名；断言：仅一人成功，另一人收到名额已满提示; 证据 仅一人成功，另一人收到名额已满提示\n- AC-04 FR-04 [AC-62d430e271899c0bbf4a] Given 视口宽度为 360 CSS 像素; When 学生打开并操作报名页面; Then 页面无横向滚动且可完成报名; 验证 准备夹具：视口宽度为 360 CSS 像素；学生打开并操作报名页面；断言：页面无横向滚动且可完成报名; 证据 页面无横向滚动且可完成报名\n\n## 假设\n\n\n\n## 来源记录\n- 基线 baseline-run-8becd703 / acceptance-campus / v1 / 1d9ed1bbf4b5cab718f21ca9dc86b164609967a6ec6f3c6e5f4fe6bd88fa0173\n- 目标 ws-080d15a7 / 62852e9f6f71de8a3e948a7466c9be694bedf35c\n- 范围外 候补队列\n\n## modules\n\n```json\n[\n  {\n    \"id\": \"entry\",\n    \"name\": \"移动报名界面\",\n    \"layer\": \"frontend\",\n    \"responsibility\": \"在 360 CSS 像素视口中显示活动状态并完成报名和取消，避免横向滚动\",\n    \"inputs\": [\n      \"活动、校园身份和用户操作\"\n    ],\n    \"outputs\": [\n      \"报名状态和失败提示\"\n    ],\n    \"requirementIds\": [\n      \"FR-e9c0c1e97f4001b50b8d\",\n      \"FR-520bfb92acff99939347\",\n      \"NFR-21ebdff2a2462461e259\"\n    ],\n    \"dependsOn\": [\n      \"core\"\n    ],\n    \"files\": [\n      {\n        \"path\": \"src/registration-view.tsx\",\n        \"action\": \"create\"\n      }\n    ]\n  },\n  {\n    \"id\": \"core\",\n    \"name\": \"报名名额服务\",\n    \"layer\": \"backend\",\n    \"responsibility\": \"按学生和活动唯一键防重复，原子检查容量和写入报名，取消时释放名额\",\n    \"inputs\": [\n      \"活动编号、学生编号、报名或取消操作\"\n    ],\n    \"outputs\": [\n      \"有效报名或明确业务状态\"\n    ],\n    \"requirementIds\": [\n      \"FR-e9c0c1e97f4001b50b8d\",\n      \"FR-520bfb92acff99939347\",\n      \"FR-0df462187b29853037bd\"\n    ],\n    \"dependsOn\": [],\n    \"files\": [\n      {\n        \"path\": \"src/registration.ts\",\n        \"action\": \"create\"\n      }\n    ]\n  }\n]\n```\n\n## interfaces\n\n```json\n[\n  {\n    \"id\": \"operation\",\n    \"provider\": \"core\",\n    \"consumers\": [\n      \"entry\"\n    ],\n    \"kind\": \"http\",\n    \"input\": \"POST /registrations 或 DELETE /registrations/{id}；携带有效校园身份及活动编号\",\n    \"result\": \"返回有效报名和剩余名额或取消状态\",\n    \"failure\": \"无名额或重复报名时返回明确状态，不多扣名额；身份无效时拒绝报名\",\n    \"sideEffects\": \"成功报名占用一个名额，成功取消释放名额\"\n  }\n]\n```\n\n## quality\n\n```json\n[\n  {\n    \"requirementId\": \"NFR-21ebdff2a2462461e259\",\n    \"moduleIds\": [\n      \"entry\"\n    ],\n    \"method\": \"准备：视口宽度为 360 CSS 像素；执行：学生打开并操作报名页面；记录可观察结果\",\n    \"passCondition\": \"页面无横向滚动且可完成报名\"\n  }\n]\n```\n\n## decisions\n\n```json\n[\n  {\n    \"id\": \"module-boundary\",\n    \"decision\": \"将移动交互与名额原子事务分开\",\n    \"rationale\": \"明确实现职责、跨模块契约和验证入口\",\n    \"alternatives\": [\n      \"把所有职责放在单个入口中\"\n    ],\n    \"requirementIds\": [\n      \"FR-e9c0c1e97f4001b50b8d\",\n      \"FR-520bfb92acff99939347\",\n      \"FR-0df462187b29853037bd\",\n      \"NFR-21ebdff2a2462461e259\"\n    ],\n    \"evidence\": [\n      \"FR-e9c0c1e97f4001b50b8d\",\n      \"FR-520bfb92acff99939347\",\n      \"FR-0df462187b29853037bd\",\n      \"NFR-21ebdff2a2462461e259\"\n    ]\n  }\n]\n```\n\n## assumptions\n\n```json\n[]\n```\n\n## trace\n\n```json\n[\n  {\n    \"requirementId\": \"FR-e9c0c1e97f4001b50b8d\",\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-751562f2dc980d63c9e2\",\n        \"method\": \"准备夹具：存在一个可报名活动；学生打开活动列表；断言：列表显示该活动及其报名状态\",\n        \"expectedEvidence\": \"列表显示该活动及其报名状态\"\n      }\n    ]\n  },\n  {\n    \"requirementId\": \"FR-520bfb92acff99939347\",\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-c5c889d4f9c2a753c6fa\",\n        \"method\": \"准备夹具：用户尚未报名且有余量；用户连续提交两次报名；断言：仅产生一个有效报名记录\",\n        \"expectedEvidence\": \"仅产生一个有效报名记录\"\n      }\n    ]\n  },\n  {\n    \"requirementId\": \"FR-0df462187b29853037bd\",\n    \"moduleIds\": [\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-3a11937d775f8249f835\",\n        \"method\": \"准备夹具：活动仅余一个名额；两名学生同时报名；断言：仅一人成功，另一人收到名额已满提示\",\n        \"expectedEvidence\": \"仅一人成功，另一人收到名额已满提示\"\n      }\n    ]\n  },\n  {\n    \"requirementId\": \"NFR-21ebdff2a2462461e259\",\n    \"moduleIds\": [\n      \"entry\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-62d430e271899c0bbf4a\",\n        \"method\": \"准备夹具：视口宽度为 360 CSS 像素；学生打开并操作报名页面；断言：页面无横向滚动且可完成报名\",\n        \"expectedEvidence\": \"页面无横向滚动且可完成报名\"\n      }\n    ]\n  }\n]\n```\n\n## unresolved\n\n```json\n[]\n```\n\n## 设计补充检查（独立于 HAMA 原始 AC）\n\n```json\n[\n  {\n    \"id\": \"DC-operation-failure\",\n    \"source\": {\n      \"kind\": \"interface\",\n      \"id\": \"operation\"\n    },\n    \"rationale\": \"核对设计新增的跨模块失败契约\",\n    \"requirementIds\": [\n      \"FR-520bfb92acff99939347\"\n    ],\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"method\": \"向入口注入失败并核对调用方可见行为：无名额或重复报名时返回明确状态，不多扣名额；身份无效时拒绝报名\",\n    \"expectedEvidence\": \"无名额或重复报名时返回明确状态，不多扣名额；身份无效时拒绝报名\"\n  }\n]\n```",
+    "pmMarkdown": "# 校园服务平台活动报名软件设计\n\n## 目标\n完成移动活动报名，保证名额上限\n\n## 输入\n- 活动、校园身份和用户操作\n\n## 输出\n- 报名状态和失败提示\n\n## 需求\n- FR-01 [FR-e9c0c1e97f4001b50b8d] 浏览可报名活动 优先级 must\n- FR-02 [FR-520bfb92acff99939347] 报名或取消 优先级 must\n- FR-03 [FR-0df462187b29853037bd] 确认报名时校验容量 优先级 must\n- FR-04 [NFR-21ebdff2a2462461e259] 移动端易用 优先级 must\n\n## 模块\n- 移动报名界面: 在 360 CSS 像素视口中显示活动状态并完成报名和取消，避免横向滚动；依赖 core；接口 operation: POST /registrations 或 DELETE /registrations/{id}；携带有效校园身份及活动编号 → 返回有效报名和剩余名额或取消状态；失败 无名额或重复报名时返回明确状态，不多扣名额；身份无效时拒绝报名；覆盖 FR-01, FR-02, FR-04 (`src/registration-view.tsx`)\n- 报名名额服务: 按学生和活动唯一键防重复，原子检查容量和写入报名，取消时释放名额；依赖 无；接口 operation: POST /registrations 或 DELETE /registrations/{id}；携带有效校园身份及活动编号 → 返回有效报名和剩余名额或取消状态；失败 无名额或重复报名时返回明确状态，不多扣名额；身份无效时拒绝报名；覆盖 FR-01, FR-02, FR-03 (`src/registration.ts`)\n\n## 约束\n- 复用已有校园登录\n- 首版使用现有活动列表\n- FR-e9c0c1e97f4001b50b8d: 复用已有校园登录\n- FR-520bfb92acff99939347: 复用已有校园登录\n- FR-0df462187b29853037bd: 复用已有校园登录\n- NFR-21ebdff2a2462461e259: 复用已有校园登录\n- 复用已有校园登录\n- 首版使用现有活动列表\n\n## 领域规则\n- 同一学生不可重复报名同一活动\n- 同一学生不可重复报名同一活动\n- 学生与活动唯一，名额扣减和报名写入原子完成\n\n## 验收\n- AC-01 FR-01 [AC-751562f2dc980d63c9e2] Given 存在一个可报名活动; When 学生打开活动列表; Then 列表显示该活动及其报名状态; 验证 准备夹具：存在一个可报名活动；学生打开活动列表；断言：列表显示该活动及其报名状态; 证据 列表显示该活动及其报名状态\n- AC-02 FR-02 [AC-c5c889d4f9c2a753c6fa] Given 用户尚未报名且有余量; When 用户连续提交两次报名; Then 仅产生一个有效报名记录; 验证 准备夹具：用户尚未报名且有余量；用户连续提交两次报名；断言：仅产生一个有效报名记录; 证据 仅产生一个有效报名记录\n- AC-03 FR-03 [AC-3a11937d775f8249f835] Given 活动仅余一个名额; When 两名学生同时报名; Then 仅一人成功，另一人收到名额已满提示; 验证 准备夹具：活动仅余一个名额；两名学生同时报名；断言：仅一人成功，另一人收到名额已满提示; 证据 仅一人成功，另一人收到名额已满提示\n- AC-04 FR-04 [AC-62d430e271899c0bbf4a] Given 视口宽度为 360 CSS 像素; When 学生打开并操作报名页面; Then 页面无横向滚动且可完成报名; 验证 准备夹具：视口宽度为 360 CSS 像素；学生打开并操作报名页面；断言：页面无横向滚动且可完成报名; 证据 页面无横向滚动且可完成报名\n\n## 假设\n\n",
+    "diagnostics": [],
+    "reviewEligible": false
+  },
+  "draft": {
+    "designId": "design-c0d7ddde-3751-4354-8f10-c8fa0ce396a7",
+    "revision": 1,
+    "parentRevision": null,
+    "state": "draft",
+    "schemaVersion": 1,
+    "input": {
+      "designId": "design-c0d7ddde-3751-4354-8f10-c8fa0ce396a7",
+      "revision": 1,
+      "state": "draft",
+      "stage": "input_ready",
+      "createdAt": "2026-11-24T06:59:31.906Z",
+      "contentSha256": "2b41d02d3f9fa17008889e66879d65d1051116dd7c3678ed313d42ce88ae69dd",
+      "baselineRef": {
+        "id": "baseline-run-8becd703",
+        "projectId": "acceptance-campus",
+        "revision": 1,
+        "sha256": "1d9ed1bbf4b5cab718f21ca9dc86b164609967a6ec6f3c6e5f4fe6bd88fa0173",
+        "schemaVersion": 1,
+        "mode": "demo"
+      },
+      "baseline": {
+        "schemaVersion": 1,
+        "id": "baseline-run-8becd703",
+        "projectId": "acceptance-campus",
+        "revision": 1,
+        "parentId": null,
+        "mode": "demo",
+        "approvedPrd": {
+          "id": "prd-7a16d04a-1f78-4567-a8e7-d650964b83e5",
+          "kind": "prd",
+          "revision": 1,
+          "hash": "6d530f7b9f0b5ee3861adcff8e2779f5c69db7263ccafff7b4e68f31e8fc675f"
+        },
+        "approval": {
+          "targetId": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916",
+          "targetHash": "93e0ab577abb35e4bf9681f0a4b22919e97eab253f07ecd4d3e9375a26b5750c",
+          "actor": "验收脚本模拟审批人",
+          "action": "approve",
+          "feedback": "",
+          "scope": "local",
+          "issueIds": [],
+          "id": "int-3f6f1948",
+          "gateKind": "approval",
+          "targetRevision": 1,
+          "decidedAt": "2026-11-24T06:59:31.166Z"
+        },
+        "confirmation": {
+          "targetId": "prd-7a16d04a-1f78-4567-a8e7-d650964b83e5",
+          "targetHash": "6d530f7b9f0b5ee3861adcff8e2779f5c69db7263ccafff7b4e68f31e8fc675f",
+          "actor": "验收脚本模拟审批人",
+          "action": "confirm",
+          "feedback": "",
+          "scope": "local",
+          "issueIds": [],
+          "id": "int-8dee98e6",
+          "gateKind": "confirmation",
+          "targetRevision": 1,
+          "decidedAt": "2026-11-24T06:59:31.176Z"
+        },
+        "prd": {
+          "title": "校园服务平台活动报名",
+          "revision": 1,
+          "proposal": {
+            "id": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916",
+            "kind": "proposal",
+            "revision": 1,
+            "hash": "93e0ab577abb35e4bf9681f0a4b22919e97eab253f07ecd4d3e9375a26b5750c"
+          },
+          "approvalId": "int-3f6f1948",
+          "sections": {
+            "goals": [
+              "完成移动活动报名，保证名额上限"
+            ],
+            "summary": "复用校园身份和活动列表，明确报名状态。",
+            "approach": [
+              "确认报名时以原子操作扣减容量",
+              "取消成功后释放名额"
+            ],
+            "scope": [
+              {
+                "key": "browse",
+                "kind": "functional",
+                "title": "浏览可报名活动",
+                "decision": "浏览可报名活动",
+                "issueIds": [
+                  "issue-browse"
+                ]
+              },
+              {
+                "key": "register",
+                "kind": "functional",
+                "title": "报名或取消",
+                "decision": "报名或取消",
+                "issueIds": [
+                  "issue-register"
+                ]
+              },
+              {
+                "key": "capacity",
+                "kind": "functional",
+                "title": "确认报名时校验容量",
+                "decision": "确认报名时校验容量",
+                "issueIds": [
+                  "issue-capacity"
+                ]
+              },
+              {
+                "key": "mobile",
+                "kind": "nonfunctional",
+                "title": "移动端易用",
+                "decision": "移动端易用",
+                "issueIds": [
+                  "issue-mobile"
+                ]
+              }
+            ],
+            "outOfScope": [
+              "候补队列"
+            ],
+            "constraints": [
+              "复用已有校园登录",
+              "首版使用现有活动列表"
+            ],
+            "tradeoffs": [
+              "先交付报名与容量校验"
+            ],
+            "risks": [
+              "需验证末席并发报名"
+            ],
+            "unresolved": [],
+            "businessRules": [
+              "同一学生不可重复报名同一活动"
+            ],
+            "externalDependencies": [
+              "校园统一身份认证"
+            ]
+          },
+          "background": "校园服务平台的学生需要在移动端完成活动报名。",
+          "scenarios": [
+            "学生浏览活动、确认报名、取消报名。"
+          ],
+          "requirements": [
+            {
+              "id": "FR-e9c0c1e97f4001b50b8d",
+              "scopeKey": "browse",
+              "kind": "functional",
+              "title": "浏览可报名活动",
+              "description": "浏览可报名活动",
+              "value": "便于学生管理活动报名。",
+              "priority": "must",
+              "dependencies": [],
+              "constraints": [
+                "复用已有校园登录"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-751562f2dc980d63c9e2",
+                  "given": "存在一个可报名活动",
+                  "when": "学生打开活动列表",
+                  "then": "列表显示该活动及其报名状态"
+                }
+              ]
+            },
+            {
+              "id": "FR-520bfb92acff99939347",
+              "scopeKey": "register",
+              "kind": "functional",
+              "title": "报名或取消",
+              "description": "报名或取消",
+              "value": "便于学生管理活动报名。",
+              "priority": "must",
+              "dependencies": [
+                "FR-0df462187b29853037bd"
+              ],
+              "constraints": [
+                "复用已有校园登录"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-c5c889d4f9c2a753c6fa",
+                  "given": "用户尚未报名且有余量",
+                  "when": "用户连续提交两次报名",
+                  "then": "仅产生一个有效报名记录"
+                }
+              ]
+            },
+            {
+              "id": "FR-0df462187b29853037bd",
+              "scopeKey": "capacity",
+              "kind": "functional",
+              "title": "确认报名时校验容量",
+              "description": "确认报名时校验容量",
+              "value": "便于学生管理活动报名。",
+              "priority": "must",
+              "dependencies": [],
+              "constraints": [
+                "复用已有校园登录"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-3a11937d775f8249f835",
+                  "given": "活动仅余一个名额",
+                  "when": "两名学生同时报名",
+                  "then": "仅一人成功，另一人收到名额已满提示"
+                }
+              ]
+            },
+            {
+              "id": "NFR-21ebdff2a2462461e259",
+              "scopeKey": "mobile",
+              "kind": "nonfunctional",
+              "title": "移动端易用",
+              "description": "移动端易用",
+              "value": "便于学生管理活动报名。",
+              "priority": "must",
+              "dependencies": [],
+              "constraints": [
+                "复用已有校园登录"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-62d430e271899c0bbf4a",
+                  "given": "视口宽度为 360 CSS 像素",
+                  "when": "学生打开并操作报名页面",
+                  "then": "页面无横向滚动且可完成报名"
+                }
+              ]
+            }
+          ],
+          "changes": [
+            "初版草案"
+          ],
+          "trace": [
+            {
+              "issueIds": [
+                "issue-browse"
+              ],
+              "ideaAndDocumentIds": [
+                "idea-1"
+              ],
+              "proposal": {
+                "id": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "93e0ab577abb35e4bf9681f0a4b22919e97eab253f07ecd4d3e9375a26b5750c"
+              },
+              "scopeKey": "browse",
+              "approvalId": "int-3f6f1948",
+              "requirementId": "FR-e9c0c1e97f4001b50b8d",
+              "acceptanceIds": [
+                "AC-751562f2dc980d63c9e2"
+              ]
+            },
+            {
+              "issueIds": [
+                "issue-register"
+              ],
+              "ideaAndDocumentIds": [
+                "idea-1"
+              ],
+              "proposal": {
+                "id": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "93e0ab577abb35e4bf9681f0a4b22919e97eab253f07ecd4d3e9375a26b5750c"
+              },
+              "scopeKey": "register",
+              "approvalId": "int-3f6f1948",
+              "requirementId": "FR-520bfb92acff99939347",
+              "acceptanceIds": [
+                "AC-c5c889d4f9c2a753c6fa"
+              ]
+            },
+            {
+              "issueIds": [
+                "issue-capacity"
+              ],
+              "ideaAndDocumentIds": [
+                "idea-1"
+              ],
+              "proposal": {
+                "id": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "93e0ab577abb35e4bf9681f0a4b22919e97eab253f07ecd4d3e9375a26b5750c"
+              },
+              "scopeKey": "capacity",
+              "approvalId": "int-3f6f1948",
+              "requirementId": "FR-0df462187b29853037bd",
+              "acceptanceIds": [
+                "AC-3a11937d775f8249f835"
+              ]
+            },
+            {
+              "issueIds": [
+                "issue-mobile"
+              ],
+              "ideaAndDocumentIds": [
+                "idea-1"
+              ],
+              "proposal": {
+                "id": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "93e0ab577abb35e4bf9681f0a4b22919e97eab253f07ecd4d3e9375a26b5750c"
+              },
+              "scopeKey": "mobile",
+              "approvalId": "int-3f6f1948",
+              "requirementId": "NFR-21ebdff2a2462461e259",
+              "acceptanceIds": [
+                "AC-62d430e271899c0bbf4a"
+              ]
+            }
+          ]
+        },
+        "sha256": "1d9ed1bbf4b5cab718f21ca9dc86b164609967a6ec6f3c6e5f4fe6bd88fa0173"
+      },
+      "workspace": {
+        "workspaceId": "ws-080d15a7",
+        "name": "校园服务平台活动报名",
+        "sourceCommit": "62852e9f6f71de8a3e948a7466c9be694bedf35c",
+        "existingPaths": [
+          "README.md"
+        ],
+        "entryPoints": [],
+        "manifests": [],
+        "dependencies": [],
+        "testCommands": [
+          {
+            "directory": ".",
+            "command": "node --test",
+            "source": "workspace.verifyCommand（配置值，尚未执行）"
+          }
+        ],
+        "proposedPaths": [],
+        "notes": [
+          "清单及依赖取自目标提交，未提交或未跟踪文件不计入该版本。",
+          "输入阶段尚未推导拟新增路径；生成后的拟建工件见设计正文 modules.files 中 action=create 的条目。"
+        ]
+      },
+      "reviewEligible": false,
+      "blockers": [
+        "演示基线仅供演练；正式交接需要 live 基线。"
+      ]
+    },
+    "body": {
+      "schemaVersion": 1,
+      "title": "校园服务平台活动报名软件设计",
+      "goal": "完成移动活动报名，保证名额上限",
+      "inputs": [
+        "活动、校园身份和用户操作"
+      ],
+      "outputs": [
+        "报名状态和失败提示"
+      ],
+      "modules": [
+        {
+          "id": "entry",
+          "name": "移动报名界面",
+          "layer": "frontend",
+          "responsibility": "在 360 CSS 像素视口中显示活动状态并完成报名和取消，避免横向滚动",
+          "inputs": [
+            "活动、校园身份和用户操作"
+          ],
+          "outputs": [
+            "报名状态和失败提示"
+          ],
+          "requirementIds": [
+            "FR-e9c0c1e97f4001b50b8d",
+            "FR-520bfb92acff99939347",
+            "NFR-21ebdff2a2462461e259"
+          ],
+          "dependsOn": [
+            "core"
+          ],
+          "files": [
+            {
+              "path": "src/registration-view.tsx",
+              "action": "create"
+            }
+          ]
+        },
+        {
+          "id": "core",
+          "name": "报名名额服务",
+          "layer": "backend",
+          "responsibility": "按学生和活动唯一键防重复，原子检查容量和写入报名，取消时释放名额",
+          "inputs": [
+            "活动编号、学生编号、报名或取消操作"
+          ],
+          "outputs": [
+            "有效报名或明确业务状态"
+          ],
+          "requirementIds": [
+            "FR-e9c0c1e97f4001b50b8d",
+            "FR-520bfb92acff99939347",
+            "FR-0df462187b29853037bd"
+          ],
+          "dependsOn": [],
+          "files": [
+            {
+              "path": "src/registration.ts",
+              "action": "create"
+            }
+          ]
+        }
+      ],
+      "interfaces": [
+        {
+          "id": "operation",
+          "provider": "core",
+          "consumers": [
+            "entry"
+          ],
+          "kind": "http",
+          "input": "POST /registrations 或 DELETE /registrations/{id}；携带有效校园身份及活动编号",
+          "result": "返回有效报名和剩余名额或取消状态",
+          "failure": "无名额或重复报名时返回明确状态，不多扣名额；身份无效时拒绝报名",
+          "sideEffects": "成功报名占用一个名额，成功取消释放名额"
+        }
+      ],
+      "dataRules": [
+        "同一学生不可重复报名同一活动",
+        "学生与活动唯一，名额扣减和报名写入原子完成"
+      ],
+      "constraints": [
+        "复用已有校园登录",
+        "首版使用现有活动列表"
+      ],
+      "quality": [
+        {
+          "requirementId": "NFR-21ebdff2a2462461e259",
+          "moduleIds": [
+            "entry"
+          ],
+          "method": "准备：视口宽度为 360 CSS 像素；执行：学生打开并操作报名页面；记录可观察结果",
+          "passCondition": "页面无横向滚动且可完成报名"
+        }
+      ],
+      "decisions": [
+        {
+          "id": "module-boundary",
+          "decision": "将移动交互与名额原子事务分开",
+          "rationale": "明确实现职责、跨模块契约和验证入口",
+          "alternatives": [
+            "把所有职责放在单个入口中"
+          ],
+          "requirementIds": [
+            "FR-e9c0c1e97f4001b50b8d",
+            "FR-520bfb92acff99939347",
+            "FR-0df462187b29853037bd",
+            "NFR-21ebdff2a2462461e259"
+          ],
+          "evidence": [
+            "FR-e9c0c1e97f4001b50b8d",
+            "FR-520bfb92acff99939347",
+            "FR-0df462187b29853037bd",
+            "NFR-21ebdff2a2462461e259"
+          ]
+        }
+      ],
+      "assumptions": [],
+      "trace": [
+        {
+          "requirementId": "FR-e9c0c1e97f4001b50b8d",
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-751562f2dc980d63c9e2",
+              "method": "准备夹具：存在一个可报名活动；学生打开活动列表；断言：列表显示该活动及其报名状态",
+              "expectedEvidence": "列表显示该活动及其报名状态"
+            }
+          ]
+        },
+        {
+          "requirementId": "FR-520bfb92acff99939347",
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-c5c889d4f9c2a753c6fa",
+              "method": "准备夹具：用户尚未报名且有余量；用户连续提交两次报名；断言：仅产生一个有效报名记录",
+              "expectedEvidence": "仅产生一个有效报名记录"
+            }
+          ]
+        },
+        {
+          "requirementId": "FR-0df462187b29853037bd",
+          "moduleIds": [
+            "core"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-3a11937d775f8249f835",
+              "method": "准备夹具：活动仅余一个名额；两名学生同时报名；断言：仅一人成功，另一人收到名额已满提示",
+              "expectedEvidence": "仅一人成功，另一人收到名额已满提示"
+            }
+          ]
+        },
+        {
+          "requirementId": "NFR-21ebdff2a2462461e259",
+          "moduleIds": [
+            "entry"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-62d430e271899c0bbf4a",
+              "method": "准备夹具：视口宽度为 360 CSS 像素；学生打开并操作报名页面；断言：页面无横向滚动且可完成报名",
+              "expectedEvidence": "页面无横向滚动且可完成报名"
+            }
+          ]
+        }
+      ],
+      "unresolved": [],
+      "designChecks": [
+        {
+          "id": "DC-operation-failure",
+          "source": {
+            "kind": "interface",
+            "id": "operation"
+          },
+          "rationale": "核对设计新增的跨模块失败契约",
+          "requirementIds": [
+            "FR-520bfb92acff99939347"
+          ],
+          "moduleIds": [
+            "entry",
+            "core"
+          ],
+          "method": "向入口注入失败并核对调用方可见行为：无名额或重复报名时返回明确状态，不多扣名额；身份无效时拒绝报名",
+          "expectedEvidence": "无名额或重复报名时返回明确状态，不多扣名额；身份无效时拒绝报名"
+        }
+      ]
+    },
+    "contentSha256": "5f85ad1e5d0a8e3a67191d14a53836a1277d18e6da782032aabde3b1974d60d6",
+    "createdAt": "2026-11-24T06:59:31.921Z",
+    "metadata": {
+      "actor": "验收脚本模拟设计负责人",
+      "reason": "campus-demo",
+      "generationId": "generation-d36fea01-b4b7-4efa-a717-c6834fe731d9",
+      "resolutions": [],
+      "previousDesign": null,
+      "baselineDiff": null
+    },
+    "reviewMarkdown": "# 校园服务平台活动报名软件设计\n\n## 目标\n完成移动活动报名，保证名额上限\n\n## 输入\n- 活动、校园身份和用户操作\n\n## 输出\n- 报名状态和失败提示\n\n## 需求\n- FR-01 [FR-e9c0c1e97f4001b50b8d] 浏览可报名活动 优先级 must\n- FR-02 [FR-520bfb92acff99939347] 报名或取消 优先级 must\n- FR-03 [FR-0df462187b29853037bd] 确认报名时校验容量 优先级 must\n- FR-04 [NFR-21ebdff2a2462461e259] 移动端易用 优先级 must\n\n## 模块\n- 移动报名界面: 在 360 CSS 像素视口中显示活动状态并完成报名和取消，避免横向滚动；依赖 core；接口 operation: POST /registrations 或 DELETE /registrations/{id}；携带有效校园身份及活动编号 → 返回有效报名和剩余名额或取消状态；失败 无名额或重复报名时返回明确状态，不多扣名额；身份无效时拒绝报名；覆盖 FR-01, FR-02, FR-04 (`src/registration-view.tsx`)\n- 报名名额服务: 按学生和活动唯一键防重复，原子检查容量和写入报名，取消时释放名额；依赖 无；接口 operation: POST /registrations 或 DELETE /registrations/{id}；携带有效校园身份及活动编号 → 返回有效报名和剩余名额或取消状态；失败 无名额或重复报名时返回明确状态，不多扣名额；身份无效时拒绝报名；覆盖 FR-01, FR-02, FR-03 (`src/registration.ts`)\n\n## 约束\n- 复用已有校园登录\n- 首版使用现有活动列表\n- FR-e9c0c1e97f4001b50b8d: 复用已有校园登录\n- FR-520bfb92acff99939347: 复用已有校园登录\n- FR-0df462187b29853037bd: 复用已有校园登录\n- NFR-21ebdff2a2462461e259: 复用已有校园登录\n- 复用已有校园登录\n- 首版使用现有活动列表\n\n## 领域规则\n- 同一学生不可重复报名同一活动\n- 同一学生不可重复报名同一活动\n- 学生与活动唯一，名额扣减和报名写入原子完成\n\n## 验收\n- AC-01 FR-01 [AC-751562f2dc980d63c9e2] Given 存在一个可报名活动; When 学生打开活动列表; Then 列表显示该活动及其报名状态; 验证 准备夹具：存在一个可报名活动；学生打开活动列表；断言：列表显示该活动及其报名状态; 证据 列表显示该活动及其报名状态\n- AC-02 FR-02 [AC-c5c889d4f9c2a753c6fa] Given 用户尚未报名且有余量; When 用户连续提交两次报名; Then 仅产生一个有效报名记录; 验证 准备夹具：用户尚未报名且有余量；用户连续提交两次报名；断言：仅产生一个有效报名记录; 证据 仅产生一个有效报名记录\n- AC-03 FR-03 [AC-3a11937d775f8249f835] Given 活动仅余一个名额; When 两名学生同时报名; Then 仅一人成功，另一人收到名额已满提示; 验证 准备夹具：活动仅余一个名额；两名学生同时报名；断言：仅一人成功，另一人收到名额已满提示; 证据 仅一人成功，另一人收到名额已满提示\n- AC-04 FR-04 [AC-62d430e271899c0bbf4a] Given 视口宽度为 360 CSS 像素; When 学生打开并操作报名页面; Then 页面无横向滚动且可完成报名; 验证 准备夹具：视口宽度为 360 CSS 像素；学生打开并操作报名页面；断言：页面无横向滚动且可完成报名; 证据 页面无横向滚动且可完成报名\n\n## 假设\n\n\n\n## 来源记录\n- 基线 baseline-run-8becd703 / acceptance-campus / v1 / 1d9ed1bbf4b5cab718f21ca9dc86b164609967a6ec6f3c6e5f4fe6bd88fa0173\n- 目标 ws-080d15a7 / 62852e9f6f71de8a3e948a7466c9be694bedf35c\n- 范围外 候补队列\n\n## modules\n\n```json\n[\n  {\n    \"id\": \"entry\",\n    \"name\": \"移动报名界面\",\n    \"layer\": \"frontend\",\n    \"responsibility\": \"在 360 CSS 像素视口中显示活动状态并完成报名和取消，避免横向滚动\",\n    \"inputs\": [\n      \"活动、校园身份和用户操作\"\n    ],\n    \"outputs\": [\n      \"报名状态和失败提示\"\n    ],\n    \"requirementIds\": [\n      \"FR-e9c0c1e97f4001b50b8d\",\n      \"FR-520bfb92acff99939347\",\n      \"NFR-21ebdff2a2462461e259\"\n    ],\n    \"dependsOn\": [\n      \"core\"\n    ],\n    \"files\": [\n      {\n        \"path\": \"src/registration-view.tsx\",\n        \"action\": \"create\"\n      }\n    ]\n  },\n  {\n    \"id\": \"core\",\n    \"name\": \"报名名额服务\",\n    \"layer\": \"backend\",\n    \"responsibility\": \"按学生和活动唯一键防重复，原子检查容量和写入报名，取消时释放名额\",\n    \"inputs\": [\n      \"活动编号、学生编号、报名或取消操作\"\n    ],\n    \"outputs\": [\n      \"有效报名或明确业务状态\"\n    ],\n    \"requirementIds\": [\n      \"FR-e9c0c1e97f4001b50b8d\",\n      \"FR-520bfb92acff99939347\",\n      \"FR-0df462187b29853037bd\"\n    ],\n    \"dependsOn\": [],\n    \"files\": [\n      {\n        \"path\": \"src/registration.ts\",\n        \"action\": \"create\"\n      }\n    ]\n  }\n]\n```\n\n## interfaces\n\n```json\n[\n  {\n    \"id\": \"operation\",\n    \"provider\": \"core\",\n    \"consumers\": [\n      \"entry\"\n    ],\n    \"kind\": \"http\",\n    \"input\": \"POST /registrations 或 DELETE /registrations/{id}；携带有效校园身份及活动编号\",\n    \"result\": \"返回有效报名和剩余名额或取消状态\",\n    \"failure\": \"无名额或重复报名时返回明确状态，不多扣名额；身份无效时拒绝报名\",\n    \"sideEffects\": \"成功报名占用一个名额，成功取消释放名额\"\n  }\n]\n```\n\n## quality\n\n```json\n[\n  {\n    \"requirementId\": \"NFR-21ebdff2a2462461e259\",\n    \"moduleIds\": [\n      \"entry\"\n    ],\n    \"method\": \"准备：视口宽度为 360 CSS 像素；执行：学生打开并操作报名页面；记录可观察结果\",\n    \"passCondition\": \"页面无横向滚动且可完成报名\"\n  }\n]\n```\n\n## decisions\n\n```json\n[\n  {\n    \"id\": \"module-boundary\",\n    \"decision\": \"将移动交互与名额原子事务分开\",\n    \"rationale\": \"明确实现职责、跨模块契约和验证入口\",\n    \"alternatives\": [\n      \"把所有职责放在单个入口中\"\n    ],\n    \"requirementIds\": [\n      \"FR-e9c0c1e97f4001b50b8d\",\n      \"FR-520bfb92acff99939347\",\n      \"FR-0df462187b29853037bd\",\n      \"NFR-21ebdff2a2462461e259\"\n    ],\n    \"evidence\": [\n      \"FR-e9c0c1e97f4001b50b8d\",\n      \"FR-520bfb92acff99939347\",\n      \"FR-0df462187b29853037bd\",\n      \"NFR-21ebdff2a2462461e259\"\n    ]\n  }\n]\n```\n\n## assumptions\n\n```json\n[]\n```\n\n## trace\n\n```json\n[\n  {\n    \"requirementId\": \"FR-e9c0c1e97f4001b50b8d\",\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-751562f2dc980d63c9e2\",\n        \"method\": \"准备夹具：存在一个可报名活动；学生打开活动列表；断言：列表显示该活动及其报名状态\",\n        \"expectedEvidence\": \"列表显示该活动及其报名状态\"\n      }\n    ]\n  },\n  {\n    \"requirementId\": \"FR-520bfb92acff99939347\",\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-c5c889d4f9c2a753c6fa\",\n        \"method\": \"准备夹具：用户尚未报名且有余量；用户连续提交两次报名；断言：仅产生一个有效报名记录\",\n        \"expectedEvidence\": \"仅产生一个有效报名记录\"\n      }\n    ]\n  },\n  {\n    \"requirementId\": \"FR-0df462187b29853037bd\",\n    \"moduleIds\": [\n      \"core\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-3a11937d775f8249f835\",\n        \"method\": \"准备夹具：活动仅余一个名额；两名学生同时报名；断言：仅一人成功，另一人收到名额已满提示\",\n        \"expectedEvidence\": \"仅一人成功，另一人收到名额已满提示\"\n      }\n    ]\n  },\n  {\n    \"requirementId\": \"NFR-21ebdff2a2462461e259\",\n    \"moduleIds\": [\n      \"entry\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-62d430e271899c0bbf4a\",\n        \"method\": \"准备夹具：视口宽度为 360 CSS 像素；学生打开并操作报名页面；断言：页面无横向滚动且可完成报名\",\n        \"expectedEvidence\": \"页面无横向滚动且可完成报名\"\n      }\n    ]\n  }\n]\n```\n\n## unresolved\n\n```json\n[]\n```\n\n## 设计补充检查（独立于 HAMA 原始 AC）\n\n```json\n[\n  {\n    \"id\": \"DC-operation-failure\",\n    \"source\": {\n      \"kind\": \"interface\",\n      \"id\": \"operation\"\n    },\n    \"rationale\": \"核对设计新增的跨模块失败契约\",\n    \"requirementIds\": [\n      \"FR-520bfb92acff99939347\"\n    ],\n    \"moduleIds\": [\n      \"entry\",\n      \"core\"\n    ],\n    \"method\": \"向入口注入失败并核对调用方可见行为：无名额或重复报名时返回明确状态，不多扣名额；身份无效时拒绝报名\",\n    \"expectedEvidence\": \"无名额或重复报名时返回明确状态，不多扣名额；身份无效时拒绝报名\"\n  }\n]\n```",
+    "pmMarkdown": "# 校园服务平台活动报名软件设计\n\n## 目标\n完成移动活动报名，保证名额上限\n\n## 输入\n- 活动、校园身份和用户操作\n\n## 输出\n- 报名状态和失败提示\n\n## 需求\n- FR-01 [FR-e9c0c1e97f4001b50b8d] 浏览可报名活动 优先级 must\n- FR-02 [FR-520bfb92acff99939347] 报名或取消 优先级 must\n- FR-03 [FR-0df462187b29853037bd] 确认报名时校验容量 优先级 must\n- FR-04 [NFR-21ebdff2a2462461e259] 移动端易用 优先级 must\n\n## 模块\n- 移动报名界面: 在 360 CSS 像素视口中显示活动状态并完成报名和取消，避免横向滚动；依赖 core；接口 operation: POST /registrations 或 DELETE /registrations/{id}；携带有效校园身份及活动编号 → 返回有效报名和剩余名额或取消状态；失败 无名额或重复报名时返回明确状态，不多扣名额；身份无效时拒绝报名；覆盖 FR-01, FR-02, FR-04 (`src/registration-view.tsx`)\n- 报名名额服务: 按学生和活动唯一键防重复，原子检查容量和写入报名，取消时释放名额；依赖 无；接口 operation: POST /registrations 或 DELETE /registrations/{id}；携带有效校园身份及活动编号 → 返回有效报名和剩余名额或取消状态；失败 无名额或重复报名时返回明确状态，不多扣名额；身份无效时拒绝报名；覆盖 FR-01, FR-02, FR-03 (`src/registration.ts`)\n\n## 约束\n- 复用已有校园登录\n- 首版使用现有活动列表\n- FR-e9c0c1e97f4001b50b8d: 复用已有校园登录\n- FR-520bfb92acff99939347: 复用已有校园登录\n- FR-0df462187b29853037bd: 复用已有校园登录\n- NFR-21ebdff2a2462461e259: 复用已有校园登录\n- 复用已有校园登录\n- 首版使用现有活动列表\n\n## 领域规则\n- 同一学生不可重复报名同一活动\n- 同一学生不可重复报名同一活动\n- 学生与活动唯一，名额扣减和报名写入原子完成\n\n## 验收\n- AC-01 FR-01 [AC-751562f2dc980d63c9e2] Given 存在一个可报名活动; When 学生打开活动列表; Then 列表显示该活动及其报名状态; 验证 准备夹具：存在一个可报名活动；学生打开活动列表；断言：列表显示该活动及其报名状态; 证据 列表显示该活动及其报名状态\n- AC-02 FR-02 [AC-c5c889d4f9c2a753c6fa] Given 用户尚未报名且有余量; When 用户连续提交两次报名; Then 仅产生一个有效报名记录; 验证 准备夹具：用户尚未报名且有余量；用户连续提交两次报名；断言：仅产生一个有效报名记录; 证据 仅产生一个有效报名记录\n- AC-03 FR-03 [AC-3a11937d775f8249f835] Given 活动仅余一个名额; When 两名学生同时报名; Then 仅一人成功，另一人收到名额已满提示; 验证 准备夹具：活动仅余一个名额；两名学生同时报名；断言：仅一人成功，另一人收到名额已满提示; 证据 仅一人成功，另一人收到名额已满提示\n- AC-04 FR-04 [AC-62d430e271899c0bbf4a] Given 视口宽度为 360 CSS 像素; When 学生打开并操作报名页面; Then 页面无横向滚动且可完成报名; 验证 准备夹具：视口宽度为 360 CSS 像素；学生打开并操作报名页面；断言：页面无横向滚动且可完成报名; 证据 页面无横向滚动且可完成报名\n\n## 假设\n\n",
+    "diagnostics": [],
+    "decisions": [],
+    "handoffs": [],
+    "diff": {
+      "changedFields": [
+        "schemaVersion",
+        "title",
+        "goal",
+        "inputs",
+        "outputs",
+        "modules",
+        "interfaces",
+        "dataRules",
+        "constraints",
+        "quality",
+        "decisions",
+        "assumptions",
+        "trace",
+        "unresolved",
+        "designChecks"
+      ],
+      "changes": [
+        {
+          "field": "schemaVersion",
+          "before": null,
+          "after": 1
+        },
+        {
+          "field": "title",
+          "before": null,
+          "after": "校园服务平台活动报名软件设计"
+        },
+        {
+          "field": "goal",
+          "before": null,
+          "after": "完成移动活动报名，保证名额上限"
+        },
+        {
+          "field": "inputs",
+          "before": null,
+          "after": [
+            "活动、校园身份和用户操作"
+          ]
+        },
+        {
+          "field": "outputs",
+          "before": null,
+          "after": [
+            "报名状态和失败提示"
+          ]
+        },
+        {
+          "field": "modules",
+          "before": null,
+          "after": [
+            {
+              "id": "entry",
+              "name": "移动报名界面",
+              "layer": "frontend",
+              "responsibility": "在 360 CSS 像素视口中显示活动状态并完成报名和取消，避免横向滚动",
+              "inputs": [
+                "活动、校园身份和用户操作"
+              ],
+              "outputs": [
+                "报名状态和失败提示"
+              ],
+              "requirementIds": [
+                "FR-e9c0c1e97f4001b50b8d",
+                "FR-520bfb92acff99939347",
+                "NFR-21ebdff2a2462461e259"
+              ],
+              "dependsOn": [
+                "core"
+              ],
+              "files": [
+                {
+                  "path": "src/registration-view.tsx",
+                  "action": "create"
+                }
+              ]
+            },
+            {
+              "id": "core",
+              "name": "报名名额服务",
+              "layer": "backend",
+              "responsibility": "按学生和活动唯一键防重复，原子检查容量和写入报名，取消时释放名额",
+              "inputs": [
+                "活动编号、学生编号、报名或取消操作"
+              ],
+              "outputs": [
+                "有效报名或明确业务状态"
+              ],
+              "requirementIds": [
+                "FR-e9c0c1e97f4001b50b8d",
+                "FR-520bfb92acff99939347",
+                "FR-0df462187b29853037bd"
+              ],
+              "dependsOn": [],
+              "files": [
+                {
+                  "path": "src/registration.ts",
+                  "action": "create"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "field": "interfaces",
+          "before": null,
+          "after": [
+            {
+              "id": "operation",
+              "provider": "core",
+              "consumers": [
+                "entry"
+              ],
+              "kind": "http",
+              "input": "POST /registrations 或 DELETE /registrations/{id}；携带有效校园身份及活动编号",
+              "result": "返回有效报名和剩余名额或取消状态",
+              "failure": "无名额或重复报名时返回明确状态，不多扣名额；身份无效时拒绝报名",
+              "sideEffects": "成功报名占用一个名额，成功取消释放名额"
+            }
+          ]
+        },
+        {
+          "field": "dataRules",
+          "before": null,
+          "after": [
+            "同一学生不可重复报名同一活动",
+            "学生与活动唯一，名额扣减和报名写入原子完成"
+          ]
+        },
+        {
+          "field": "constraints",
+          "before": null,
+          "after": [
+            "复用已有校园登录",
+            "首版使用现有活动列表"
+          ]
+        },
+        {
+          "field": "quality",
+          "before": null,
+          "after": [
+            {
+              "requirementId": "NFR-21ebdff2a2462461e259",
+              "moduleIds": [
+                "entry"
+              ],
+              "method": "准备：视口宽度为 360 CSS 像素；执行：学生打开并操作报名页面；记录可观察结果",
+              "passCondition": "页面无横向滚动且可完成报名"
+            }
+          ]
+        },
+        {
+          "field": "decisions",
+          "before": null,
+          "after": [
+            {
+              "id": "module-boundary",
+              "decision": "将移动交互与名额原子事务分开",
+              "rationale": "明确实现职责、跨模块契约和验证入口",
+              "alternatives": [
+                "把所有职责放在单个入口中"
+              ],
+              "requirementIds": [
+                "FR-e9c0c1e97f4001b50b8d",
+                "FR-520bfb92acff99939347",
+                "FR-0df462187b29853037bd",
+                "NFR-21ebdff2a2462461e259"
+              ],
+              "evidence": [
+                "FR-e9c0c1e97f4001b50b8d",
+                "FR-520bfb92acff99939347",
+                "FR-0df462187b29853037bd",
+                "NFR-21ebdff2a2462461e259"
+              ]
+            }
+          ]
+        },
+        {
+          "field": "assumptions",
+          "before": null,
+          "after": []
+        },
+        {
+          "field": "trace",
+          "before": null,
+          "after": [
+            {
+              "requirementId": "FR-e9c0c1e97f4001b50b8d",
+              "moduleIds": [
+                "entry",
+                "core"
+              ],
+              "acceptance": [
+                {
+                  "acceptanceId": "AC-751562f2dc980d63c9e2",
+                  "method": "准备夹具：存在一个可报名活动；学生打开活动列表；断言：列表显示该活动及其报名状态",
+                  "expectedEvidence": "列表显示该活动及其报名状态"
+                }
+              ]
+            },
+            {
+              "requirementId": "FR-520bfb92acff99939347",
+              "moduleIds": [
+                "entry",
+                "core"
+              ],
+              "acceptance": [
+                {
+                  "acceptanceId": "AC-c5c889d4f9c2a753c6fa",
+                  "method": "准备夹具：用户尚未报名且有余量；用户连续提交两次报名；断言：仅产生一个有效报名记录",
+                  "expectedEvidence": "仅产生一个有效报名记录"
+                }
+              ]
+            },
+            {
+              "requirementId": "FR-0df462187b29853037bd",
+              "moduleIds": [
+                "core"
+              ],
+              "acceptance": [
+                {
+                  "acceptanceId": "AC-3a11937d775f8249f835",
+                  "method": "准备夹具：活动仅余一个名额；两名学生同时报名；断言：仅一人成功，另一人收到名额已满提示",
+                  "expectedEvidence": "仅一人成功，另一人收到名额已满提示"
+                }
+              ]
+            },
+            {
+              "requirementId": "NFR-21ebdff2a2462461e259",
+              "moduleIds": [
+                "entry"
+              ],
+              "acceptance": [
+                {
+                  "acceptanceId": "AC-62d430e271899c0bbf4a",
+                  "method": "准备夹具：视口宽度为 360 CSS 像素；学生打开并操作报名页面；断言：页面无横向滚动且可完成报名",
+                  "expectedEvidence": "页面无横向滚动且可完成报名"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "field": "unresolved",
+          "before": null,
+          "after": []
+        },
+        {
+          "field": "designChecks",
+          "before": null,
+          "after": [
+            {
+              "id": "DC-operation-failure",
+              "source": {
+                "kind": "interface",
+                "id": "operation"
+              },
+              "rationale": "核对设计新增的跨模块失败契约",
+              "requirementIds": [
+                "FR-520bfb92acff99939347"
+              ],
+              "moduleIds": [
+                "entry",
+                "core"
+              ],
+              "method": "向入口注入失败并核对调用方可见行为：无名额或重复报名时返回明确状态，不多扣名额；身份无效时拒绝报名",
+              "expectedEvidence": "无名额或重复报名时返回明确状态，不多扣名额；身份无效时拒绝报名"
+            }
+          ]
+        }
+      ],
+      "addedFiles": [
+        "src/registration-view.tsx",
+        "src/registration.ts"
+      ],
+      "removedFiles": [],
+      "targetChanged": false
+    }
+  },
+  "confirmed": null,
+  "receipt": null,
+  "coverage": [
+    {
+      "requirementId": "FR-e9c0c1e97f4001b50b8d",
+      "scopeKey": "browse",
+      "kind": "functional",
+      "priority": "must",
+      "dependencies": [],
+      "constraints": [
+        "复用已有校园登录"
+      ],
+      "moduleIds": [
+        "entry",
+        "core"
+      ],
+      "acceptance": [
+        {
+          "id": "AC-751562f2dc980d63c9e2",
+          "given": "存在一个可报名活动",
+          "when": "学生打开活动列表",
+          "then": "列表显示该活动及其报名状态",
+          "acceptanceId": "AC-751562f2dc980d63c9e2",
+          "method": "准备夹具：存在一个可报名活动；学生打开活动列表；断言：列表显示该活动及其报名状态",
+          "expectedEvidence": "列表显示该活动及其报名状态"
+        }
+      ],
+      "issueIds": [
+        "issue-browse"
+      ],
+      "proposalId": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916"
+    },
+    {
+      "requirementId": "FR-520bfb92acff99939347",
+      "scopeKey": "register",
+      "kind": "functional",
+      "priority": "must",
+      "dependencies": [
+        "FR-0df462187b29853037bd"
+      ],
+      "constraints": [
+        "复用已有校园登录"
+      ],
+      "moduleIds": [
+        "entry",
+        "core"
+      ],
+      "acceptance": [
+        {
+          "id": "AC-c5c889d4f9c2a753c6fa",
+          "given": "用户尚未报名且有余量",
+          "when": "用户连续提交两次报名",
+          "then": "仅产生一个有效报名记录",
+          "acceptanceId": "AC-c5c889d4f9c2a753c6fa",
+          "method": "准备夹具：用户尚未报名且有余量；用户连续提交两次报名；断言：仅产生一个有效报名记录",
+          "expectedEvidence": "仅产生一个有效报名记录"
+        }
+      ],
+      "issueIds": [
+        "issue-register"
+      ],
+      "proposalId": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916"
+    },
+    {
+      "requirementId": "FR-0df462187b29853037bd",
+      "scopeKey": "capacity",
+      "kind": "functional",
+      "priority": "must",
+      "dependencies": [],
+      "constraints": [
+        "复用已有校园登录"
+      ],
+      "moduleIds": [
+        "core"
+      ],
+      "acceptance": [
+        {
+          "id": "AC-3a11937d775f8249f835",
+          "given": "活动仅余一个名额",
+          "when": "两名学生同时报名",
+          "then": "仅一人成功，另一人收到名额已满提示",
+          "acceptanceId": "AC-3a11937d775f8249f835",
+          "method": "准备夹具：活动仅余一个名额；两名学生同时报名；断言：仅一人成功，另一人收到名额已满提示",
+          "expectedEvidence": "仅一人成功，另一人收到名额已满提示"
+        }
+      ],
+      "issueIds": [
+        "issue-capacity"
+      ],
+      "proposalId": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916"
+    },
+    {
+      "requirementId": "NFR-21ebdff2a2462461e259",
+      "scopeKey": "mobile",
+      "kind": "nonfunctional",
+      "priority": "must",
+      "dependencies": [],
+      "constraints": [
+        "复用已有校园登录"
+      ],
+      "moduleIds": [
+        "entry"
+      ],
+      "acceptance": [
+        {
+          "id": "AC-62d430e271899c0bbf4a",
+          "given": "视口宽度为 360 CSS 像素",
+          "when": "学生打开并操作报名页面",
+          "then": "页面无横向滚动且可完成报名",
+          "acceptanceId": "AC-62d430e271899c0bbf4a",
+          "method": "准备夹具：视口宽度为 360 CSS 像素；学生打开并操作报名页面；断言：页面无横向滚动且可完成报名",
+          "expectedEvidence": "页面无横向滚动且可完成报名"
+        }
+      ],
+      "issueIds": [
+        "issue-mobile"
+      ],
+      "proposalId": "proposal-71a16636-25c1-4cd9-9aa6-29abfa96f916"
+    }
+  ]
+}

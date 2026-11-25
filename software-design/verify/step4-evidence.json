@@ -1,0 +1,1125 @@
+{
+  "confirmedSnapshot": {
+    "designId": "design-80cc6d64-a40c-4d47-b6ed-6e7a5be6e9c2",
+    "revision": 1,
+    "parentRevision": null,
+    "state": "confirmed",
+    "schemaVersion": 1,
+    "input": {
+      "designId": "design-80cc6d64-a40c-4d47-b6ed-6e7a5be6e9c2",
+      "revision": 1,
+      "state": "draft",
+      "stage": "input_ready",
+      "createdAt": "2026-11-24T06:30:36.135Z",
+      "contentSha256": "7904457b9aeca49a773d13b57b5a2b1ae63f2fff966714a3e2482a92799f86cc",
+      "baselineRef": {
+        "id": "baseline-pm-line-counter",
+        "projectId": "line-counter",
+        "revision": 1,
+        "sha256": "12e116bf81cfaede9b19397707c087c71e1777ad6c3e97e03bdfc92200c6a033",
+        "schemaVersion": 1,
+        "mode": "live"
+      },
+      "baseline": {
+        "schemaVersion": 1,
+        "id": "baseline-pm-line-counter",
+        "projectId": "line-counter",
+        "revision": 1,
+        "parentId": null,
+        "mode": "live",
+        "approvedPrd": {
+          "id": "prd-count",
+          "kind": "prd",
+          "revision": 1,
+          "hash": "d4237146c0f5798ad69670e482ac2033ea174badc31e11d1074c745b187417e8"
+        },
+        "approval": {
+          "actor": "测试评审人",
+          "scope": "proposal",
+          "issueIds": [],
+          "feedback": "",
+          "gateKind": "approval",
+          "targetRevision": 1,
+          "decidedAt": "2026-11-24T00:00:00.000Z",
+          "id": "approval-count",
+          "action": "approve",
+          "targetId": "proposal-count",
+          "targetHash": "5e2f4a983ca91379c9219a7a46d86bdc44c28a92b944bed89f7c192641574147"
+        },
+        "confirmation": {
+          "actor": "测试评审人",
+          "scope": "proposal",
+          "issueIds": [],
+          "feedback": "",
+          "gateKind": "confirmation",
+          "targetRevision": 1,
+          "decidedAt": "2026-11-24T00:00:00.000Z",
+          "id": "confirm-count",
+          "action": "confirm",
+          "targetId": "prd-count",
+          "targetHash": "d4237146c0f5798ad69670e482ac2033ea174badc31e11d1074c745b187417e8"
+        },
+        "prd": {
+          "title": "非空行统计",
+          "revision": 1,
+          "proposal": {
+            "id": "proposal-count",
+            "kind": "proposal",
+            "revision": 1,
+            "hash": "5e2f4a983ca91379c9219a7a46d86bdc44c28a92b944bed89f7c192641574147"
+          },
+          "approvalId": "approval-count",
+          "sections": {
+            "goals": [
+              "统计文本文件非空行数"
+            ],
+            "summary": "提供命令行统计工具",
+            "approach": [
+              "读取文件并计数"
+            ],
+            "scope": [
+              {
+                "key": "count",
+                "kind": "functional",
+                "title": "统计非空行",
+                "decision": "输入文件路径，输出非空行数",
+                "issueIds": [
+                  "issue-count"
+                ]
+              },
+              {
+                "key": "format-options",
+                "kind": "functional",
+                "title": "输出格式",
+                "decision": "成功时只输出十进制行数和换行",
+                "issueIds": [
+                  "issue-format-options"
+                ]
+              },
+              {
+                "key": "bounded-memory",
+                "kind": "nonfunctional",
+                "title": "内存上限",
+                "decision": "流式计数时峰值内存不超过 32 MiB",
+                "issueIds": [
+                  "issue-bounded-memory"
+                ]
+              }
+            ],
+            "outOfScope": [],
+            "constraints": [
+              "仅本地文件"
+            ],
+            "tradeoffs": [],
+            "risks": [],
+            "unresolved": [
+              "后续格式扩展是否需要 JSON（当前范围外）"
+            ],
+            "businessRules": [],
+            "externalDependencies": []
+          },
+          "background": "需要快速统计文本",
+          "scenarios": [
+            "在终端查看文件行数"
+          ],
+          "changes": [
+            "首次建立"
+          ],
+          "requirements": [
+            {
+              "id": "FR-count",
+              "scopeKey": "count",
+              "kind": "functional",
+              "title": "统计非空行",
+              "description": "输入文件路径，输出非空行数",
+              "value": "减少人工计数",
+              "priority": "must",
+              "dependencies": [],
+              "constraints": [
+                "空白字符组成的行不计数"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-count-normal",
+                  "given": "文件含两行文本和一行空白",
+                  "when": "执行计数命令",
+                  "then": "输出 2"
+                },
+                {
+                  "id": "AC-count-missing",
+                  "given": "文件不存在",
+                  "when": "执行计数命令",
+                  "then": "报告文件不存在并非零退出"
+                }
+              ]
+            },
+            {
+              "id": "FR-format-options",
+              "scopeKey": "format-options",
+              "kind": "functional",
+              "priority": "should",
+              "title": "输出格式",
+              "description": "成功时只输出十进制行数和换行",
+              "value": "便于脚本消费",
+              "dependencies": [
+                "FR-count"
+              ],
+              "constraints": [
+                "成功输出不带说明前缀"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-format-zero",
+                  "given": "输入为空文件",
+                  "when": "执行计数",
+                  "then": "标准输出为 0 和换行"
+                }
+              ]
+            },
+            {
+              "id": "NFR-bounded-memory",
+              "scopeKey": "bounded-memory",
+              "kind": "nonfunctional",
+              "priority": "could",
+              "title": "内存上限",
+              "description": "流式计数时峰值内存不超过 32 MiB",
+              "value": "适应受限环境",
+              "dependencies": [],
+              "constraints": [
+                "不能一次加载完整文件"
+              ],
+              "state": "baselined",
+              "acceptance": [
+                {
+                  "id": "AC-memory-limit",
+                  "given": "10 MiB 的 UTF-8 文件",
+                  "when": "采集入口和计数模块的峰值内存",
+                  "then": "峰值不超过 32 MiB"
+                }
+              ]
+            }
+          ],
+          "trace": [
+            {
+              "ideaAndDocumentIds": [
+                "idea-count"
+              ],
+              "issueIds": [
+                "issue-count"
+              ],
+              "proposal": {
+                "id": "proposal-count",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "5e2f4a983ca91379c9219a7a46d86bdc44c28a92b944bed89f7c192641574147"
+              },
+              "scopeKey": "count",
+              "approvalId": "approval-count",
+              "requirementId": "FR-count",
+              "acceptanceIds": [
+                "AC-count-normal",
+                "AC-count-missing"
+              ]
+            },
+            {
+              "ideaAndDocumentIds": [
+                "idea-count"
+              ],
+              "issueIds": [
+                "issue-format-options"
+              ],
+              "proposal": {
+                "id": "proposal-count",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "5e2f4a983ca91379c9219a7a46d86bdc44c28a92b944bed89f7c192641574147"
+              },
+              "scopeKey": "format-options",
+              "approvalId": "approval-count",
+              "requirementId": "FR-format-options",
+              "acceptanceIds": [
+                "AC-format-zero"
+              ]
+            },
+            {
+              "ideaAndDocumentIds": [
+                "idea-count"
+              ],
+              "issueIds": [
+                "issue-bounded-memory"
+              ],
+              "proposal": {
+                "id": "proposal-count",
+                "kind": "proposal",
+                "revision": 1,
+                "hash": "5e2f4a983ca91379c9219a7a46d86bdc44c28a92b944bed89f7c192641574147"
+              },
+              "scopeKey": "bounded-memory",
+              "approvalId": "approval-count",
+              "requirementId": "NFR-bounded-memory",
+              "acceptanceIds": [
+                "AC-memory-limit"
+              ]
+            }
+          ]
+        },
+        "sha256": "12e116bf81cfaede9b19397707c087c71e1777ad6c3e97e03bdfc92200c6a033"
+      },
+      "workspace": {
+        "workspaceId": "ws-33baa82a",
+        "name": "PM input target",
+        "sourceCommit": "46fafad7202ded4d627e52ab527b8ba1484d4445",
+        "existingPaths": [
+          "src/service.ts"
+        ],
+        "entryPoints": [],
+        "manifests": [],
+        "dependencies": [],
+        "testCommands": [
+          {
+            "directory": ".",
+            "command": "echo Verification gate passed",
+            "source": "workspace.verifyCommand（配置值，尚未执行）"
+          }
+        ],
+        "proposedPaths": [],
+        "notes": [
+          "清单及依赖取自目标提交，未提交或未跟踪文件不计入该版本。",
+          "输入阶段尚未推导拟新增路径；生成后的拟建工件见设计正文 modules.files 中 action=create 的条目。"
+        ]
+      },
+      "reviewEligible": true,
+      "blockers": []
+    },
+    "body": {
+      "schemaVersion": 1,
+      "title": "现有统计服务改造",
+      "goal": "统计文本文件非空行数",
+      "inputs": [
+        "UTF-8 文件路径"
+      ],
+      "outputs": [
+        "非空行数；失败时错误消息及非零退出码"
+      ],
+      "modules": [
+        {
+          "id": "entry",
+          "name": "统计服务入口",
+          "layer": "integration",
+          "responsibility": "接收路径，调用计数逻辑并将结果输出；异常转为错误消息",
+          "inputs": [
+            "文件路径"
+          ],
+          "outputs": [
+            "计数结果或错误"
+          ],
+          "requirementIds": [
+            "FR-count",
+            "FR-format-options",
+            "NFR-bounded-memory"
+          ],
+          "dependsOn": [
+            "counter"
+          ],
+          "files": [
+            {
+              "path": "src/service.ts",
+              "action": "modify"
+            }
+          ]
+        },
+        {
+          "id": "counter",
+          "name": "非空行计数",
+          "layer": "backend",
+          "responsibility": "读取 UTF-8 文件，trim 后非空则计数，文件不存在时抛出错误",
+          "inputs": [
+            "路径"
+          ],
+          "outputs": [
+            "非负整数"
+          ],
+          "requirementIds": [
+            "FR-count",
+            "FR-format-options",
+            "NFR-bounded-memory"
+          ],
+          "dependsOn": [],
+          "files": [
+            {
+              "path": "src/count.ts",
+              "action": "create"
+            }
+          ]
+        }
+      ],
+      "interfaces": [
+        {
+          "id": "count-file",
+          "provider": "counter",
+          "consumers": [
+            "entry"
+          ],
+          "kind": "function",
+          "input": "countFile(path: string)",
+          "result": "Promise<number> 非空行数",
+          "failure": "文件不存在或读取失败时抛出带路径的错误；调用方返回非零退出码",
+          "sideEffects": "只读取指定文件，不改动原文件"
+        }
+      ],
+      "dataRules": [
+        "按换行拆分，trim 后长度为零的行不计入"
+      ],
+      "constraints": [
+        "仅本地文件",
+        "空白字符组成的行不计数",
+        "成功输出不带说明前缀",
+        "不能一次加载完整文件"
+      ],
+      "quality": [
+        {
+          "requirementId": "NFR-bounded-memory",
+          "moduleIds": [
+            "entry",
+            "counter"
+          ],
+          "method": "对服务入口和计数逻辑采集峰值内存",
+          "passCondition": "不超过 32 MiB"
+        }
+      ],
+      "decisions": [
+        {
+          "id": "separate-count",
+          "decision": "分离入口与纯计数逻辑",
+          "rationale": "便于命令和服务复用及自动化验证",
+          "alternatives": [
+            "全部写在入口中"
+          ],
+          "requirementIds": [
+            "FR-count",
+            "FR-format-options",
+            "NFR-bounded-memory"
+          ],
+          "evidence": [
+            "FR-count"
+          ]
+        }
+      ],
+      "assumptions": [
+        {
+          "id": "preserve-entry",
+          "text": "保持现有服务入口调用方式",
+          "requirementIds": [
+            "FR-count"
+          ],
+          "evidence": [
+            "src/service.ts"
+          ],
+          "verification": "对原入口调用执行回归"
+        }
+      ],
+      "trace": [
+        {
+          "requirementId": "FR-count",
+          "moduleIds": [
+            "entry",
+            "counter"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-count-normal",
+              "method": "准备：文件含两行文本和一行空白；执行：执行计数命令；对输出和资源记录断言",
+              "expectedEvidence": "输出 2"
+            },
+            {
+              "acceptanceId": "AC-count-missing",
+              "method": "准备：文件不存在；执行：执行计数命令；对输出和资源记录断言",
+              "expectedEvidence": "报告文件不存在并非零退出"
+            }
+          ]
+        },
+        {
+          "requirementId": "FR-format-options",
+          "moduleIds": [
+            "entry",
+            "counter"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-format-zero",
+              "method": "准备：输入为空文件；执行：执行计数；对输出和资源记录断言",
+              "expectedEvidence": "标准输出为 0 和换行"
+            }
+          ]
+        },
+        {
+          "requirementId": "NFR-bounded-memory",
+          "moduleIds": [
+            "entry",
+            "counter"
+          ],
+          "acceptance": [
+            {
+              "acceptanceId": "AC-memory-limit",
+              "method": "准备：10 MiB 的 UTF-8 文件；执行：采集入口和计数模块的峰值内存；对输出和资源记录断言",
+              "expectedEvidence": "峰值不超过 32 MiB"
+            }
+          ]
+        }
+      ],
+      "unresolved": [
+        {
+          "id": "future-format",
+          "question": "后续是否增加 JSON 格式（当前范围外）",
+          "owner": "产品负责人",
+          "requirementIds": [
+            "FR-format-options"
+          ],
+          "blocking": false
+        }
+      ],
+      "designChecks": [
+        {
+          "id": "DC-error-no-partial-output",
+          "source": {
+            "kind": "interface",
+            "id": "count-file"
+          },
+          "rationale": "明确读取失败时调用方行为",
+          "requirementIds": [
+            "FR-count"
+          ],
+          "moduleIds": [
+            "entry",
+            "counter"
+          ],
+          "method": "注入读取失败，核对没有部分统计值",
+          "expectedEvidence": "错误路径和非零退出码，无部分计数输出"
+        },
+        {
+          "id": "DC-shared-counting",
+          "source": {
+            "kind": "decision",
+            "id": "separate-count"
+          },
+          "rationale": "入口与逻辑分离后的契约回归",
+          "requirementIds": [
+            "FR-count",
+            "FR-format-options"
+          ],
+          "moduleIds": [
+            "entry",
+            "counter"
+          ],
+          "method": "用同一输入分别调用入口和计数逻辑",
+          "expectedEvidence": "结果一致，入口仅增加格式化换行"
+        },
+        {
+          "id": "DC-memory-observation",
+          "source": {
+            "kind": "quality",
+            "id": "NFR-bounded-memory"
+          },
+          "rationale": "覆盖跨模块资源观测",
+          "requirementIds": [
+            "NFR-bounded-memory"
+          ],
+          "moduleIds": [
+            "entry",
+            "counter"
+          ],
+          "method": "分别采集入口与内部实现的内存记录",
+          "expectedEvidence": "观测记录关联同一输入及模块"
+        }
+      ]
+    },
+    "contentSha256": "fa78da6ac7d9b1bd78df96512b7548f6e27db756b8304b154c4d2be25328629f",
+    "createdAt": "2026-11-24T06:30:36.141Z",
+    "metadata": {
+      "actor": "Designer",
+      "reason": "PM 输入字段保真联调",
+      "generationId": "generation-4a163bcb-5775-4754-94e8-341ccd5f026e",
+      "resolutions": [],
+      "previousDesign": null,
+      "baselineDiff": null
+    },
+    "reviewMarkdown": "# 现有统计服务改造\n\n## 目标\n统计文本文件非空行数\n\n## 输入\n- UTF-8 文件路径\n\n## 输出\n- 非空行数；失败时错误消息及非零退出码\n\n## 需求\n- FR-01 [FR-count] 输入文件路径，输出非空行数 优先级 must\n- FR-02 [FR-format-options] 成功时只输出十进制行数和换行 优先级 should\n- FR-03 [NFR-bounded-memory] 流式计数时峰值内存不超过 32 MiB 优先级 could\n\n## 模块\n- 统计服务入口: 接收路径，调用计数逻辑并将结果输出；异常转为错误消息；依赖 counter；接口 count-file: countFile(path: string) → Promise<number> 非空行数；失败 文件不存在或读取失败时抛出带路径的错误；调用方返回非零退出码；覆盖 FR-01, FR-02, FR-03 (`src/service.ts`)\n- 非空行计数: 读取 UTF-8 文件，trim 后非空则计数，文件不存在时抛出错误；依赖 无；接口 count-file: countFile(path: string) → Promise<number> 非空行数；失败 文件不存在或读取失败时抛出带路径的错误；调用方返回非零退出码；覆盖 FR-01, FR-02, FR-03 (`src/count.ts`)\n\n## 约束\n- 仅本地文件\n- FR-count: 空白字符组成的行不计数\n- FR-format-options: 成功输出不带说明前缀\n- NFR-bounded-memory: 不能一次加载完整文件\n- 仅本地文件\n- 空白字符组成的行不计数\n- 成功输出不带说明前缀\n- 不能一次加载完整文件\n\n## 领域规则\n- 按换行拆分，trim 后长度为零的行不计入\n\n## 验收\n- AC-01 FR-01 [AC-count-normal] Given 文件含两行文本和一行空白; When 执行计数命令; Then 输出 2; 验证 准备：文件含两行文本和一行空白；执行：执行计数命令；对输出和资源记录断言; 证据 输出 2\n- AC-02 FR-01 [AC-count-missing] Given 文件不存在; When 执行计数命令; Then 报告文件不存在并非零退出; 验证 准备：文件不存在；执行：执行计数命令；对输出和资源记录断言; 证据 报告文件不存在并非零退出\n- AC-03 FR-02 [AC-format-zero] Given 输入为空文件; When 执行计数; Then 标准输出为 0 和换行; 验证 准备：输入为空文件；执行：执行计数；对输出和资源记录断言; 证据 标准输出为 0 和换行\n- AC-04 FR-03 [AC-memory-limit] Given 10 MiB 的 UTF-8 文件; When 采集入口和计数模块的峰值内存; Then 峰值不超过 32 MiB; 验证 准备：10 MiB 的 UTF-8 文件；执行：采集入口和计数模块的峰值内存；对输出和资源记录断言; 证据 峰值不超过 32 MiB\n\n## 假设\n- preserve-entry: 保持现有服务入口调用方式；核验 对原入口调用执行回归\n\n\n## 来源记录\n- 基线 baseline-pm-line-counter / line-counter / v1 / 12e116bf81cfaede9b19397707c087c71e1777ad6c3e97e03bdfc92200c6a033\n- 目标 ws-33baa82a / 46fafad7202ded4d627e52ab527b8ba1484d4445\n- 范围外 无\n\n## modules\n\n```json\n[\n  {\n    \"id\": \"entry\",\n    \"name\": \"统计服务入口\",\n    \"layer\": \"integration\",\n    \"responsibility\": \"接收路径，调用计数逻辑并将结果输出；异常转为错误消息\",\n    \"inputs\": [\n      \"文件路径\"\n    ],\n    \"outputs\": [\n      \"计数结果或错误\"\n    ],\n    \"requirementIds\": [\n      \"FR-count\",\n      \"FR-format-options\",\n      \"NFR-bounded-memory\"\n    ],\n    \"dependsOn\": [\n      \"counter\"\n    ],\n    \"files\": [\n      {\n        \"path\": \"src/service.ts\",\n        \"action\": \"modify\"\n      }\n    ]\n  },\n  {\n    \"id\": \"counter\",\n    \"name\": \"非空行计数\",\n    \"layer\": \"backend\",\n    \"responsibility\": \"读取 UTF-8 文件，trim 后非空则计数，文件不存在时抛出错误\",\n    \"inputs\": [\n      \"路径\"\n    ],\n    \"outputs\": [\n      \"非负整数\"\n    ],\n    \"requirementIds\": [\n      \"FR-count\",\n      \"FR-format-options\",\n      \"NFR-bounded-memory\"\n    ],\n    \"dependsOn\": [],\n    \"files\": [\n      {\n        \"path\": \"src/count.ts\",\n        \"action\": \"create\"\n      }\n    ]\n  }\n]\n```\n\n## interfaces\n\n```json\n[\n  {\n    \"id\": \"count-file\",\n    \"provider\": \"counter\",\n    \"consumers\": [\n      \"entry\"\n    ],\n    \"kind\": \"function\",\n    \"input\": \"countFile(path: string)\",\n    \"result\": \"Promise<number> 非空行数\",\n    \"failure\": \"文件不存在或读取失败时抛出带路径的错误；调用方返回非零退出码\",\n    \"sideEffects\": \"只读取指定文件，不改动原文件\"\n  }\n]\n```\n\n## quality\n\n```json\n[\n  {\n    \"requirementId\": \"NFR-bounded-memory\",\n    \"moduleIds\": [\n      \"entry\",\n      \"counter\"\n    ],\n    \"method\": \"对服务入口和计数逻辑采集峰值内存\",\n    \"passCondition\": \"不超过 32 MiB\"\n  }\n]\n```\n\n## decisions\n\n```json\n[\n  {\n    \"id\": \"separate-count\",\n    \"decision\": \"分离入口与纯计数逻辑\",\n    \"rationale\": \"便于命令和服务复用及自动化验证\",\n    \"alternatives\": [\n      \"全部写在入口中\"\n    ],\n    \"requirementIds\": [\n      \"FR-count\",\n      \"FR-format-options\",\n      \"NFR-bounded-memory\"\n    ],\n    \"evidence\": [\n      \"FR-count\"\n    ]\n  }\n]\n```\n\n## assumptions\n\n```json\n[\n  {\n    \"id\": \"preserve-entry\",\n    \"text\": \"保持现有服务入口调用方式\",\n    \"requirementIds\": [\n      \"FR-count\"\n    ],\n    \"evidence\": [\n      \"src/service.ts\"\n    ],\n    \"verification\": \"对原入口调用执行回归\"\n  }\n]\n```\n\n## trace\n\n```json\n[\n  {\n    \"requirementId\": \"FR-count\",\n    \"moduleIds\": [\n      \"entry\",\n      \"counter\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-count-normal\",\n        \"method\": \"准备：文件含两行文本和一行空白；执行：执行计数命令；对输出和资源记录断言\",\n        \"expectedEvidence\": \"输出 2\"\n      },\n      {\n        \"acceptanceId\": \"AC-count-missing\",\n        \"method\": \"准备：文件不存在；执行：执行计数命令；对输出和资源记录断言\",\n        \"expectedEvidence\": \"报告文件不存在并非零退出\"\n      }\n    ]\n  },\n  {\n    \"requirementId\": \"FR-format-options\",\n    \"moduleIds\": [\n      \"entry\",\n      \"counter\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-format-zero\",\n        \"method\": \"准备：输入为空文件；执行：执行计数；对输出和资源记录断言\",\n        \"expectedEvidence\": \"标准输出为 0 和换行\"\n      }\n    ]\n  },\n  {\n    \"requirementId\": \"NFR-bounded-memory\",\n    \"moduleIds\": [\n      \"entry\",\n      \"counter\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-memory-limit\",\n        \"method\": \"准备：10 MiB 的 UTF-8 文件；执行：采集入口和计数模块的峰值内存；对输出和资源记录断言\",\n        \"expectedEvidence\": \"峰值不超过 32 MiB\"\n      }\n    ]\n  }\n]\n```\n\n## unresolved\n\n```json\n[\n  {\n    \"id\": \"future-format\",\n    \"question\": \"后续是否增加 JSON 格式（当前范围外）\",\n    \"owner\": \"产品负责人\",\n    \"requirementIds\": [\n      \"FR-format-options\"\n    ],\n    \"blocking\": false\n  }\n]\n```\n\n## 设计补充检查（独立于 HAMA 原始 AC）\n\n```json\n[\n  {\n    \"id\": \"DC-error-no-partial-output\",\n    \"source\": {\n      \"kind\": \"interface\",\n      \"id\": \"count-file\"\n    },\n    \"rationale\": \"明确读取失败时调用方行为\",\n    \"requirementIds\": [\n      \"FR-count\"\n    ],\n    \"moduleIds\": [\n      \"entry\",\n      \"counter\"\n    ],\n    \"method\": \"注入读取失败，核对没有部分统计值\",\n    \"expectedEvidence\": \"错误路径和非零退出码，无部分计数输出\"\n  },\n  {\n    \"id\": \"DC-shared-counting\",\n    \"source\": {\n      \"kind\": \"decision\",\n      \"id\": \"separate-count\"\n    },\n    \"rationale\": \"入口与逻辑分离后的契约回归\",\n    \"requirementIds\": [\n      \"FR-count\",\n      \"FR-format-options\"\n    ],\n    \"moduleIds\": [\n      \"entry\",\n      \"counter\"\n    ],\n    \"method\": \"用同一输入分别调用入口和计数逻辑\",\n    \"expectedEvidence\": \"结果一致，入口仅增加格式化换行\"\n  },\n  {\n    \"id\": \"DC-memory-observation\",\n    \"source\": {\n      \"kind\": \"quality\",\n      \"id\": \"NFR-bounded-memory\"\n    },\n    \"rationale\": \"覆盖跨模块资源观测\",\n    \"requirementIds\": [\n      \"NFR-bounded-memory\"\n    ],\n    \"moduleIds\": [\n      \"entry\",\n      \"counter\"\n    ],\n    \"method\": \"分别采集入口与内部实现的内存记录\",\n    \"expectedEvidence\": \"观测记录关联同一输入及模块\"\n  }\n]\n```",
+    "pmMarkdown": "# 现有统计服务改造\n\n## 目标\n统计文本文件非空行数\n\n## 输入\n- UTF-8 文件路径\n\n## 输出\n- 非空行数；失败时错误消息及非零退出码\n\n## 需求\n- FR-01 [FR-count] 输入文件路径，输出非空行数 优先级 must\n- FR-02 [FR-format-options] 成功时只输出十进制行数和换行 优先级 should\n- FR-03 [NFR-bounded-memory] 流式计数时峰值内存不超过 32 MiB 优先级 could\n\n## 模块\n- 统计服务入口: 接收路径，调用计数逻辑并将结果输出；异常转为错误消息；依赖 counter；接口 count-file: countFile(path: string) → Promise<number> 非空行数；失败 文件不存在或读取失败时抛出带路径的错误；调用方返回非零退出码；覆盖 FR-01, FR-02, FR-03 (`src/service.ts`)\n- 非空行计数: 读取 UTF-8 文件，trim 后非空则计数，文件不存在时抛出错误；依赖 无；接口 count-file: countFile(path: string) → Promise<number> 非空行数；失败 文件不存在或读取失败时抛出带路径的错误；调用方返回非零退出码；覆盖 FR-01, FR-02, FR-03 (`src/count.ts`)\n\n## 约束\n- 仅本地文件\n- FR-count: 空白字符组成的行不计数\n- FR-format-options: 成功输出不带说明前缀\n- NFR-bounded-memory: 不能一次加载完整文件\n- 仅本地文件\n- 空白字符组成的行不计数\n- 成功输出不带说明前缀\n- 不能一次加载完整文件\n\n## 领域规则\n- 按换行拆分，trim 后长度为零的行不计入\n\n## 验收\n- AC-01 FR-01 [AC-count-normal] Given 文件含两行文本和一行空白; When 执行计数命令; Then 输出 2; 验证 准备：文件含两行文本和一行空白；执行：执行计数命令；对输出和资源记录断言; 证据 输出 2\n- AC-02 FR-01 [AC-count-missing] Given 文件不存在; When 执行计数命令; Then 报告文件不存在并非零退出; 验证 准备：文件不存在；执行：执行计数命令；对输出和资源记录断言; 证据 报告文件不存在并非零退出\n- AC-03 FR-02 [AC-format-zero] Given 输入为空文件; When 执行计数; Then 标准输出为 0 和换行; 验证 准备：输入为空文件；执行：执行计数；对输出和资源记录断言; 证据 标准输出为 0 和换行\n- AC-04 FR-03 [AC-memory-limit] Given 10 MiB 的 UTF-8 文件; When 采集入口和计数模块的峰值内存; Then 峰值不超过 32 MiB; 验证 准备：10 MiB 的 UTF-8 文件；执行：采集入口和计数模块的峰值内存；对输出和资源记录断言; 证据 峰值不超过 32 MiB\n\n## 假设\n- preserve-entry: 保持现有服务入口调用方式；核验 对原入口调用执行回归\n",
+    "diagnostics": [],
+    "decisions": [
+      {
+        "decisionId": "894d3b46-4db2-40f8-8357-d631c0898184",
+        "designId": "design-80cc6d64-a40c-4d47-b6ed-6e7a5be6e9c2",
+        "revision": 1,
+        "expectedHash": "fa78da6ac7d9b1bd78df96512b7548f6e27db756b8304b154c4d2be25328629f",
+        "actor": "Reviewer",
+        "action": "submit",
+        "scope": "technical",
+        "findings": [],
+        "decidedAt": "2026-11-24T06:30:36.160Z"
+      },
+      {
+        "decisionId": "92f6a705-7557-40f0-8d6f-a8fe5c2640f7",
+        "designId": "design-80cc6d64-a40c-4d47-b6ed-6e7a5be6e9c2",
+        "revision": 1,
+        "expectedHash": "fa78da6ac7d9b1bd78df96512b7548f6e27db756b8304b154c4d2be25328629f",
+        "actor": "Reviewer",
+        "action": "confirm",
+        "scope": "technical",
+        "findings": [],
+        "decidedAt": "2026-11-24T06:30:36.163Z"
+      }
+    ],
+    "handoffs": [],
+    "diff": {
+      "changedFields": [
+        "schemaVersion",
+        "title",
+        "goal",
+        "inputs",
+        "outputs",
+        "modules",
+        "interfaces",
+        "dataRules",
+        "constraints",
+        "quality",
+        "decisions",
+        "assumptions",
+        "trace",
+        "unresolved",
+        "designChecks"
+      ],
+      "changes": [
+        {
+          "field": "schemaVersion",
+          "before": null,
+          "after": 1
+        },
+        {
+          "field": "title",
+          "before": null,
+          "after": "现有统计服务改造"
+        },
+        {
+          "field": "goal",
+          "before": null,
+          "after": "统计文本文件非空行数"
+        },
+        {
+          "field": "inputs",
+          "before": null,
+          "after": [
+            "UTF-8 文件路径"
+          ]
+        },
+        {
+          "field": "outputs",
+          "before": null,
+          "after": [
+            "非空行数；失败时错误消息及非零退出码"
+          ]
+        },
+        {
+          "field": "modules",
+          "before": null,
+          "after": [
+            {
+              "id": "entry",
+              "name": "统计服务入口",
+              "layer": "integration",
+              "responsibility": "接收路径，调用计数逻辑并将结果输出；异常转为错误消息",
+              "inputs": [
+                "文件路径"
+              ],
+              "outputs": [
+                "计数结果或错误"
+              ],
+              "requirementIds": [
+                "FR-count",
+                "FR-format-options",
+                "NFR-bounded-memory"
+              ],
+              "dependsOn": [
+                "counter"
+              ],
+              "files": [
+                {
+                  "path": "src/service.ts",
+                  "action": "modify"
+                }
+              ]
+            },
+            {
+              "id": "counter",
+              "name": "非空行计数",
+              "layer": "backend",
+              "responsibility": "读取 UTF-8 文件，trim 后非空则计数，文件不存在时抛出错误",
+              "inputs": [
+                "路径"
+              ],
+              "outputs": [
+                "非负整数"
+              ],
+              "requirementIds": [
+                "FR-count",
+                "FR-format-options",
+                "NFR-bounded-memory"
+              ],
+              "dependsOn": [],
+              "files": [
+                {
+                  "path": "src/count.ts",
+                  "action": "create"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "field": "interfaces",
+          "before": null,
+          "after": [
+            {
+              "id": "count-file",
+              "provider": "counter",
+              "consumers": [
+                "entry"
+              ],
+              "kind": "function",
+              "input": "countFile(path: string)",
+              "result": "Promise<number> 非空行数",
+              "failure": "文件不存在或读取失败时抛出带路径的错误；调用方返回非零退出码",
+              "sideEffects": "只读取指定文件，不改动原文件"
+            }
+          ]
+        },
+        {
+          "field": "dataRules",
+          "before": null,
+          "after": [
+            "按换行拆分，trim 后长度为零的行不计入"
+          ]
+        },
+        {
+          "field": "constraints",
+          "before": null,
+          "after": [
+            "仅本地文件",
+            "空白字符组成的行不计数",
+            "成功输出不带说明前缀",
+            "不能一次加载完整文件"
+          ]
+        },
+        {
+          "field": "quality",
+          "before": null,
+          "after": [
+            {
+              "requirementId": "NFR-bounded-memory",
+              "moduleIds": [
+                "entry",
+                "counter"
+              ],
+              "method": "对服务入口和计数逻辑采集峰值内存",
+              "passCondition": "不超过 32 MiB"
+            }
+          ]
+        },
+        {
+          "field": "decisions",
+          "before": null,
+          "after": [
+            {
+              "id": "separate-count",
+              "decision": "分离入口与纯计数逻辑",
+              "rationale": "便于命令和服务复用及自动化验证",
+              "alternatives": [
+                "全部写在入口中"
+              ],
+              "requirementIds": [
+                "FR-count",
+                "FR-format-options",
+                "NFR-bounded-memory"
+              ],
+              "evidence": [
+                "FR-count"
+              ]
+            }
+          ]
+        },
+        {
+          "field": "assumptions",
+          "before": null,
+          "after": [
+            {
+              "id": "preserve-entry",
+              "text": "保持现有服务入口调用方式",
+              "requirementIds": [
+                "FR-count"
+              ],
+              "evidence": [
+                "src/service.ts"
+              ],
+              "verification": "对原入口调用执行回归"
+            }
+          ]
+        },
+        {
+          "field": "trace",
+          "before": null,
+          "after": [
+            {
+              "requirementId": "FR-count",
+              "moduleIds": [
+                "entry",
+                "counter"
+              ],
+              "acceptance": [
+                {
+                  "acceptanceId": "AC-count-normal",
+                  "method": "准备：文件含两行文本和一行空白；执行：执行计数命令；对输出和资源记录断言",
+                  "expectedEvidence": "输出 2"
+                },
+                {
+                  "acceptanceId": "AC-count-missing",
+                  "method": "准备：文件不存在；执行：执行计数命令；对输出和资源记录断言",
+                  "expectedEvidence": "报告文件不存在并非零退出"
+                }
+              ]
+            },
+            {
+              "requirementId": "FR-format-options",
+              "moduleIds": [
+                "entry",
+                "counter"
+              ],
+              "acceptance": [
+                {
+                  "acceptanceId": "AC-format-zero",
+                  "method": "准备：输入为空文件；执行：执行计数；对输出和资源记录断言",
+                  "expectedEvidence": "标准输出为 0 和换行"
+                }
+              ]
+            },
+            {
+              "requirementId": "NFR-bounded-memory",
+              "moduleIds": [
+                "entry",
+                "counter"
+              ],
+              "acceptance": [
+                {
+                  "acceptanceId": "AC-memory-limit",
+                  "method": "准备：10 MiB 的 UTF-8 文件；执行：采集入口和计数模块的峰值内存；对输出和资源记录断言",
+                  "expectedEvidence": "峰值不超过 32 MiB"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "field": "unresolved",
+          "before": null,
+          "after": [
+            {
+              "id": "future-format",
+              "question": "后续是否增加 JSON 格式（当前范围外）",
+              "owner": "产品负责人",
+              "requirementIds": [
+                "FR-format-options"
+              ],
+              "blocking": false
+            }
+          ]
+        },
+        {
+          "field": "designChecks",
+          "before": null,
+          "after": [
+            {
+              "id": "DC-error-no-partial-output",
+              "source": {
+                "kind": "interface",
+                "id": "count-file"
+              },
+              "rationale": "明确读取失败时调用方行为",
+              "requirementIds": [
+                "FR-count"
+              ],
+              "moduleIds": [
+                "entry",
+                "counter"
+              ],
+              "method": "注入读取失败，核对没有部分统计值",
+              "expectedEvidence": "错误路径和非零退出码，无部分计数输出"
+            },
+            {
+              "id": "DC-shared-counting",
+              "source": {
+                "kind": "decision",
+                "id": "separate-count"
+              },
+              "rationale": "入口与逻辑分离后的契约回归",
+              "requirementIds": [
+                "FR-count",
+                "FR-format-options"
+              ],
+              "moduleIds": [
+                "entry",
+                "counter"
+              ],
+              "method": "用同一输入分别调用入口和计数逻辑",
+              "expectedEvidence": "结果一致，入口仅增加格式化换行"
+            },
+            {
+              "id": "DC-memory-observation",
+              "source": {
+                "kind": "quality",
+                "id": "NFR-bounded-memory"
+              },
+              "rationale": "覆盖跨模块资源观测",
+              "requirementIds": [
+                "NFR-bounded-memory"
+              ],
+              "moduleIds": [
+                "entry",
+                "counter"
+              ],
+              "method": "分别采集入口与内部实现的内存记录",
+              "expectedEvidence": "观测记录关联同一输入及模块"
+            }
+          ]
+        }
+      ],
+      "addedFiles": [
+        "src/service.ts",
+        "src/count.ts"
+      ],
+      "removedFiles": [],
+      "targetChanged": false
+    }
+  },
+  "projection": {
+    "schemaVersion": 1,
+    "designRef": {
+      "designId": "design-80cc6d64-a40c-4d47-b6ed-6e7a5be6e9c2",
+      "revision": 1,
+      "contentSha256": "fa78da6ac7d9b1bd78df96512b7548f6e27db756b8304b154c4d2be25328629f",
+      "workspaceId": "ws-33baa82a",
+      "sourceCommit": "46fafad7202ded4d627e52ab527b8ba1484d4445"
+    },
+    "goalSpec": {
+      "rawMarkdown": "# 现有统计服务改造\n\n## 目标\n统计文本文件非空行数\n\n## 输入\n- UTF-8 文件路径\n\n## 输出\n- 非空行数；失败时错误消息及非零退出码\n\n## 需求\n- FR-01 [FR-count] 输入文件路径，输出非空行数 优先级 must\n- FR-02 [FR-format-options] 成功时只输出十进制行数和换行 优先级 should\n- FR-03 [NFR-bounded-memory] 流式计数时峰值内存不超过 32 MiB 优先级 could\n\n## 模块\n- 统计服务入口: 接收路径，调用计数逻辑并将结果输出；异常转为错误消息；依赖 counter；接口 count-file: countFile(path: string) → Promise<number> 非空行数；失败 文件不存在或读取失败时抛出带路径的错误；调用方返回非零退出码；覆盖 FR-01, FR-02, FR-03 (`src/service.ts`)\n- 非空行计数: 读取 UTF-8 文件，trim 后非空则计数，文件不存在时抛出错误；依赖 无；接口 count-file: countFile(path: string) → Promise<number> 非空行数；失败 文件不存在或读取失败时抛出带路径的错误；调用方返回非零退出码；覆盖 FR-01, FR-02, FR-03 (`src/count.ts`)\n\n## 约束\n- 仅本地文件\n- FR-count: 空白字符组成的行不计数\n- FR-format-options: 成功输出不带说明前缀\n- NFR-bounded-memory: 不能一次加载完整文件\n- 仅本地文件\n- 空白字符组成的行不计数\n- 成功输出不带说明前缀\n- 不能一次加载完整文件\n\n## 领域规则\n- 按换行拆分，trim 后长度为零的行不计入\n\n## 验收\n- AC-01 FR-01 [AC-count-normal] Given 文件含两行文本和一行空白; When 执行计数命令; Then 输出 2; 验证 准备：文件含两行文本和一行空白；执行：执行计数命令；对输出和资源记录断言; 证据 输出 2\n- AC-02 FR-01 [AC-count-missing] Given 文件不存在; When 执行计数命令; Then 报告文件不存在并非零退出; 验证 准备：文件不存在；执行：执行计数命令；对输出和资源记录断言; 证据 报告文件不存在并非零退出\n- AC-03 FR-02 [AC-format-zero] Given 输入为空文件; When 执行计数; Then 标准输出为 0 和换行; 验证 准备：输入为空文件；执行：执行计数；对输出和资源记录断言; 证据 标准输出为 0 和换行\n- AC-04 FR-03 [AC-memory-limit] Given 10 MiB 的 UTF-8 文件; When 采集入口和计数模块的峰值内存; Then 峰值不超过 32 MiB; 验证 准备：10 MiB 的 UTF-8 文件；执行：采集入口和计数模块的峰值内存；对输出和资源记录断言; 证据 峰值不超过 32 MiB\n\n## 假设\n- preserve-entry: 保持现有服务入口调用方式；核验 对原入口调用执行回归\n\n\n## 来源记录\n- 基线 baseline-pm-line-counter / line-counter / v1 / 12e116bf81cfaede9b19397707c087c71e1777ad6c3e97e03bdfc92200c6a033\n- 目标 ws-33baa82a / 46fafad7202ded4d627e52ab527b8ba1484d4445\n- 范围外 无\n\n## modules\n\n```json\n[\n  {\n    \"id\": \"entry\",\n    \"name\": \"统计服务入口\",\n    \"layer\": \"integration\",\n    \"responsibility\": \"接收路径，调用计数逻辑并将结果输出；异常转为错误消息\",\n    \"inputs\": [\n      \"文件路径\"\n    ],\n    \"outputs\": [\n      \"计数结果或错误\"\n    ],\n    \"requirementIds\": [\n      \"FR-count\",\n      \"FR-format-options\",\n      \"NFR-bounded-memory\"\n    ],\n    \"dependsOn\": [\n      \"counter\"\n    ],\n    \"files\": [\n      {\n        \"path\": \"src/service.ts\",\n        \"action\": \"modify\"\n      }\n    ]\n  },\n  {\n    \"id\": \"counter\",\n    \"name\": \"非空行计数\",\n    \"layer\": \"backend\",\n    \"responsibility\": \"读取 UTF-8 文件，trim 后非空则计数，文件不存在时抛出错误\",\n    \"inputs\": [\n      \"路径\"\n    ],\n    \"outputs\": [\n      \"非负整数\"\n    ],\n    \"requirementIds\": [\n      \"FR-count\",\n      \"FR-format-options\",\n      \"NFR-bounded-memory\"\n    ],\n    \"dependsOn\": [],\n    \"files\": [\n      {\n        \"path\": \"src/count.ts\",\n        \"action\": \"create\"\n      }\n    ]\n  }\n]\n```\n\n## interfaces\n\n```json\n[\n  {\n    \"id\": \"count-file\",\n    \"provider\": \"counter\",\n    \"consumers\": [\n      \"entry\"\n    ],\n    \"kind\": \"function\",\n    \"input\": \"countFile(path: string)\",\n    \"result\": \"Promise<number> 非空行数\",\n    \"failure\": \"文件不存在或读取失败时抛出带路径的错误；调用方返回非零退出码\",\n    \"sideEffects\": \"只读取指定文件，不改动原文件\"\n  }\n]\n```\n\n## quality\n\n```json\n[\n  {\n    \"requirementId\": \"NFR-bounded-memory\",\n    \"moduleIds\": [\n      \"entry\",\n      \"counter\"\n    ],\n    \"method\": \"对服务入口和计数逻辑采集峰值内存\",\n    \"passCondition\": \"不超过 32 MiB\"\n  }\n]\n```\n\n## decisions\n\n```json\n[\n  {\n    \"id\": \"separate-count\",\n    \"decision\": \"分离入口与纯计数逻辑\",\n    \"rationale\": \"便于命令和服务复用及自动化验证\",\n    \"alternatives\": [\n      \"全部写在入口中\"\n    ],\n    \"requirementIds\": [\n      \"FR-count\",\n      \"FR-format-options\",\n      \"NFR-bounded-memory\"\n    ],\n    \"evidence\": [\n      \"FR-count\"\n    ]\n  }\n]\n```\n\n## assumptions\n\n```json\n[\n  {\n    \"id\": \"preserve-entry\",\n    \"text\": \"保持现有服务入口调用方式\",\n    \"requirementIds\": [\n      \"FR-count\"\n    ],\n    \"evidence\": [\n      \"src/service.ts\"\n    ],\n    \"verification\": \"对原入口调用执行回归\"\n  }\n]\n```\n\n## trace\n\n```json\n[\n  {\n    \"requirementId\": \"FR-count\",\n    \"moduleIds\": [\n      \"entry\",\n      \"counter\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-count-normal\",\n        \"method\": \"准备：文件含两行文本和一行空白；执行：执行计数命令；对输出和资源记录断言\",\n        \"expectedEvidence\": \"输出 2\"\n      },\n      {\n        \"acceptanceId\": \"AC-count-missing\",\n        \"method\": \"准备：文件不存在；执行：执行计数命令；对输出和资源记录断言\",\n        \"expectedEvidence\": \"报告文件不存在并非零退出\"\n      }\n    ]\n  },\n  {\n    \"requirementId\": \"FR-format-options\",\n    \"moduleIds\": [\n      \"entry\",\n      \"counter\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-format-zero\",\n        \"method\": \"准备：输入为空文件；执行：执行计数；对输出和资源记录断言\",\n        \"expectedEvidence\": \"标准输出为 0 和换行\"\n      }\n    ]\n  },\n  {\n    \"requirementId\": \"NFR-bounded-memory\",\n    \"moduleIds\": [\n      \"entry\",\n      \"counter\"\n    ],\n    \"acceptance\": [\n      {\n        \"acceptanceId\": \"AC-memory-limit\",\n        \"method\": \"准备：10 MiB 的 UTF-8 文件；执行：采集入口和计数模块的峰值内存；对输出和资源记录断言\",\n        \"expectedEvidence\": \"峰值不超过 32 MiB\"\n      }\n    ]\n  }\n]\n```\n\n## unresolved\n\n```json\n[\n  {\n    \"id\": \"future-format\",\n    \"question\": \"后续是否增加 JSON 格式（当前范围外）\",\n    \"owner\": \"产品负责人\",\n    \"requirementIds\": [\n      \"FR-format-options\"\n    ],\n    \"blocking\": false\n  }\n]\n```\n\n## 设计补充检查（独立于 HAMA 原始 AC）\n\n```json\n[\n  {\n    \"id\": \"DC-error-no-partial-output\",\n    \"source\": {\n      \"kind\": \"interface\",\n      \"id\": \"count-file\"\n    },\n    \"rationale\": \"明确读取失败时调用方行为\",\n    \"requirementIds\": [\n      \"FR-count\"\n    ],\n    \"moduleIds\": [\n      \"entry\",\n      \"counter\"\n    ],\n    \"method\": \"注入读取失败，核对没有部分统计值\",\n    \"expectedEvidence\": \"错误路径和非零退出码，无部分计数输出\"\n  },\n  {\n    \"id\": \"DC-shared-counting\",\n    \"source\": {\n      \"kind\": \"decision\",\n      \"id\": \"separate-count\"\n    },\n    \"rationale\": \"入口与逻辑分离后的契约回归\",\n    \"requirementIds\": [\n      \"FR-count\",\n      \"FR-format-options\"\n    ],\n    \"moduleIds\": [\n      \"entry\",\n      \"counter\"\n    ],\n    \"method\": \"用同一输入分别调用入口和计数逻辑\",\n    \"expectedEvidence\": \"结果一致，入口仅增加格式化换行\"\n  },\n  {\n    \"id\": \"DC-memory-observation\",\n    \"source\": {\n      \"kind\": \"quality\",\n      \"id\": \"NFR-bounded-memory\"\n    },\n    \"rationale\": \"覆盖跨模块资源观测\",\n    \"requirementIds\": [\n      \"NFR-bounded-memory\"\n    ],\n    \"moduleIds\": [\n      \"entry\",\n      \"counter\"\n    ],\n    \"method\": \"分别采集入口与内部实现的内存记录\",\n    \"expectedEvidence\": \"观测记录关联同一输入及模块\"\n  }\n]\n```",
+      "title": "现有统计服务改造",
+      "goal": "统计文本文件非空行数",
+      "requirementsBaseline": {
+        "id": "baseline-pm-line-counter",
+        "projectId": "line-counter",
+        "revision": 1,
+        "sha256": "12e116bf81cfaede9b19397707c087c71e1777ad6c3e97e03bdfc92200c6a033"
+      },
+      "inputs": [
+        "UTF-8 文件路径"
+      ],
+      "outputs": [
+        "非空行数；失败时错误消息及非零退出码"
+      ],
+      "constraints": [
+        "仅本地文件",
+        "空白字符组成的行不计数",
+        "成功输出不带说明前缀",
+        "不能一次加载完整文件"
+      ],
+      "domainRules": [
+        "按换行拆分，trim 后长度为零的行不计入"
+      ],
+      "assumptions": [
+        {
+          "id": "hama-unresolved-1",
+          "text": "后续格式扩展是否需要 JSON（当前范围外）",
+          "source": "suggested",
+          "rationale": "HAMA 基线未决事项；来源 baseline-pm-line-counter / v1 / 12e116bf81cfaede9b19397707c087c71e1777ad6c3e97e03bdfc92200c6a033"
+        },
+        {
+          "id": "design-assumption-preserve-entry",
+          "text": "保持现有服务入口调用方式",
+          "source": "doc",
+          "rationale": "设计假设 preserve-entry；需求 FR-count；证据 src/service.ts；核验 对原入口调用执行回归"
+        },
+        {
+          "id": "design-unresolved-future-format",
+          "text": "后续是否增加 JSON 格式（当前范围外）",
+          "source": "suggested",
+          "rationale": "设计未决项；责任人 产品负责人；需求 FR-format-options"
+        }
+      ],
+      "requirements": [
+        {
+          "id": "FR-count",
+          "code": "FR-count",
+          "title": "统计非空行",
+          "description": "输入文件路径，输出非空行数",
+          "priority": "must",
+          "verifyHint": "[AC-count-normal] 前提：文件含两行文本和一行空白。操作：执行计数命令。预期：输出 2。 验证：准备：文件含两行文本和一行空白；执行：执行计数命令；对输出和资源记录断言。证据：输出 2。\n[AC-count-missing] 前提：文件不存在。操作：执行计数命令。预期：报告文件不存在并非零退出。 验证：准备：文件不存在；执行：执行计数命令；对输出和资源记录断言。证据：报告文件不存在并非零退出。\n设计补充检查 [DC-error-no-partial-output]（非原始 AC，来源 interface:count-file）：注入读取失败，核对没有部分统计值；证据 错误路径和非零退出码，无部分计数输出\n设计补充检查 [DC-shared-counting]（非原始 AC，来源 decision:separate-count）：用同一输入分别调用入口和计数逻辑；证据 结果一致，入口仅增加格式化换行"
+        },
+        {
+          "id": "FR-format-options",
+          "code": "FR-format-options",
+          "title": "输出格式",
+          "description": "成功时只输出十进制行数和换行",
+          "priority": "should",
+          "verifyHint": "[AC-format-zero] 前提：输入为空文件。操作：执行计数。预期：标准输出为 0 和换行。 验证：准备：输入为空文件；执行：执行计数；对输出和资源记录断言。证据：标准输出为 0 和换行。\n设计补充检查 [DC-shared-counting]（非原始 AC，来源 decision:separate-count）：用同一输入分别调用入口和计数逻辑；证据 结果一致，入口仅增加格式化换行"
+        },
+        {
+          "id": "NFR-bounded-memory",
+          "code": "NFR-bounded-memory",
+          "title": "内存上限",
+          "description": "流式计数时峰值内存不超过 32 MiB",
+          "priority": "should",
+          "verifyHint": "[AC-memory-limit] 前提：10 MiB 的 UTF-8 文件。操作：采集入口和计数模块的峰值内存。预期：峰值不超过 32 MiB。 验证：准备：10 MiB 的 UTF-8 文件；执行：采集入口和计数模块的峰值内存；对输出和资源记录断言。证据：峰值不超过 32 MiB。\n设计补充检查 [DC-memory-observation]（非原始 AC，来源 quality:NFR-bounded-memory）：分别采集入口与内部实现的内存记录；证据 观测记录关联同一输入及模块"
+        }
+      ],
+      "acceptanceCriteria": [
+        {
+          "id": "AC-count-normal",
+          "code": "AC-count-normal",
+          "requirementId": "FR-count",
+          "label": "前提：文件含两行文本和一行空白。操作：执行计数命令。预期：输出 2。",
+          "verified": false
+        },
+        {
+          "id": "AC-count-missing",
+          "code": "AC-count-missing",
+          "requirementId": "FR-count",
+          "label": "前提：文件不存在。操作：执行计数命令。预期：报告文件不存在并非零退出。",
+          "verified": false
+        },
+        {
+          "id": "AC-format-zero",
+          "code": "AC-format-zero",
+          "requirementId": "FR-format-options",
+          "label": "前提：输入为空文件。操作：执行计数。预期：标准输出为 0 和换行。",
+          "verified": false
+        },
+        {
+          "id": "AC-memory-limit",
+          "code": "AC-memory-limit",
+          "requirementId": "NFR-bounded-memory",
+          "label": "前提：10 MiB 的 UTF-8 文件。操作：采集入口和计数模块的峰值内存。预期：峰值不超过 32 MiB。",
+          "verified": false
+        }
+      ],
+      "modules": [
+        {
+          "name": "统计服务入口",
+          "layer": "integration",
+          "artifacts": [
+            "src/service.ts"
+          ],
+          "relatedFrCodes": [
+            "FR-count",
+            "FR-format-options",
+            "NFR-bounded-memory"
+          ],
+          "summary": "模块 entry：接收路径，调用计数逻辑并将结果输出；异常转为错误消息\n输入：文件路径\n输出：计数结果或错误\n依赖：counter (非空行计数)\n接口 count-file [function]；提供方 counter；消费方 entry；输入 countFile(path: string)；结果 Promise<number> 非空行数；失败 文件不存在或读取失败时抛出带路径的错误；调用方返回非零退出码；副作用 只读取指定文件，不改动原文件\n文件动作：modify src/service.ts\n质量要求 NFR-bounded-memory：对服务入口和计数逻辑采集峰值内存；通过条件 不超过 32 MiB\n设计补充检查 DC-error-no-partial-output（非原始 AC，来源 interface:count-file，关联需求 FR-count）：注入读取失败，核对没有部分统计值；证据 错误路径和非零退出码，无部分计数输出\n设计补充检查 DC-shared-counting（非原始 AC，来源 decision:separate-count，关联需求 FR-count, FR-format-options）：用同一输入分别调用入口和计数逻辑；证据 结果一致，入口仅增加格式化换行\n设计补充检查 DC-memory-observation（非原始 AC，来源 quality:NFR-bounded-memory，关联需求 NFR-bounded-memory）：分别采集入口与内部实现的内存记录；证据 观测记录关联同一输入及模块"
+        },
+        {
+          "name": "非空行计数",
+          "layer": "backend",
+          "artifacts": [
+            "src/count.ts"
+          ],
+          "relatedFrCodes": [
+            "FR-count",
+            "FR-format-options",
+            "NFR-bounded-memory"
+          ],
+          "summary": "模块 counter：读取 UTF-8 文件，trim 后非空则计数，文件不存在时抛出错误\n输入：路径\n输出：非负整数\n依赖：无\n接口 count-file [function]；提供方 counter；消费方 entry；输入 countFile(path: string)；结果 Promise<number> 非空行数；失败 文件不存在或读取失败时抛出带路径的错误；调用方返回非零退出码；副作用 只读取指定文件，不改动原文件\n文件动作：create src/count.ts\n质量要求 NFR-bounded-memory：对服务入口和计数逻辑采集峰值内存；通过条件 不超过 32 MiB\n设计补充检查 DC-error-no-partial-output（非原始 AC，来源 interface:count-file，关联需求 FR-count）：注入读取失败，核对没有部分统计值；证据 错误路径和非零退出码，无部分计数输出\n设计补充检查 DC-shared-counting（非原始 AC，来源 decision:separate-count，关联需求 FR-count, FR-format-options）：用同一输入分别调用入口和计数逻辑；证据 结果一致，入口仅增加格式化换行\n设计补充检查 DC-memory-observation（非原始 AC，来源 quality:NFR-bounded-memory，关联需求 NFR-bounded-memory）：分别采集入口与内部实现的内存记录；证据 观测记录关联同一输入及模块"
+        }
+      ]
+    },
+    "moduleDependencies": [
+      {
+        "moduleId": "entry",
+        "dependsOn": [
+          "counter"
+        ]
+      },
+      {
+        "moduleId": "counter",
+        "dependsOn": []
+      }
+    ],
+    "designChecks": [
+      {
+        "id": "DC-error-no-partial-output",
+        "source": {
+          "kind": "interface",
+          "id": "count-file"
+        },
+        "rationale": "明确读取失败时调用方行为",
+        "requirementIds": [
+          "FR-count"
+        ],
+        "moduleIds": [
+          "entry",
+          "counter"
+        ],
+        "method": "注入读取失败，核对没有部分统计值",
+        "expectedEvidence": "错误路径和非零退出码，无部分计数输出",
+        "origin": "design",
+        "designId": "design-80cc6d64-a40c-4d47-b6ed-6e7a5be6e9c2",
+        "revision": 1,
+        "contentSha256": "fa78da6ac7d9b1bd78df96512b7548f6e27db756b8304b154c4d2be25328629f",
+        "verified": false
+      },
+      {
+        "id": "DC-shared-counting",
+        "source": {
+          "kind": "decision",
+          "id": "separate-count"
+        },
+        "rationale": "入口与逻辑分离后的契约回归",
+        "requirementIds": [
+          "FR-count",
+          "FR-format-options"
+        ],
+        "moduleIds": [
+          "entry",
+          "counter"
+        ],
+        "method": "用同一输入分别调用入口和计数逻辑",
+        "expectedEvidence": "结果一致，入口仅增加格式化换行",
+        "origin": "design",
+        "designId": "design-80cc6d64-a40c-4d47-b6ed-6e7a5be6e9c2",
+        "revision": 1,
+        "contentSha256": "fa78da6ac7d9b1bd78df96512b7548f6e27db756b8304b154c4d2be25328629f",
+        "verified": false
+      },
+      {
+        "id": "DC-memory-observation",
+        "source": {
+          "kind": "quality",
+          "id": "NFR-bounded-memory"
+        },
+        "rationale": "覆盖跨模块资源观测",
+        "requirementIds": [
+          "NFR-bounded-memory"
+        ],
+        "moduleIds": [
+          "entry",
+          "counter"
+        ],
+        "method": "分别采集入口与内部实现的内存记录",
+        "expectedEvidence": "观测记录关联同一输入及模块",
+        "origin": "design",
+        "designId": "design-80cc6d64-a40c-4d47-b6ed-6e7a5be6e9c2",
+        "revision": 1,
+        "contentSha256": "fa78da6ac7d9b1bd78df96512b7548f6e27db756b8304b154c4d2be25328629f",
+        "verified": false
+      }
+    ]
+  }
+}
