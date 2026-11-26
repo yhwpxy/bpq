@@ -1,0 +1,284 @@
+{
+  "runId": "run-be6da209",
+  "status": "succeeded",
+  "mode": "live",
+  "provider": "DeepSeek official API",
+  "model": "deepseek-flash",
+  "startedAt": "2026-11-26T13:31:51.007Z",
+  "finishedAt": "2026-11-26T13:48:59.855Z",
+  "sourceTimeline": [
+    {
+      "sourceCommit": "eec62e40f6d49b73453f687497d679e3342c9f1c",
+      "phase": "intake/discussion and failed integration attempt",
+      "calls": [
+        1,
+        109
+      ]
+    },
+    {
+      "sourceCommit": "d7e4c7fefa6e02b152ef9355ee129304f503da50",
+      "phase": "restarted runtime; official retry-node resumes integration through publication",
+      "calls": [
+        110,
+        115
+      ]
+    }
+  ],
+  "baselineId": "baseline-run-be6da209",
+  "baselineSha256": "1c3d6d5d345b96720edab25f165101c9bfa90ff2bdabb7d68ae804d460f4b6ec",
+  "requirements": 6,
+  "acceptanceCriteria": 33,
+  "proposalRevisions": 1,
+  "reportVerdicts": [
+    "conditional_pass"
+  ],
+  "evaluationVerdicts": [
+    {
+      "dimension": "value",
+      "verdict": "conditional_pass",
+      "findings": [
+        {
+          "severity": "informational",
+          "category": "value",
+          "issueIds": [
+            "issue-toggle-read-status"
+          ]
+        },
+        {
+          "severity": "informational",
+          "category": "value",
+          "issueIds": [
+            "issue-delete-book"
+          ]
+        },
+        {
+          "severity": "condition",
+          "category": "coverage",
+          "issueIds": [
+            "issue-local-persistence"
+          ]
+        },
+        {
+          "severity": "condition",
+          "category": "coverage",
+          "issueIds": [
+            "issue-add-book"
+          ]
+        }
+      ]
+    },
+    {
+      "dimension": "completeness",
+      "verdict": "pass",
+      "findings": [
+        {
+          "severity": "informational",
+          "category": "coverage",
+          "issueIds": [
+            "issue-filter-by-status"
+          ]
+        },
+        {
+          "severity": "informational",
+          "category": "coverage",
+          "issueIds": [
+            "issue-toggle-read-status",
+            "issue-delete-book"
+          ]
+        }
+      ]
+    },
+    {
+      "dimension": "risk",
+      "verdict": "pass",
+      "findings": [
+        {
+          "severity": "informational",
+          "category": "technical",
+          "issueIds": [
+            "issue-local-persistence"
+          ]
+        },
+        {
+          "severity": "informational",
+          "category": "coverage",
+          "issueIds": [
+            "issue-local-persistence"
+          ]
+        },
+        {
+          "severity": "informational",
+          "category": "coverage",
+          "issueIds": [
+            "issue-add-book",
+            "issue-scope-and-ui"
+          ]
+        }
+      ]
+    },
+    {
+      "dimension": "feasibility",
+      "verdict": "conditional_pass",
+      "findings": [
+        {
+          "severity": "condition",
+          "category": "technical",
+          "issueIds": [
+            "issue-local-persistence"
+          ]
+        },
+        {
+          "severity": "condition",
+          "category": "technical",
+          "issueIds": [
+            "issue-local-persistence"
+          ]
+        },
+        {
+          "severity": "informational",
+          "category": "technical",
+          "issueIds": [
+            "issue-scope-and-ui"
+          ]
+        },
+        {
+          "severity": "informational",
+          "category": "technical",
+          "issueIds": [
+            "issue-add-book",
+            "issue-scope-and-ui"
+          ]
+        },
+        {
+          "severity": "informational",
+          "category": "technical",
+          "issueIds": [
+            "issue-local-persistence"
+          ]
+        }
+      ]
+    }
+  ],
+  "reworkByLoop": {
+    "A": 6,
+    "B": 0,
+    "C": 0,
+    "approval": 0
+  },
+  "apiCalls": 115,
+  "apiCompleted": 115,
+  "localValidationCompleted": 108,
+  "localInvalidOutputs": 7,
+  "inputTokens": 777260,
+  "outputTokens": 77210,
+  "failedAttempts": [
+    {
+      "id": "att-3acf5c54",
+      "runId": "run-be6da209",
+      "nodeId": "run-be6da209-integrate",
+      "nodeCode": "integrate",
+      "attemptNumber": 1,
+      "executorKind": "agent",
+      "capabilityId": "native-api",
+      "model": "deepseek-flash",
+      "status": "failed",
+      "exitCode": 1,
+      "durationSec": 43.39,
+      "inputSnapshotJson": "{\"inputContract\":\"读取完整版本化 HAMA-Loop 工件\",\"requirementRefs\":[]}",
+      "outputSummary": "",
+      "errorMessage": "Agent Consensus Agent / integrate 执行失败（invalid_output，已尝试 3 次）；最后一次校验错误：候选范围必须关联真实议题",
+      "sessionId": null,
+      "inputTokens": 0,
+      "cachedTokens": 0,
+      "outputTokens": 0,
+      "costUsd": 0,
+      "startedAt": "2026-11-26T13:38:54.863Z",
+      "finishedAt": "2026-11-26T13:39:38.249Z"
+    }
+  ],
+  "decisions": [
+    {
+      "targetId": "issue_board-632ec57f-aade-4c09-8a85-a21a1cfce6af",
+      "targetHash": "2b19898d527190cf4a3d19a92743a1f86a476140f8ceb2365dfb58367d4dcbe2",
+      "actor": "Codex：用户授权的 live 验收",
+      "action": "resolve_issue",
+      "feedback": "本次验收裁决：采用本轮候选的添加流程，并关闭以下已提出问题。q-empty-title：提交时 trim 去首尾空白，结果为空（含纯空格）拒绝并提示‘请输入非空书名’，保留输入；长度按 trim 后 Unicode 码点计，1–100，内部空格保留，不做实时字数提示。500 本是硬上限，按全部记录计数；达到上限拒绝新增并提示，删除后可继续添加。允许同名，通过唯一内部 ID 操作。q-filter-all/q-status-display：提供全部、已读、未读三种筛选，初始全部；按添加时间降序，同时间按内部 ID 升序，筛选不持久化。q-toggle-ui：每行一个按钮切换已读/未读，按当前状态显示下一动作。q-delete-confirm：浏览器原生确认框，显示书名及该行编号，取消无变更。采用先写入成功再更新界面，异常时保持原列表与当前输入并显示保存失败，不宣称保存成功。列表至少显示书名、阅读状态和可区分同名条目的编号。不新增移动端专项、联网、登录、动画或备份功能。此为这些已提出事项的明确决定，后续整合直接采用，不再保留相同问题的待确认表述；新的实质矛盾仍正常报告。",
+      "scope": "local",
+      "issueIds": [],
+      "id": "int-419eff07",
+      "gateKind": "discussion",
+      "targetRevision": 2,
+      "decidedAt": "2026-11-26T13:34:18.738Z"
+    },
+    {
+      "targetId": "issue_board-1fbf20c8-5002-47be-9a0d-b97d801e0ce8",
+      "targetHash": "94c38447bd1eb0bd36c7ea4b079c5a6e7422eb58e45262e254637c1d1232bd99",
+      "actor": "Codex：用户授权的 live 验收",
+      "action": "resolve_issue",
+      "feedback": "本次验收裁决：首版加入页面顶部固定文案‘数据仅保存在当前浏览器，清理浏览器数据会丢失’，普通文档流、不悬浮，接受长列表滚动后需回顶部查看。持久化采用单键 JSON 数组，包含唯一 ID、书名、已读/未读状态、添加时间。加载时键不存在即空表；读取抛错、非 JSON、顶层非数组、任一记录缺字段/类型无效/重复 ID、记录数超过500，都进入只读错误态，不渲染部分条目、不允许添加/切换/删除、不覆盖或清理原值。只读期间不判定满额。明确不采用跳过坏记录后覆盖的方案，不新增解锁、清空、修复、恢复或二次覆盖确认功能；用户自行修复浏览器数据后刷新重读即可。合法记录：ID 为非空且唯一的字符串；书名为 trim 后1–100 Unicode码点文本；状态为已读或未读；添加时间为非负安全整数毫秒；未知额外字段可忽略。新增 ID 用浏览器 crypto.randomUUID，列表与删除确认框展示同一完整 ID；添加时间 Date.now，同时间按完整 ID 字典序升序。正常态500本按全部记录计；原有先写后更新和失败保持规则适用于三种写操作。写成功以 setItem 未抛异常为准，不宣称防浏览器清理或静默丢盘，接受该取舍。首版仅单标签页，不新增跨标签同步/冲突检测；页面说明单标签使用。状态提示优先级统一为只读错误＞本次保存失败＞已满500本；写成功清除保存失败提示。输入校验错误单独在输入旁显示，满额时禁止新增，不做新输入校验。保留原候选中其它与上述决定一致的流程，删除相反的旧结论与待确认字样。",
+      "scope": "local",
+      "issueIds": [],
+      "id": "int-b37d8d31",
+      "gateKind": "discussion",
+      "targetRevision": 8,
+      "decidedAt": "2026-11-26T13:37:06.365Z"
+    },
+    {
+      "targetId": "issue_board-95bed0b9-a2c8-4f29-ba4e-edcc789daa45",
+      "targetHash": "f017f10a314dfbd0e5d0e869e8caf4fc9a02d9df16cb9a65ccdc02e8d46bd68c",
+      "actor": "Codex：用户授权的 live 验收",
+      "action": "resolve_issue",
+      "feedback": "本次验收裁决：维持 crypto.randomUUID，不改为时间戳加随机串。使用前提为支持 localStorage 和 crypto.randomUUID 的现代桌面 Chrome/Edge，通过 HTTPS 或 localhost 安全上下文打开；localhost 静态文件服务不承担业务后端、数据库或付费服务器预算，不要求 file:// 支持。添加前检查 API 可用性，不可用时拒绝新增、不写入、不显示成功，并给出中文环境提示；这是环境校验错误，不称为保存失败。ID 生成失败或与现有记录碰撞同样拒绝本次新增，不覆盖旧记录。其它已有合法记录的筛选、切换、删除仍可使用。采用本轮候选其余与历史裁决一致的范围；纠正 rejected 中‘恰好500条合法可添加’这个笔误：恰好500条合法禁止新增、可删除腾位；501条是只读错误态不可写入。使用前提和清理浏览器数据丢失/单标签使用说明可同在页面顶部普通文档流展示。以上环境边界和新增失败路径已明确，无需再次询问替代 ID 生成方式。",
+      "scope": "local",
+      "issueIds": [],
+      "id": "int-b96a7072",
+      "gateKind": "discussion",
+      "targetRevision": 11,
+      "decidedAt": "2026-11-26T13:38:54.857Z"
+    },
+    {
+      "targetId": "proposal-df9899c4-ed73-43f4-b441-76bffda9d2ba",
+      "targetHash": "5299257b41421f681d336cf1032eafcb70d54c2fefdec9011fd8d95bfb88d909",
+      "actor": "Codex：用户授权的 live 验收",
+      "action": "conditional_approve",
+      "feedback": "本次需求流程验收附条件批准当前 proposal v1，保留四维评审原文。逐项处理非阻断条件：1）产品/前端负责人在 PRD 中明确页面顶部文案‘请只开一个标签页，多开可能互相覆盖’，不新增同步、锁、版本号或读回比对；本验收接受无检测的已知风险。2）产品/前端负责人在 PRD 添加满额时隐藏/清除旧书名校验错误的验收项，空书名提交时只显示顶部满额提示。3）明确只读错误态不提供应用内修复/清空/恢复，保留‘请自行修复浏览器数据后刷新’说明；本验收接受需借助浏览器工具恢复的取舍，不增加清空按钮。4）完整 UUID 不截断，顶部状态区位于筛选条上方；环境不可用按实际能力区分，localStorage 读取异常是只读错误态、三种写操作均禁止，只有 crypto.randomUUID 缺失但存储正常时可操作已有条目。上述为需求内容与已接受取舍的明确授权，PRD 必须逐项表达，不是声称下游网页已经实现或完成实测。",
+      "scope": "local",
+      "issueIds": [],
+      "id": "int-8ff94b81",
+      "gateKind": "approval",
+      "targetRevision": 1,
+      "decidedAt": "2026-11-26T13:47:07.443Z"
+    },
+    {
+      "targetId": "proposal-df9899c4-ed73-43f4-b441-76bffda9d2ba",
+      "targetHash": "5299257b41421f681d336cf1032eafcb70d54c2fefdec9011fd8d95bfb88d909",
+      "actor": "Codex：用户授权的 live 验收",
+      "action": "release_conditions",
+      "feedback": "基于附条件审批中的明确授权解除本阶段条件：接受单标签、无同步检测及无应用内恢复的既定取舍；批准顶部风险文案、满额隐藏旧校验错误、只读与 API 缺失区分等具体需求口径。责任人为后续产品/前端负责人，核验方法是下一关检查 PRD 文字及 Given/When/Then 是否覆盖这些条目；若缺失则在确认关要求修订，不会直接确认。此决定只允许生成 PRD，不证明功能已实现、页面文案已部署或浏览器行为已测试。",
+      "scope": "local",
+      "issueIds": [],
+      "id": "int-729cea1b",
+      "gateKind": "conditions",
+      "targetRevision": 1,
+      "decidedAt": "2026-11-26T13:47:35.877Z"
+    },
+    {
+      "targetId": "prd-8e1ea433-b9ad-488c-8190-5f037c804816",
+      "targetHash": "199163b4158c9b00b30a92579e3be56c4d4ae715c1103bcabb7261d9fbc85ed2",
+      "actor": "Codex：用户授权的 live 验收",
+      "action": "confirm",
+      "feedback": "已核对 PRD v1 的六条需求与获批 scope 一一对应，包含源资料→议题→方案→审批→需求→验收追踪。已检查附条件审批的全部条目在 PRD 中落地：多开覆盖风险提示、满额隐藏旧书名错误、只读禁止写入与无修复入口、完整 ID、状态区位置、UUID 缺失与存储异常区分。确认此需求版本并发布不可变基线。此确认仅代表本次授权的需求流程验收，不代表下游读书清单应用已经开发或测试完成。",
+      "scope": "local",
+      "issueIds": [],
+      "id": "int-08187fe3",
+      "gateKind": "confirmation",
+      "targetRevision": 1,
+      "decidedAt": "2026-11-26T13:48:59.848Z"
+    }
+  ],
+  "check": {
+    "command": "node scripts/check.mjs",
+    "passed": true,
+    "tests": 30
+  }
+}

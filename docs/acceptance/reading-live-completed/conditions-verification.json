@@ -1,0 +1,44 @@
+{
+  "prdId": "prd-8e1ea433-b9ad-488c-8190-5f037c804816",
+  "prdHash": "199163b4158c9b00b30a92579e3be56c4d4ae715c1103bcabb7261d9fbc85ed2",
+  "verifiedAt": "2026-11-26T13:48:59.791Z",
+  "method": "PRD 文本及验收条目核对，不是下游应用运行验证",
+  "results": [
+    {
+      "condition": "单标签使用及多开覆盖风险文案",
+      "scopeKey": "local-persistence",
+      "requirementId": "NFR-711c4999757e70d389a4",
+      "passed": true
+    },
+    {
+      "condition": "满额隐藏旧书名错误",
+      "scopeKey": "add-book",
+      "requirementId": "FR-d5b49dc9dfdb60ec2c02",
+      "passed": true
+    },
+    {
+      "condition": "不提供应用内清空修复及恢复指引",
+      "scopeKey": "local-persistence",
+      "requirementId": "NFR-711c4999757e70d389a4",
+      "passed": true
+    },
+    {
+      "condition": "仅 UUID 缺失时可操作已有条目",
+      "scopeKey": "add-book",
+      "requirementId": "FR-d5b49dc9dfdb60ec2c02",
+      "passed": true
+    },
+    {
+      "condition": "完整 ID 不截断",
+      "scopeKey": "delete-book",
+      "requirementId": "FR-22b48049630c067d4bf0",
+      "passed": true
+    },
+    {
+      "condition": "顶部状态区位于筛选条上方",
+      "scopeKey": "local-persistence",
+      "requirementId": "NFR-711c4999757e70d389a4",
+      "passed": true
+    }
+  ]
+}
