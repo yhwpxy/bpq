@@ -1,0 +1,12 @@
+{
+  "checkedAt": "2026-11-26T04:35:58.092Z",
+  "status": 402,
+  "body": {
+    "error": {
+      "message": "Insufficient Balance (request_id: a7d735e1-2b53-4418-936a-94f7237dc7af)",
+      "type": "insufficient_balance_error",
+      "param": null,
+      "code": "invalid_request_error"
+    }
+  }
+}

@@ -1,0 +1,91 @@
+PASS: 137 reference files checked against 472cd7a5891a1a1bd22247a53197c78dc637d452, with 8 documented local fixes; no extra subsystem source files.
+
+> workflow-orchestrator@0.2.0 typecheck
+> tsc -p tsconfig.json --noEmit && tsc -p tsconfig.renderer.json --noEmit
+
+
+> workflow-orchestrator@0.2.0 build
+> node scripts/build.mjs
+
+vite v8.3.8 building client environment for production...
+transforming...
+✓ 50 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/renderer/index.html                   0.68 kB │ gzip:   0.42 kB
+dist/renderer/assets/index-CRthUTB2.css   25.20 kB │ gzip:   5.04 kB
+dist/renderer/assets/index-DFf8-MP2.js   570.43 kB │ gzip: 173.64 kB │ map: 2,383.90 kB
+
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 154ms
+
+> workflow-orchestrator@0.2.0 verify:gates
+> node scripts/run-verify.mjs
+
+
+>>> Running verification gate: fullstack-smoke.verify.ts
+[PASS] fullstack-smoke: HTTP Bearer Auth + SSE + PRD->Trial->Version->Run + Static Bundle
+
+>>> Running verification gate: orchestrator-and-sandbox.verify.ts
+[PASS] orchestrator-and-sandbox: Worktree + HumanGate + GhostNode + Rework + Constitution + Cleanup
+
+>>> Running verification gate: planner-and-validator.verify.ts
+[PASS] planner-and-validator: DesignSpec Modules + Customization + DDD Guard + Export + Capsule
+
+ALL VERIFICATION GATES PASSED.
+(node:29563) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ demo requires human gates, resumes after restart, and publishes immutable versions (2011.768209ms)
+▶ discussion failures expose validation details and corrected retries can continue
+  ✔ agenda (416.560416ms)
+  ✔ critique (363.591375ms)
+  ✔ schema (272.665792ms)
+  ✔ source (316.076458ms)
+  ✔ json (327.107125ms)
+  ✔ recovery (620.435208ms)
+✔ discussion failures expose validation details and corrected retries can continue (2317.974333ms)
+✔ HTTP model adapter, selective A/B/C rework, technical retry, and structured baseline handoff (3332.361417ms)
+▶ persistent blocking reviews exhaust the shared budget and route integration defects locally
+  ✔ issue-blocking (995.0845ms)
+  ✔ coverage (890.361542ms)
+  ✔ integration-technical (673.99725ms)
+  ✔ human-resolution (627.898792ms)
+  ✔ review-contract (491.65075ms)
+  ✔ zero-budget (291.172292ms)
+✔ persistent blocking reviews exhaust the shared budget and route integration defects locally (3971.374583ms)
+(node:29564) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ published PRD → generated design → confirmed revision → real PM receipt across projects and baseline revisions (5759.982333ms)
+(node:29565) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ reference validation locates AC gaps, NFR coverage, unsafe paths, overlapping writes, assumptions and dependency failures (174.208292ms)
+✔ real no-tool model adapter and HTTP generation: new CLI, existing service, failed attempts and feedback retry (914.828875ms)
+(node:29566) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ baseline digest, approval references and AC provenance reject corrupt input (1.696167ms)
+✔ committed inventory, conceptual drafts, failures, immutable source facts and recovery (733.359958ms)
+(node:29567) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ canonical hash, durable review, technical rework, rollback, immutable history and cross-baseline lineage (767.012708ms)
+✔ HTTP revisions: adoption, concurrent stale decisions, blockers, concept commit binding and reopening after host restart (1192.590375ms)
+(node:29568) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ atomic HTTP handoff: failed ledger write rolls back all PM artifacts; concurrent retries commit once, broadcast after commit, and recover after source drift/restart (2812.169875ms)
+✔ missing reports and input mismatches keep a pending ledger; queries recover the original workflow without another import (1111.288875ms)
+(node:29569) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ legacy confirmed snapshots project without changing frozen body, digest or confirmation Markdown (12.627125ms)
+✔ design checks validate their source and ownership; changes require a new confirmed digest (2.510917ms)
+✔ HTTP PM input preserves original IDs, priority projection, cross-module NFR, contracts and check provenance without creating workflows (1191.000792ms)
+ℹ tests 28
+ℹ suites 0
+ℹ pass 28
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 13104.987

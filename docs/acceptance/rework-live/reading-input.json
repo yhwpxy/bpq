@@ -1,0 +1,46 @@
+{
+  "projectId": "reading-1795599370571",
+  "title": "个人读书清单",
+  "ideas": [
+    "我想做一个自己用的读书清单网页。可以输入书名添加一本书，把书标记为已读或未读，按阅读状态筛选列表，也可以删除不想保留的书。"
+  ],
+  "background": "个人学习用的小网页，只在本人电脑浏览器使用，不对外提供服务。",
+  "problem": "读过和想读的书混在备忘录里，不容易查找。",
+  "goals": "方便记录和查看自己的阅读状态。",
+  "constraints": "单用户，无登录、分享、付费和联网同步；数据保存在当前浏览器 localStorage，刷新后保留，清理浏览器数据会丢失。首版一周内完成，零服务器预算，最多500本。",
+  "preferences": "中文界面，先做桌面浏览器，文字清楚，操作简单；允许同名书，添加时书名不能为空且最多100字，新书默认未读，删除前确认。",
+  "documents": [],
+  "mode": "live",
+  "providerId": "deepseek",
+  "model": "deepseek-flash",
+  "roles": [
+    {
+      "id": "product",
+      "name": "产品与业务",
+      "instructions": "核对用户价值、业务规则、范围和优先级。"
+    },
+    {
+      "id": "architecture",
+      "name": "架构与技术",
+      "instructions": "核对架构边界、集成和非功能约束。"
+    },
+    {
+      "id": "development",
+      "name": "开发",
+      "instructions": "评估复杂度、实现依赖和可维护性。"
+    },
+    {
+      "id": "design",
+      "name": "体验设计",
+      "instructions": "核对工作流、移动体验和异常反馈。"
+    },
+    {
+      "id": "quality",
+      "name": "测试与质量",
+      "instructions": "检查边界、异常及验收可验证性。"
+    }
+  ],
+  "maxDiscussionRounds": 2,
+  "maxRevisions": 3,
+  "parentBaselineId": ""
+}
