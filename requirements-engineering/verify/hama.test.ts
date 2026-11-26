@@ -422,3 +422,111 @@ test('HTTP model adapter, selective A/B/C rework, technical retry, and structure
     temporary.remove();
   }
 });
+
+
+test('persistent blocking reviews exhaust the shared budget and route integration defects locally', async t => {
+  for (const scenario of [
+    {name: 'issue-blocking', category: 'technical', issueIds: ['issue-capacity'], target: 'discuss', budget: 2},
+    {name: 'coverage', category: 'coverage', issueIds: [], target: 'integrate', budget: 2},
+    {name: 'integration-technical', category: 'technical', issueIds: [], target: 'integrate', budget: 2},
+    {name: 'human-resolution', category: 'coverage', issueIds: ['issue-capacity'], target: 'integrate', budget: 2, human: true},
+    {name: 'review-contract', category: 'technical', issueIds: ['issue-capacity'], target: 'discuss', budget: 2, contract: true},
+    {name: 'zero-budget', category: 'technical', issueIds: ['issue-capacity'], target: 'discuss', budget: 0},
+  ]) await t.test(scenario.name, async () => {
+    const temporary = mkdtempDisposableSync(join(tmpdir(), 'hama-persistent-review-'));
+    const fake = createServer(async (req, res) => {
+      const chunks = [];
+      for await (const chunk of req) chunks.push(chunk);
+      const body = JSON.parse(Buffer.concat(chunks).toString());
+      const role = /^角色：(.+?)。/.exec(body.messages[0].content)![1]!;
+      const data = JSON.parse(body.messages[1].content).context;
+      const operation = identify(role, data);
+      let value = operation === 'evaluate' ? {
+        verdict: 'revision_required', summary: '持续阻断，禁止绕过评审',
+        findings: [{...finding('blocking'), category: scenario.category, issueIds: scenario.issueIds}],
+      } : campusResponder({role, operation, data});
+      if ('contract' in scenario && operation === 'evaluate') {
+        const feedback = JSON.parse(body.messages[1].content).validationFeedback;
+        value = {verdict: feedback ? 'conditional_pass' : 'revision_required', summary: '只有非阻断整改项',
+          findings: [finding('condition')]};
+      }
+      if ('human' in scenario) {
+        if (operation === 'refine' && data.issue.id === 'issue-capacity') {
+          value = {...value as object, state: 'blocked', blockers: ['名额策略等待人工裁决']};
+        }
+        if (operation === 'integrate') {
+          const item = data.discussions.find((row: {issue: {id: string}}) => row.issue.id === 'issue-capacity');
+          const closed = item.humanDecision?.feedback === '采用原子扣减，名额不足则拒绝；此事项已裁决。' &&
+            item.conclusion?.state === 'resolved' && item.conclusion.blockers.length === 0 && item.issue.blockers.length === 0;
+          value = {...value as object, unresolved: closed ? [] : ['名额策略等待人工裁决']};
+        }
+        if (operation === 'evaluate' && data.proposal.data.unresolved.length === 0) {
+          value = data.proposal.revision === 1 ? {
+            verdict: 'revision_required', summary: '独立整合缺漏需补齐',
+            findings: [{...finding('blocking'), category: 'coverage', issueIds: [], problem: '候选遗漏跨议题说明'}],
+          } : campusResponder({role, operation, data});
+        }
+      }
+      res.writeHead(200, {'Content-Type': 'application/json'});
+      res.end(JSON.stringify({choices: [{message: {content: JSON.stringify(value)}}]}));
+    });
+    await new Promise<void>(resolve => fake.listen(0, '127.0.0.1', resolve));
+    const runtime = await createOrchestratorRuntime({dataDir: temporary.path, seedSample: false});
+    try {
+      const address = fake.address();
+      assert.ok(address && typeof address === 'object');
+      runtime.vault.setApiKey('openai', 'local-fixture-secret');
+      runtime.store.updateProviderBaseUrl('openai', `http://127.0.0.1:${address.port}/v1`);
+      const started = await request<RunView>(runtime, '/api/hama/runs', {...input,
+        mode: 'live', providerId: 'openai', model: 'fixture', maxRevisions: scenario.budget}, 201);
+      const id = started.detail.run.id;
+      await decide(runtime, await wait(runtime, id, v => v.gate?.kind === 'clarification'), 'clarify', '复用已有账号');
+      if ('contract' in scenario) {
+        const approval = await wait(runtime, id, v => v.gate?.kind === 'approval' || v.gate?.kind === 'limit');
+        assert.equal(approval.gate?.kind, 'approval');
+        assert.ok(approval.artifacts.some(a => a.kind === 'model_call' && (a.data as {outcome: string}).outcome === 'invalid_output'));
+        assert.equal(approval.artifacts.filter(a => a.kind === 'rework').length, 0);
+        assert.ok(approval.artifacts.filter(a => a.kind === 'evaluation').every(a =>
+          (a.data as {review: {verdict: string}}).review.verdict === 'conditional_pass'));
+        await decide(runtime, approval, 'reject', '一致性纠错测试结束，保留非阻断条件');
+        return;
+      }
+      if ('human' in scenario) {
+        const discussion = await wait(runtime, id, v => v.gate?.kind === 'discussion');
+        await decide(runtime, discussion, 'resolve_issue', '采用原子扣减，名额不足则拒绝；此事项已裁决。');
+        const approval = await wait(runtime, id, v => v.gate?.kind === 'approval' || v.gate?.kind === 'limit');
+        assert.equal(approval.gate?.kind, 'approval');
+        assert.equal(approval.artifacts.filter(a => a.kind === 'proposal').length, 2);
+        const changes = approval.artifacts.filter(a => a.kind === 'rework' && (a.data as {loop: string}).loop === 'B');
+        assert.equal(changes.length, 1);
+        assert.equal((changes[0]!.data as {target: string}).target, 'integrate');
+        assert.equal(approval.artifacts.filter(a => a.kind === 'discussion' && a.subject === 'issue-capacity').length, 1);
+        const original = approval.artifacts.find(a => a.kind === 'discussion' && a.subject === 'issue-capacity')!;
+        assert.deepEqual((original.data as {conclusion: {blockers: string[]}}).conclusion.blockers, ['名额策略等待人工裁决']);
+        await decide(runtime, approval, 'approve');
+        await decide(runtime, await wait(runtime, id, v => v.gate?.kind === 'confirmation'), 'confirm');
+        assert.ok((await wait(runtime, id, v => v.detail.run.status === 'succeeded')).baseline);
+        return;
+      }
+      const limited = await wait(runtime, id, v => v.gate?.kind === 'limit');
+      assert.deepEqual(limited.gate!.options, ['escalate', 'reject']);
+      const reworks = limited.artifacts.filter(a => a.kind === 'rework').map(a => a.data as {
+        loop: string; round: number; target: string;
+      }).filter(a => a.loop !== 'A');
+      assert.equal(reworks.length, scenario.budget);
+      assert.deepEqual(reworks.map(a => a.round), Array.from({length: scenario.budget}, (_, i) => i + 1));
+      assert.ok(reworks.every(a => a.target === scenario.target));
+      assert.equal(limited.artifacts.filter(a => a.kind === 'report').length, scenario.budget + 1);
+      assert.equal(limited.artifacts.filter(a => a.kind === 'discussion').length,
+        4 + (scenario.target === 'discuss' ? scenario.budget : 0));
+      assert.equal(limited.baseline, null);
+      await decide(runtime, limited, 'approve', '', 'local', 409);
+      await decide(runtime, limited, 'escalate', '保留真实阻断并移交负责人');
+      await wait(runtime, id, v => v.detail.run.status === 'cancelled');
+    } finally {
+      await runtime.stop();
+      await new Promise<void>(resolve => fake.close(() => resolve()));
+      temporary.remove();
+    }
+  });
+});

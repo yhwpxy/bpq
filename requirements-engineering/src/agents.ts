@@ -13,8 +13,8 @@ export const instructions = {
   propose: '只针对当前 issue/base 和证据独立提出可行设计，其他需求仅作边界，不把整个系统重新设计一遍。说明理由、来源和待确认假设。sources 只能选择 allowedSourceIds 中的原始资料 ID，至少一项。需求、议题、问题、工件、人工决定的 ID 不可填入 sources；人工澄清的内容可在 proposal 或 rationale 中说明。已有讨论仅作为返工历史。',
   critique: '审查 peers 中其他角色的本轮提案。objections[].roleId 必须使用被质疑作者的 peers[].roleId，不能填写自己的 own.roleId，也不能填议题 ID 或中文角色名。指出本议题中的具体漏洞、依赖、矛盾或遗漏，说明理由和改进办法；没有具体问题时返回空 objections，不为凑数质疑。',
   refine: '根据本轮各角色提案、交叉质疑、历史结论和人工反馈优化方案。同一事项以 clarifications 中最新人工决定为准，覆盖历史结论及旧阻塞项；已裁决事项不再列为 blockers，除非指出新的冲突证据。记录未采纳意见及原因。仍有关键分歧时标为 discussing 或 blocked；一般实现细节不等同于需人工批准的重大范围取舍。候选设计必须引用并尊重已有约束。仅列本议题涉及的新增或更新依赖。',
-  integrate: '你是 Consensus Agent。整合每一议题的结论，跨议题去重，检查冲突、边界、技术依赖和业务一致性。同一事项以 humanFeedback 中最新人工决定为准，覆盖旧议题标题、blockers、历史讨论和 prior 中的旧结论。人工已解决的问题直接采用决定，不再要求重复确认，也不列入 unresolved；只有尚未决定或有新冲突证据的问题才保留。每个 scope 条目对应一项正式候选需求，有唯一可跨修订复用的 key、决策及来源议题。包含功能及非功能约束，明确取舍和未决问题。禁止自行确认重大假设。',
-  evaluate: '你是独立评审员，只评审提供的候选版本和原始证据。用 evidence 引用原始来源 ID、议题 ID 或候选版本 ID。证据不足标 uncertain。重大安全、合规、不可行或无法接受的预算/周期风险标 veto 并升级，不能以其他维度抵消。明确可整改的阻断缺陷。非阻断 condition 必须明确 owner 和可核验 verification。建议返工时列关联议题，无可定位议题可以留空。',
+  integrate: '你是 Consensus Agent。整合每一议题的结论，跨议题去重，检查冲突、边界、技术依赖和业务一致性。同一事项以 humanFeedback 中最新人工决定为准，覆盖旧议题标题、blockers、历史讨论和 prior 中的旧结论。discussions 中含 humanDecision 的条目已由人类裁决，以 conclusion 为当前结论，previousCandidate 仅解释裁决引用的旧方案，不得恢复历史 blockers。人工已解决的问题直接采用决定，不再要求重复确认，也不列入 unresolved；只有尚未决定或有新冲突证据的问题才保留。每个 scope 条目对应一项正式候选需求，有唯一可跨修订复用的 key、决策及来源议题。包含功能及非功能约束，明确取舍和未决问题。禁止自行确认重大假设。',
+  evaluate: '你是独立评审员，只评审提供的候选版本和原始证据。facts 中同一事项的最新人工决定覆盖旧决定；已接受的取舍不能仅因历史措辞不同而重开，新的冲突必须指出当前候选中的具体证据。当前是方案评审，详细 Given/When/Then 验收用例在后续 PRD 阶段生成，不得仅因尚无测试数据或操作步骤阻断；但缺失可判定的需求边界、真实矛盾和重大风险仍须指出。用 evidence 引用原始来源 ID、议题 ID 或候选版本 ID。证据不足标 uncertain。重大安全、合规、不可行或无法接受的预算/周期风险标 veto 并升级，不能以其他维度抵消。明确可整改的阻断缺陷。非阻断 condition 必须明确 owner 和可核验 verification。建议返工时列关联议题，无可定位议题可以留空。',
   prd: '你是 Requirements Agent。仅依据批准版本和已满足的附加条件。每个获批 scopeKey 恰好对应一条需求，依赖引用其他 scopeKey。保留旧稿仍适用的验收 key。验收用 Given/When/Then 描述具体可观察结果，覆盖关键边界。逐项保留适用约束。不得增加未批准的范围或修改已批准方案方向。',
 } as const;
 export type Operation = keyof typeof instructions;

@@ -127,7 +127,7 @@ export class HamaService implements WorkflowHandler {
       const issue = board.data.issues.find(row => row.pendingDecisionBy !== null);
       if (!issue?.discussion) reject('当前审批请求没有阻塞议题');
       const updated = pipeline.stage('issue_board', {...board.data, issues: board.data.issues.map(row => row.id === issue.id ?
-        {...row, state: 'escalated', pendingDecisionBy: null, humanDecision: decision.id} : row)});
+        {...row, state: 'escalated', blockers: [], pendingDecisionBy: null, humanDecision: decision.id} : row)});
       const trigger = this.db.latest<Rework>(runId, 'rework', `A-${issue.id}`);
       return save('已记录人工裁决', {repeatFrom: 'discuss', countRework: false}, () => {
         this.db.write(updated);

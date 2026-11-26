@@ -253,14 +253,22 @@ export class HamaPipeline {
 
   async integrate(): Promise<WorkflowStepResult> {
     const board = this.artifact<Board, 'issue_board'>('issue_board');
+    const humanFeedback = this.db.decisions(this.id);
     const discussions = board.data.issues.map(issue => {
       if (!issue.discussion || !['resolved', 'escalated'].includes(issue.state)) throw new Error('存在未处理的议题');
       const discussion = this.db.read<Discussion>(this.id, issue.discussion);
-      return {issue, discussion, drafts: this.db.read(this.id, discussion.data.proposals)};
+      const humanDecision = issue.state === 'escalated' ?
+        humanFeedback.findLast(decision => decision.id === issue.humanDecision && decision.action === 'resolve_issue') : undefined;
+      // Historical model blockers remain immutable evidence, not the current human-resolved conclusion.
+      return humanDecision ? {
+        issue: {...issue, blockers: []}, discussion: reference(discussion), humanDecision,
+        previousCandidate: discussion.data.conclusion.candidate,
+        conclusion: {...discussion.data.conclusion, state: 'resolved', candidate: humanDecision.feedback,
+          rationale: '以绑定此议题的人工裁决为准；原候选仅用于理解裁决所引用的内容。', blockers: []},
+      } : {issue, discussion, drafts: this.db.read(this.id, discussion.data.proposals)};
     });
     const prior = this.db.latest<Proposal>(this.id, 'proposal');
     const parent = this.input.parentBaselineId ? this.db.baseline(this.input.parentBaselineId) : null;
-    const humanFeedback = this.db.decisions(this.id);
     const data = await this.call('integrate', 'Consensus Agent', {
       board, discussions, intake: this.artifact('intake'), dependency: this.artifact('dependency_map'),
       prior, parent, humanFeedback, feedback: this.db.latest(this.id, 'rework'),
@@ -286,6 +294,8 @@ export class HamaPipeline {
             '评价发现必须引用真实源证据或议题');
           requireValid(finding.severity !== 'condition' || (finding.owner && finding.verification), '附条件项须有责任人及核验方法');
         }
+        requireValid(value.verdict !== 'revision_required' || value.findings.some(f => f.severity === 'blocking' || f.severity === 'veto'),
+          'revision_required 必须有 blocking 或 veto 发现；仅有 condition/informational 时不能要求业务返工，请按证据纠正 verdict 或 severity');
         requireValid(value.verdict === 'pass' || value.findings.length > 0, '非通过评价必须提供发现和证据');
         requireValid(value.verdict !== 'conditional_pass' || value.findings.some(f => f.severity === 'condition'),
           '有条件通过必须列出可核验的整改事项');
@@ -304,7 +314,7 @@ export class HamaPipeline {
     const findings = reviews.flatMap(review => review.findings);
     const obstacles = findings.filter(finding => ['blocking', 'veto'].includes(finding.severity));
     const revisionTarget = obstacles.length > 0 &&
-      obstacles.every(finding => finding.category === 'coverage' && finding.issueIds.length === 0) ?
+      obstacles.every(finding => finding.issueIds.length === 0) ?
       'integrate' : 'discuss';
     const verdict: Report['verdict'] =
       findings.some(f => f.severity === 'veto') || reviews.some(r => r.verdict === 'escalation') ? 'escalation' :

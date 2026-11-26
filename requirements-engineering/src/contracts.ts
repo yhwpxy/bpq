@@ -111,6 +111,7 @@ export interface Issue extends AgendaIssue {
   cycleRound: number;
   pendingDecisionBy: string | null;
   discussion?: ArtifactRef<'discussion'>;
+  humanDecision?: string;
 }
 
 export interface ArtifactRef<K extends string = string> {

@@ -151,16 +151,16 @@
       "reason": "说明当前 DeepSeek 模型配置、密钥存放和真实运行方式。"
     },
     "requirements-engineering/src/agents.ts": {
-      "sha256": "ebde1361dc1cc0bb7e5653b1b6da19304163af83be637e7bf79922247a4b8255",
-      "reason": "明确合法引用、最新人工裁决优先及简洁中文输出，启用 DeepSeek JSON 输出，保留校验错误。"
+      "sha256": "d1472f62dc87409484e31d32756fb08ccde957da9bf0de15fb469c3357fdf655",
+      "reason": "Tell integration to consume the effective human conclusion and keep proposal review distinct from later PRD acceptance detail; preserve risk review."
     },
     "requirements-engineering/src/pipeline.ts": {
-      "sha256": "6b8f642cb94bd378d948262e58990eabed96e66da716550fa1d137747a20da3d",
-      "reason": "为模型提供原始来源 ID 列表及具体业务校验反馈；保持校验条件和输出契约不变。"
+      "sha256": "9c640df8e5a7cca00fe98c9469a2363c7d2f78a041522ac01662c14264d707d0",
+      "reason": "Route issue-free blockers to integration; pass explicitly human-resolved conclusions instead of historical blockers while retaining immutable evidence. Reject revision_required reviews lacking blocking/veto evidence so contradictory LLM output cannot silently trigger business rework."
     },
     "requirements-engineering/verify/hama.test.ts": {
-      "sha256": "cc5cb190f67a62a64a1e42f76ab72d3ff3bc201984e1d977753fe933f66fab2e",
-      "reason": "回归覆盖议程、来源、自我质疑、JSON 格式、纠错恢复与 DeepSeek 请求参数。"
+      "sha256": "cd28a984b06f99407563969f8228d505700a2fc63c0574cd933efdad0b7cb135",
+      "reason": "Persistent review budget/routing regressions and a human-resolution stale-blocker regression through the HTTP model adapter."
     },
     "workflow-orchestrator/src/adapters/contracts.ts": {
       "sha256": "182ce50add276523de42beefc428680835d27bfdc6ea966a45813c8edcfebc1e",
@@ -169,6 +169,14 @@
     "workflow-orchestrator/src/adapters/native-api.ts": {
       "sha256": "52f4fde7988cf6125a0ca1b3a70c3a281a0f24ec5522e3eff6d93345f633b03d",
       "reason": "仅在调用方显式选择时传递 response_format，默认调用行为不变。"
+    },
+    "requirements-engineering/src/service.ts": {
+      "sha256": "b2ea1dd82ce64c195b82694839ebdfc3446037a1e97e3aaa6845e5ccd4e4cd69",
+      "reason": "Clear active blockers when a human resolves the bound issue; retain prior discussion artifacts."
+    },
+    "requirements-engineering/src/contracts.ts": {
+      "sha256": "e6d62baade6d7bd3b1d53baf71497bca5d52b21c23a0314e9a2ca074bea28c81",
+      "reason": "Type the existing persisted humanDecision link on an issue; no JSON schema relaxation."
     }
   }
 }
