@@ -144,7 +144,7 @@ function finding(severity: string) {
     owner: '技术负责人', verification: '同时提交两笔末席报名只有一笔成功'};
 }
 
-test('discussion failures expose validation details and corrected retries can continue', async t => {
+test('agent output failures expose validation details and corrected retries can continue', async t => {
   for (const scenario of [
     {name: 'agenda', detail: 'baseId 必须逐一覆盖'},
     {name: 'critique', detail: '质疑目标必须是其他角色的本轮提案'},
@@ -152,10 +152,13 @@ test('discussion failures expose validation details and corrected retries can co
     {name: 'source', detail: '提案须引用已存在的来源'},
     {name: 'json', detail: 'JSON 解析失败'},
     {name: 'recovery', detail: '$.proposal: invalid text length or format'},
+    {name: 'integration-recovery', detail: '候选范围必须关联真实议题'},
+    {name: 'integration-invalid', detail: '候选范围必须关联真实议题'},
   ]) {
     await t.test(scenario.name, async () => {
       const temporary = mkdtempDisposableSync(join(tmpdir(), 'hama-propose-'));
       let proposalCalls = 0;
+      let integrationCalls = 0;
       let agendaCalls = 0;
       let critiqueCalls = 0;
       let productCritiqueCalls = 0;
@@ -194,6 +197,19 @@ test('discussion failures expose validation details and corrected retries can co
             }
             value = {objections: [{roleId: 'product', issue: '质疑自己', reason: '错误目标', suggestion: '应指向其他角色'}]};
           }
+          if (operation === 'integrate' && scenario.name.startsWith('integration-')) {
+            integrationCalls++;
+            assert.deepEqual(data.allowedIssueIds, data.board.data.issues.map((issue: {id: string}) => issue.id));
+            assert.ok(body.messages[0].content.includes('scope[].issueIds 只能选择 allowedIssueIds'));
+            if (integrationCalls > 1) {
+              assert.ok(validationFeedback.includes('无效 ID：browse'));
+              assert.ok(validationFeedback.includes(`issueIds 只允许：${data.allowedIssueIds.join(', ')}`));
+            }
+            if (integrationCalls === 1 || scenario.name === 'integration-invalid') {
+              const proposal = value as {scope: {issueIds: string[]}[]};
+              value = {...proposal, scope: proposal.scope.map(row => ({...row, issueIds: ['browse']}))};
+            }
+          }
           if (operation === 'propose' && role === 'product' && data.issue.id === 'issue-browse') {
             assert.deepEqual(data.allowedSourceIds, data.evidence.source.map((source: {id: string}) => source.id));
             assert.ok(body.messages[0].content.includes('sources 只能选择 allowedSourceIds'));
@@ -203,7 +219,7 @@ test('discussion failures expose validation details and corrected retries can co
               assert.ok(validationFeedback.includes('无效 ID：unknown-source'));
               assert.ok(validationFeedback.includes(`sources 只允许：${data.allowedSourceIds.join(', ')}`));
             }
-            if (!['agenda', 'critique'].includes(scenario.name) && (scenario.name !== 'recovery' || proposalCalls === 1)) {
+            if (!scenario.name.startsWith('integration-') && !['agenda', 'critique'].includes(scenario.name) && (scenario.name !== 'recovery' || proposalCalls === 1)) {
               if (scenario.name === 'json') content = 'not JSON';
               else if (scenario.name === 'source') value = {...value as object, sources: ['unknown-source']};
               else value = {...value as object, proposal: null};
@@ -229,20 +245,28 @@ test('discussion failures expose validation details and corrected retries can co
         }, 201);
         const id = started.detail.run.id;
         await decide(runtime, await wait(runtime, id, v => v.gate?.kind === 'clarification'), 'clarify', '复用校园账号');
-        if (scenario.name === 'recovery') {
+        if (scenario.name === 'integration-recovery') {
+          const approval = await wait(runtime, id, v => v.gate?.kind === 'approval');
+          assert.equal(integrationCalls, 2);
+          assert.equal(approval.artifacts.filter(a => a.kind === 'rework').length, 0);
+          await decide(runtime, approval, 'approve');
+          await decide(runtime, await wait(runtime, id, v => v.gate?.kind === 'confirmation'), 'confirm');
+          const completed = await wait(runtime, id, v => v.detail.run.status === 'succeeded');
+          assert.ok(completed.baseline);
+        } else if (scenario.name === 'recovery') {
           await wait(runtime, id, v => v.gate?.kind === 'approval');
           assert.equal(proposalCalls, 2);
           assert.ok(critiqueCalls > 0);
         } else {
           const failed = await wait(runtime, id, v => v.detail.run.status === 'failed');
           const attempt = failed.detail.attempts.find(a => a.status === 'failed')!;
-          const failedAgent = scenario.name === 'agenda' ? 'Moderator / agenda' :
+          const failedAgent = scenario.name === 'integration-invalid' ? 'Consensus Agent / integrate' : scenario.name === 'agenda' ? 'Moderator / agenda' :
             scenario.name === 'critique' ? 'product / critique' : 'product / propose';
           assert.ok(attempt.errorMessage.includes(`Agent ${failedAgent}`));
           assert.ok(attempt.errorMessage.includes('invalid_output，已尝试 3 次'));
           assert.ok(attempt.errorMessage.includes(scenario.detail), attempt.errorMessage);
-          assert.equal(scenario.name === 'agenda' ? agendaCalls : scenario.name === 'critique' ? productCritiqueCalls : proposalCalls, 3);
-          if (scenario.name !== 'critique') assert.equal(critiqueCalls, 0);
+          assert.equal(scenario.name === 'integration-invalid' ? integrationCalls : scenario.name === 'agenda' ? agendaCalls : scenario.name === 'critique' ? productCritiqueCalls : proposalCalls, 3);
+          if (scenario.name !== 'critique' && !scenario.name.startsWith('integration-')) assert.equal(critiqueCalls, 0);
         }
         assert.equal(payloadError, undefined);
       } finally {

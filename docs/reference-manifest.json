@@ -151,16 +151,16 @@
       "reason": "说明当前 DeepSeek 模型配置、密钥存放和真实运行方式。"
     },
     "requirements-engineering/src/agents.ts": {
-      "sha256": "d1472f62dc87409484e31d32756fb08ccde957da9bf0de15fb469c3357fdf655",
-      "reason": "Tell integration to consume the effective human conclusion and keep proposal review distinct from later PRD acceptance detail; preserve risk review."
+      "sha256": "b161b09e92d0b63dd3fc63e7158fa7568b7ebad28a125be2d940d2dec7928fcd",
+      "reason": "Tell integration to consume the effective human conclusion and keep proposal review distinct from later PRD acceptance detail; preserve risk review. Explicitly distinguish integration issue IDs from base IDs and scope keys using allowedIssueIds."
     },
     "requirements-engineering/src/pipeline.ts": {
-      "sha256": "9c640df8e5a7cca00fe98c9469a2363c7d2f78a041522ac01662c14264d707d0",
-      "reason": "Route issue-free blockers to integration; pass explicitly human-resolved conclusions instead of historical blockers while retaining immutable evidence. Reject revision_required reviews lacking blocking/veto evidence so contradictory LLM output cannot silently trigger business rework."
+      "sha256": "a760de1ae3763d2caf5048a1a7b79d38f8e73332e1f1143d2a147c12290f82af",
+      "reason": "Route issue-free blockers to integration; pass explicitly human-resolved conclusions instead of historical blockers while retaining immutable evidence. Reject revision_required reviews lacking blocking/veto evidence so contradictory LLM output cannot silently trigger business rework. Provide the integration issue-ID allowlist and actionable invalid-ID feedback without changing validation."
     },
     "requirements-engineering/verify/hama.test.ts": {
-      "sha256": "cd28a984b06f99407563969f8228d505700a2fc63c0574cd933efdad0b7cb135",
-      "reason": "Persistent review budget/routing regressions and a human-resolution stale-blocker regression through the HTTP model adapter."
+      "sha256": "3a73f4db1fdfcb234b149c164ccb6b107491b636457343acba9c17d3a85d0202",
+      "reason": "Persistent review budget/routing regressions and a human-resolution stale-blocker regression through the HTTP model adapter. Cover integration base-ID rejection, correction through publication, and persistent invalid output failure."
     },
     "workflow-orchestrator/src/adapters/contracts.ts": {
       "sha256": "182ce50add276523de42beefc428680835d27bfdc6ea966a45813c8edcfebc1e",

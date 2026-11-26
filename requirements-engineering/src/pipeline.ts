@@ -269,13 +269,15 @@ export class HamaPipeline {
     });
     const prior = this.db.latest<Proposal>(this.id, 'proposal');
     const parent = this.input.parentBaselineId ? this.db.baseline(this.input.parentBaselineId) : null;
+    const allowedIssueIds = board.data.issues.map(issue => issue.id);
     const data = await this.call('integrate', 'Consensus Agent', {
-      board, discussions, intake: this.artifact('intake'), dependency: this.artifact('dependency_map'),
+      board, discussions, allowedIssueIds, intake: this.artifact('intake'), dependency: this.artifact('dependency_map'),
       prior, parent, humanFeedback, feedback: this.db.latest(this.id, 'rework'),
     }, proposalSchema, value => {
       requireValid(unique(value.scope.map(item => item.key)), '候选范围 key 必须唯一');
-      const ids = board.data.issues.map(issue => issue.id);
-      requireValid(value.scope.every(item => item.issueIds.every(id => ids.includes(id))), '候选范围必须关联真实议题');
+      const invalidIds = [...new Set(value.scope.flatMap(item => item.issueIds).filter(id => !allowedIssueIds.includes(id)))];
+      requireValid(invalidIds.length === 0,
+        `候选范围必须关联真实议题；无效 ID：${invalidIds.join(', ')}；issueIds 只允许：${allowedIssueIds.join(', ')}`);
       requireValid(this.input.constraints.length === 0 || value.constraints.length > 0, '候选方案必须记录明确的约束');
     });
     return this.result('已冻结候选方案版本', [this.stage('proposal', data)]);
